@@ -9,6 +9,8 @@ import lombok.NonNull;
 @AllArgsConstructor
 @Data
 public class Site {
-    @NonNull Type type;
-    String url;
+    @NonNull
+    private Type type;
+
+    private String url;
 }

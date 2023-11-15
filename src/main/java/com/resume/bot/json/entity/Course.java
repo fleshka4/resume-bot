@@ -9,8 +9,13 @@ import lombok.NonNull;
 @AllArgsConstructor
 @Data
 public class Course {
-    @NonNull String name;
-    @NonNull String organization;
-    String result;
-    int year;
+    @NonNull
+    private String name;
+
+    @NonNull
+    private String organization;
+
+    private String result;
+
+    private int year;
 }

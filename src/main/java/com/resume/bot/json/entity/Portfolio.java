@@ -9,8 +9,14 @@ import lombok.NonNull;
 @AllArgsConstructor
 @Data
 public class Portfolio {
-    String description;
-    @NonNull String medium;
-    @NonNull String small;
-    @NonNull String id;
+    private String description;
+
+    @NonNull
+    private String medium;
+
+    @NonNull
+    private String small;
+
+    @NonNull
+    private String id;
 }

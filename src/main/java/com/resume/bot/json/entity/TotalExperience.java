@@ -8,5 +8,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data
 public class TotalExperience {
-    Long months;
+    private Long months;
 }

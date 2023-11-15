@@ -9,7 +9,12 @@ import lombok.NonNull;
 @AllArgsConstructor
 @Data
 public class Photo {
-    @NonNull String medium;
-    @NonNull String small;
-    @NonNull String id;
+    @NonNull
+    private String medium;
+
+    @NonNull
+    private String small;
+
+    @NonNull
+    private String id;
 }

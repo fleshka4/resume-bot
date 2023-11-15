@@ -11,7 +11,12 @@ import java.util.List;
 @AllArgsConstructor
 @Data
 public class Relocation {
-    @NonNull List<Area> area;
-    @NonNull List<Type> district;
-    @NonNull Type type;
+    @NonNull
+    private List<Area> area;
+
+    @NonNull
+    private List<Type> district;
+
+    @NonNull
+    private Type type;
 }

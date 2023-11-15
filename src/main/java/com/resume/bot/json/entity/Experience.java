@@ -1,5 +1,6 @@
 package com.resume.bot.json.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,15 +12,30 @@ import java.util.List;
 @AllArgsConstructor
 @Data
 public class Experience {
-    Area area;
-    String company;
-    String companyId;
-    String companyUrl;
-    String description;
-    Employer employer;
-    String end;
-    @NonNull List<Type> industries;
-    Type industry;
-    @NonNull String position;
-    @NonNull String start;
+    private Area area;
+
+    private String company;
+
+    @JsonProperty("company_id")
+    private String companyId;
+
+    @JsonProperty("company_url")
+    private String companyUrl;
+
+    private String description;
+
+    private Employer employer;
+
+    private String end;
+
+    @NonNull
+    private List<Type> industries;
+
+    private Type industry;
+
+    @NonNull
+    private String position;
+
+    @NonNull
+    private String start;
 }

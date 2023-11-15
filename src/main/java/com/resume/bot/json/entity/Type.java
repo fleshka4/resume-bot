@@ -9,6 +9,9 @@ import lombok.NonNull;
 @AllArgsConstructor
 @Data
 public class Type {
-    @NonNull String id;
-    @NonNull String name;
+    @NonNull
+    private String id;
+
+    @NonNull
+    private String name;
 }

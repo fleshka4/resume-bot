@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data
 public class Salary {
-    Long amount;
-    String currency;
+    private Long amount;
+
+    private String currency;
 }

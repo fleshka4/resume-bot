@@ -10,9 +10,13 @@ import java.util.List;
 @AllArgsConstructor
 @Data
 public class Education {
-    List<Course> additional;
-    List<Course> attestation;
-    List<ElementaryEducation> elementary;
-    Type level;
-    List<PrimaryEducation> primary;
+    private List<Course> additional;
+
+    private List<Course> attestation;
+
+    private List<ElementaryEducation> elementary;
+
+    private Type level;
+
+    private List<PrimaryEducation> primary;
 }

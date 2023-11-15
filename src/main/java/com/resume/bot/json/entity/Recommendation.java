@@ -9,8 +9,15 @@ import lombok.NonNull;
 @AllArgsConstructor
 @Data
 public class Recommendation {
-    @NonNull String contact;
-    @NonNull String name;
-    @NonNull String organization;
-    @NonNull String position;
+    @NonNull
+    private String contact;
+
+    @NonNull
+    private String name;
+
+    @NonNull
+    private String organization;
+
+    @NonNull
+    private String position;
 }

@@ -9,7 +9,12 @@ import lombok.NonNull;
 @AllArgsConstructor
 @Data
 public class Language {
-    @NonNull String id;
-    @NonNull String name;
-    @NonNull Type level;
+    @NonNull
+    private String id;
+
+    @NonNull
+    private String name;
+
+    @NonNull
+    private Type level;
 }

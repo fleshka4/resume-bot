@@ -9,5 +9,6 @@ import lombok.NonNull;
 @AllArgsConstructor
 @Data
 public class Id {
-    @NonNull String id;
+    @NonNull
+    private String id;
 }

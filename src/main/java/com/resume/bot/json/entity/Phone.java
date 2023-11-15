@@ -9,8 +9,15 @@ import lombok.NonNull;
 @AllArgsConstructor
 @Data
 public class Phone {
-    @NonNull String city;
-    @NonNull String country;
-    @NonNull String formatted;
-    @NonNull String number;
+    @NonNull
+    private String city;
+
+    @NonNull
+    private String country;
+
+    @NonNull
+    private String formatted;
+
+    @NonNull
+    private String number;
 }

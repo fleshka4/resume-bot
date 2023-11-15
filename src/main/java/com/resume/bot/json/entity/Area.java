@@ -9,7 +9,12 @@ import lombok.NonNull;
 @AllArgsConstructor
 @Data
 public class Area {
-    @NonNull String id;
-    @NonNull String name;
-    @NonNull String url;
+    @NonNull
+    private String id;
+
+    @NonNull
+    private String name;
+
+    @NonNull
+    private String url;
 }

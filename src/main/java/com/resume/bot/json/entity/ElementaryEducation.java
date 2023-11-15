@@ -9,6 +9,8 @@ import lombok.NonNull;
 @AllArgsConstructor
 @Data
 public class ElementaryEducation {
-    @NonNull String name;
-    long year;
+    @NonNull
+    private String name;
+
+    private long year;
 }
