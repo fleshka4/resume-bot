@@ -42,13 +42,16 @@ public class Contact {
 
     public String getActualValue() {
         if (value != null && Arrays.stream(TypeContacts.values()).anyMatch(ct -> ct.toString().equals(type.getName()))) {
-            String email = value.getEmail();
             Phone phone = value.getPhone();
-            return email != null && TypeContacts.HOME.toString().equals(email)
-                    ? email
+            return isEmail()
+                    ? value.getEmail()
                     : phone != null ? phone.getFormatted()
                     : null;
         }
         return null;
+    }
+
+    public boolean isEmail() {
+        return TypeContacts.EMAIL.toString().equals(value.getEmail());
     }
 }
