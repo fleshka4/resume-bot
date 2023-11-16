@@ -1,0 +1,14 @@
+package com.resume.latex;
+
+public enum Placeholder {
+    PLACE_FOR_NAME,
+    PLACE_FOR_POSITION,
+    PLACE_FOR_NUMBER,
+    PLACE_FOR_EMAIL,
+    PLACE_FOR_CITY,
+    PLACE_FOR_COUNTRY,
+    PLACE_FOR_SKILLS,
+    PLACE_FOR_EDUCATION,
+    PLACE_FOR_EXPERIENCE,
+    INVALID
+}
