@@ -1,6 +1,8 @@
 package com.resume.bot.config;
 
+import com.resume.bot.service.HeadHunterService;
 import com.resume.bot.service.ResumeBot;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -12,16 +14,24 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class BotInitializer {
     private final ResumeBot resumeBot;
-
-    @Autowired
-    public BotInitializer(ResumeBot resumeBot) {
-        this.resumeBot = resumeBot;
-    }
+    private final HeadHunterService headHunterService;
 
     @EventListener({ContextRefreshedEvent.class})
     public void init() throws TelegramApiException {
+        try {
+            System.out.println("MONO");
+            System.out.println(headHunterService.getMono(1).getName());
+        } catch (RuntimeException e) {
+            System.out.println("ERROR");
+        }
+
+        System.out.println("FLUX");
+        System.out.println(headHunterService.getFlux().get(0).getName());
+
+
         TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
         try {
             telegramBotsApi.registerBot(resumeBot);
