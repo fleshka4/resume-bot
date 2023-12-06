@@ -1,5 +1,5 @@
 
-package com.resume.metro;
+package com.resume.bot.json.entity.metro;
 
 import java.util.List;
 
