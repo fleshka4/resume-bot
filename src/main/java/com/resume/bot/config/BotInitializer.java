@@ -21,15 +21,15 @@ public class BotInitializer {
 
     @EventListener({ContextRefreshedEvent.class})
     public void init() throws TelegramApiException {
-        try {
+        /*try {
             System.out.println("MONO");
-            System.out.println(headHunterService.getMono(1).getName());
+            System.out.println(headHunterService.getFlux().get(0));
         } catch (RuntimeException e) {
             System.out.println("ERROR");
         }
 
         System.out.println("FLUX");
-        System.out.println(headHunterService.getFlux().get(0).getName());
+        System.out.println(headHunterService.getFlux().get(0));*/
 
 
         TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);

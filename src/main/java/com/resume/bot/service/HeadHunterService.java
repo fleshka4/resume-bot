@@ -13,31 +13,10 @@ import java.util.List;
 public class HeadHunterService {
     private TokenHolderService tokenHolderService;
     private ResumeService resumeService;
-    private final WebClient webClient;
 
-    public Metro getMetro(int id) {
+    /*public Metro getMetro(int id) {
         return get("metro/" + id, Metro.class);
-    }
+    }*/
 
-    public <T> T get(String uri, Class<T> clazz) {
-        return webClient
-                .get()
-                .uri(uri)
-                .retrieve()
-                .bodyToMono(clazz)
-                .doOnError(error -> {
-                    System.out.println(error);
-                })
-                .block();
-    }
 
-    public List<Metro> getFlux() {
-        return webClient
-                .get()
-                .uri("metro/1")
-                .retrieve()
-                .bodyToFlux(Metro.class)
-                .toStream()
-                .toList();
-    }
 }
