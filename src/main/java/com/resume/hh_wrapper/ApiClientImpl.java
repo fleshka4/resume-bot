@@ -40,4 +40,14 @@ public class ApiClientImpl implements ApiClient {
                 .bodyToMono(type)
                 .block();
     }
+
+    @Override
+    public <T> T put(String uri, T body, Class<T> type) {
+        return webClient.put()
+                .uri(uri)
+                .bodyValue(body)
+                .retrieve()
+                .bodyToMono(type)
+                .block();
+    }
 }
