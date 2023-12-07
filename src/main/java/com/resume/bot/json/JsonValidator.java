@@ -1,10 +1,11 @@
 package com.resume.bot.json;
 
-import com.resume.bot.util.Constants;
+import com.resume.util.Constants;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
@@ -48,7 +49,7 @@ public class JsonValidator {
         checks.put(ValidationType.GRADUATION_YEAR_WITH_YEAR, objects -> checkGraduationYear((Integer) objects[0]));
         checks.put(ValidationType.GRADUATION_YEAR_WITH_DATE, objects -> checkGraduationYear((Date) objects[0]));
         checks.put(ValidationType.SYMBOLS_LIMIT, objects -> checkSymbolsLimit((String) objects[0], (Long) objects[1]));
-        checks.put(ValidationType.BIRTHDAY, objects -> checkBirthday((Date) objects[0]));
+        checks.put(ValidationType.BIRTHDAY, objects -> checkBirthday((String) objects[0]));
         checks.put(ValidationType.EXPERIENCE, objects -> checkExperience((Date) objects[0], (Date) objects[1]));
         checks.put(ValidationType.ALPHA_FORMAT, objects -> checkAlphaFormat((String) objects[0]));
         checks.put(ValidationType.ALPHANUMERIC_FORMAT, objects -> checkAlphanumericFormat((String) objects[0]));
@@ -93,11 +94,10 @@ public class JsonValidator {
         return text.length() < maxLen;
     }
 
-    public static boolean checkBirthday(Date birthDate) {
-        int birthYear = birthDate.toInstant().get(ChronoField.YEAR);
-        boolean isEnoughYears = Date.from(Instant.now()).after(Date.from(birthDate.toInstant().plus(14, ChronoUnit.YEARS)));
-
-        return isEnoughYears && (birthYear >= BIRTH_DATE_MIN_YEAR);
+    public static boolean checkBirthday(String birthDateStr) {
+        LocalDate birthDate = LocalDate.parse(birthDateStr, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+        boolean isEnoughYears = LocalDate.now().isAfter(birthDate.plusYears(14));
+        return isEnoughYears && (birthDate.getYear() >= BIRTH_DATE_MIN_YEAR);
     }
 
     public static boolean checkExperience(Date experienceDate, Date birthDate) {

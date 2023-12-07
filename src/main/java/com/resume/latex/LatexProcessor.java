@@ -3,11 +3,10 @@ package com.resume.latex;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.resume.util.FileLoader;
 
 import java.io.File;
 import java.io.IOException;
-
-import static com.resume.util.FileLoader.loadFileContent;
 
 public class LatexProcessor {
 
@@ -16,7 +15,7 @@ public class LatexProcessor {
     // if not empty, latexSource would be replaced
     public void addSource(String jsonString, TemplateNumber number) throws JsonProcessingException { //Client
         //map with path - templateNumber, path
-        latexSource = loadFileContent("temp.tex");
+        latexSource = FileLoader.loadFileContent("temp.tex");
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode = objectMapper.readTree(jsonString);
 

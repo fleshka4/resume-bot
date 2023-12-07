@@ -3,8 +3,8 @@ package com.resume.bot.config;
 import com.resume.bot.service.HeadHunterService;
 import com.resume.bot.service.ResumeBot;
 import lombok.RequiredArgsConstructor;
+import com.resume.util.BotUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -36,7 +36,7 @@ public class BotInitializer {
         try {
             telegramBotsApi.registerBot(resumeBot);
         } catch (TelegramApiException e) {
-            log.error("Error occurred: " + e.getMessage());
+            log.error(BotUtil.ERROR_TEXT + e.getMessage());
         }
     }
 }
