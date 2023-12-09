@@ -1,4 +1,4 @@
-package com.resume.bot.util;
+package com.resume.util;
 
 public interface Constants {
     String[] visibilityTypes = new String[]{
