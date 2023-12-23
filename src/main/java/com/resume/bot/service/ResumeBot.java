@@ -5,7 +5,7 @@ import com.resume.bot.display.BotState;
 import com.resume.bot.display.CallbackActionHandler;
 import com.resume.bot.display.handler.CallbackActionFactory;
 import com.resume.bot.json.JsonValidator;
-import com.resume.bot.json.entity.Client;
+import com.resume.bot.json.entity.client.Client;
 import com.resume.bot.model.entity.User;
 import com.resume.hh_wrapper.HhConfig;
 import com.resume.util.BotUtil;
@@ -56,7 +56,6 @@ public class ResumeBot extends TelegramLongPollingBot {
 
                 BotState currentState = BotUtil.userStates.get(chatId);
 
-                System.out.println(message.getText());
                 if ("/start".equals(message.getText())) {
                     BotUtil.userStates.put(chatId, BotState.START);
                     BotUtil.clientsMap.put(chatId, new Client());

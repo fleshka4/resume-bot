@@ -1,6 +1,6 @@
 package com.resume.bot.model.entity;
 
-import com.resume.bot.json.entity.Token;
+import com.resume.bot.json.entity.common.Token;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

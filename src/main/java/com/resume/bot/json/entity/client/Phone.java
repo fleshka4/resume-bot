@@ -1,25 +1,23 @@
-package com.resume.bot.json.entity.metro;
+package com.resume.bot.json.entity.client;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
-import java.util.List;
-
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class Metro {
+public class Phone {
     @NonNull
-    private String id;
+    private String city;
 
     @NonNull
-    private List<Line> lines;
+    private String country;
 
     @NonNull
-    private String name;
+    private String formatted;
 
     @NonNull
-    private String url;
+    private String number;
 }

@@ -1,4 +1,4 @@
-package com.resume.bot.json.entity.metro;
+package com.resume.bot.json.entity.roles;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,16 +10,13 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class Metro {
+public class Category {
     @NonNull
     private String id;
-
-    @NonNull
-    private List<Line> lines;
 
     @NonNull
     private String name;
 
     @NonNull
-    private String url;
+    private List<Role> roles;
 }

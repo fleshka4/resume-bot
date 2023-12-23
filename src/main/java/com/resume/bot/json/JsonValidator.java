@@ -1,5 +1,8 @@
 package com.resume.bot.json;
 
+import com.resume.bot.json.entity.area.Area;
+import com.resume.bot.json.entity.area.Country;
+import com.resume.util.BotUtil;
 import com.resume.util.Constants;
 import org.apache.commons.lang3.StringUtils;
 
@@ -8,11 +11,9 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class JsonValidator {
     public enum ValidationType {
@@ -40,6 +41,8 @@ public class JsonValidator {
         CONTACT_TYPE,
         EDUCATION_LEVEL,
         LANGUAGE_LEVEL,
+        COUNTRY_NAME,
+        CITY_NAME,
         IN_LIST
     }
 
@@ -70,6 +73,8 @@ public class JsonValidator {
         checks.put(ValidationType.CONTACT_TYPE, objects -> checkContactType((String) objects[0]));
         checks.put(ValidationType.EDUCATION_LEVEL, objects -> checkEducationLevel((String) objects[0]));
         checks.put(ValidationType.LANGUAGE_LEVEL, objects -> checkLanguageLevel((String) objects[0]));
+        checks.put(ValidationType.COUNTRY_NAME, objects -> checkCountry((String) objects[0]));
+        checks.put(ValidationType.CITY_NAME, objects -> checkCity((String) objects[0]));
         checks.put(ValidationType.IN_LIST, objects -> isInList((String) objects[0], (String[]) objects[1]));
     }
 
@@ -78,6 +83,19 @@ public class JsonValidator {
     private static final String NUMBER_FORMAT = "\\d{11}";
     private static final String DATE_FORMAT = "\\d{2}-\\d{2}-\\d{4}";
 
+    private static final String OTHER_COUNTRIES_JSON_ID = "1001";
+    private static final List<String> COUNTRIES_WITHOUT_REGIONS_IDS = List.of(
+            "40",   // Казахстан
+            "9",    // Азербайджан
+            "28",   // Грузия
+            "48",   // Кыргызстан
+            "97"    // Узбекистан
+    );
+    private static final List<String> COUNTRIES_WITH_REGIONS_IDS = List.of(
+            "113",   // Россия
+            "16",    // Беларусь
+            "5"   // Украина
+    );
 
     public static boolean checkGraduationYear(int year) {
         return checkGraduationYear(Date.from(Instant.from(LocalDate.of(year, 12, 31))));
@@ -185,5 +203,19 @@ public class JsonValidator {
 
     public static boolean checkLanguageLevel(String text) {
         return isInList(text, Constants.languageLevels);
+    }
+
+    public static boolean checkCountry(String text) {
+        return isInList(text, Constants.COUNTRIES.stream().map(Country::getName).toArray(String[]::new));
+    }
+
+    public static boolean checkCity(String text) {
+        return isInList(text, Constants.AREAS.stream().filter(a -> !a.getId().equals(OTHER_COUNTRIES_JSON_ID))
+                    .map(Area::getAreas).flatMap(List::stream).filter(a -> a.getAreas() == null).map(Area::getName)
+                    .toArray(String[]::new))
+                || isInList(text, Constants.AREAS.stream()
+                    .filter(a -> COUNTRIES_WITH_REGIONS_IDS.contains(a.getId()) || a.getId().equals(OTHER_COUNTRIES_JSON_ID))
+                    .map(Area::getAreas).flatMap(List::stream).map(Area::getAreas).flatMap(List::stream)
+                    .map(Area::getName).toArray(String[]::new));
     }
 }

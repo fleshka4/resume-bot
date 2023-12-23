@@ -1,5 +1,6 @@
-package com.resume.bot.json.entity.metro;
+package com.resume.bot.json.entity.area;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,16 +11,15 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class Metro {
+public class Area {
     @NonNull
     private String id;
 
-    @NonNull
-    private List<Line> lines;
+    @JsonProperty("parent_id")
+    private String parentId;
 
     @NonNull
     private String name;
 
-    @NonNull
-    private String url;
+    private List<Area> areas;
 }
