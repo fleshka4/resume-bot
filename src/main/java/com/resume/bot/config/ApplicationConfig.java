@@ -16,13 +16,14 @@ public class ApplicationConfig {
     @Value("${hh.base-url}")
     private String hhBaseUrl;
 
-    private Long limit;
+    @Value("${json.max.size.mb}")
+    private int limit;
 
     @Bean
     public WebClient webClient() {
-        final int size = 16 * 1024 * 1024;
-        final ExchangeStrategies strategies = ExchangeStrategies.builder()
-                .codecs(codecs -> codecs.defaultCodecs().maxInMemorySize(size))
+        int limitInBytes = limit * 1024 * 1024;
+        ExchangeStrategies strategies = ExchangeStrategies.builder()
+                .codecs(codecs -> codecs.defaultCodecs().maxInMemorySize(limitInBytes))
                 .build();
         return WebClient.builder()
                 .exchangeStrategies(strategies)

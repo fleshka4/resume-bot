@@ -16,9 +16,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class HeadHunterService {
     private final TokenHolderService tokenHolderService;
-
     private final ResumeService resumeService;
-
     private final ApiClient apiClient;
 
     public void postCreateClient(String baseUri, Client client) {

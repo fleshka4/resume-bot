@@ -23,17 +23,17 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class BotInitializer implements CommandLineRunner {
+public class BotInitializer {
     private final ResumeBot resumeBot;
     private final HeadHunterService headHunterService;
 
     @Value("${hh.base-url}")
     private String hhBaseUrl;
 
-//    @EventListener({ContextStartedEvent.class})
-//    public void initAreas() {
-//
-//    }
+    @EventListener({ApplicationReadyEvent.class})
+    public void initAreas() {
+        BotUtil.AREAS = headHunterService.getAreas(hhBaseUrl);
+    }
 
     @EventListener({ContextRefreshedEvent.class})
     public void init() throws TelegramApiException {
@@ -54,11 +54,5 @@ public class BotInitializer implements CommandLineRunner {
         } catch (TelegramApiException e) {
             log.error(BotUtil.ERROR_TEXT + e.getMessage());
         }
-    }
-
-    @Override
-    public void run(String... args) throws Exception {
-        BotUtil.AREAS = headHunterService.getAreas(hhBaseUrl);
-        System.out.println(BotUtil.AREAS.get(0).getName());
     }
 }

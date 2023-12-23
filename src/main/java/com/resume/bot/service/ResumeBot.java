@@ -56,12 +56,10 @@ public class ResumeBot extends TelegramLongPollingBot {
 
                 BotState currentState = BotUtil.userStates.get(chatId);
 
-                System.out.println(message.getText());
                 if ("/start".equals(message.getText())) {
                     BotUtil.userStates.put(chatId, BotState.START);
                     BotUtil.clientsMap.put(chatId, new Client());
                     startCommandReceived(message, sendMessageRequest);
-                    System.out.println(BotUtil.AREAS.get(0).getName());
                 } else if ("/menu".equals(message.getText())) {
                     if (checkClientExists(chatId, sendMessageRequest)) {
                         menuCommandReceived(sendMessageRequest);
