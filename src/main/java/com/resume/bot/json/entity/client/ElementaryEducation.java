@@ -1,4 +1,4 @@
-package com.resume.bot.json.entity;
+package com.resume.bot.json.entity.client;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,14 +8,9 @@ import lombok.NonNull;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class Course {
+public class ElementaryEducation {
     @NonNull
     private String name;
 
-    @NonNull
-    private String organization;
-
-    private String result;
-
-    private int year;
+    private long year;
 }

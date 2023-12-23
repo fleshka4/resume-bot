@@ -1,4 +1,4 @@
-package com.resume.bot.json.entity;
+package com.resume.bot.json.entity.client;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,9 +8,13 @@ import lombok.NonNull;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class Site {
+public class Area {
     @NonNull
-    private Type type;
+    private String id;
 
+    @NonNull
+    private String name;
+
+    @NonNull
     private String url;
 }

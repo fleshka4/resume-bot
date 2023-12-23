@@ -1,4 +1,4 @@
-package com.resume.bot.json.entity;
+package com.resume.bot.json.entity.client;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,10 +8,13 @@ import lombok.NonNull;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class Type {
+public class Photo {
     @NonNull
-    private String id;
+    private String medium;
 
     @NonNull
-    private String name;
+    private String small;
+
+    @NonNull
+    private String id;
 }

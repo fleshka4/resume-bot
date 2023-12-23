@@ -1,4 +1,4 @@
-package com.resume.bot.json.entity;
+package com.resume.bot.json.entity.client;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -9,20 +9,18 @@ import lombok.NonNull;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class Employer {
+public class Certificate {
     @NonNull
-    @JsonProperty("alternate_url")
-    private String alternateUrl;
+    @JsonProperty("achieved_at")
+    private String achievedAt;
+
+    private String owner;
 
     @NonNull
-    private String id;
-
-    @JsonProperty("logo_urls")
-    private LogoUrls logoUrls;
+    private String title;
 
     @NonNull
-    private String name;
+    private String type;
 
-    @NonNull
     private String url;
 }

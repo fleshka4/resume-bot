@@ -1,7 +1,8 @@
 package com.resume.bot.service;
 
 import com.resume.bot.json.JsonProcessor;
-import com.resume.bot.json.entity.Client;
+import com.resume.bot.json.entity.area.Area;
+import com.resume.bot.json.entity.client.Client;
 import com.resume.hh_wrapper.ApiClientImpl;
 import com.resume.util.HHUriConstants;
 import lombok.RequiredArgsConstructor;
@@ -36,5 +37,9 @@ public class HeadHunterService {
     public Client getClientResume(String baseUri, String resumeId) {
         return JsonProcessor.createEntityFromJson(apiClient.get(baseUri
                         + HHUriConstants.GET_RESUME_BY_ID_URI.replace("{resume_id}", resumeId), String.class), Client.class);
+    }
+
+    public List<Area> getAreas(String baseUri) {
+        return apiClient.getList(baseUri + HHUriConstants.GET_AREAS_URI, Area.class);
     }
 }

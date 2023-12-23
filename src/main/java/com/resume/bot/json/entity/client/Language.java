@@ -1,5 +1,6 @@
-package com.resume.bot.json.entity;
+package com.resume.bot.json.entity.client;
 
+import com.resume.bot.json.entity.common.Type;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,15 +9,13 @@ import lombok.NonNull;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class Portfolio {
-    private String description;
-
-    @NonNull
-    private String medium;
-
-    @NonNull
-    private String small;
-
+public class Language {
     @NonNull
     private String id;
+
+    @NonNull
+    private String name;
+
+    @NonNull
+    private Type level;
 }

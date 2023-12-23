@@ -3,10 +3,7 @@ package com.resume.bot.json;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.resume.bot.exception.json.JsonActionException;
-import com.resume.bot.json.entity.Client;
-
-import java.util.Arrays;
-import java.util.stream.Collectors;
+import com.resume.bot.json.entity.client.Client;
 
 public class JsonProcessor {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -31,9 +28,11 @@ public class JsonProcessor {
 
     public static <T> String createJsonFromEntity(T obj) {
         try {
-            return OBJECT_MAPPER.writeValueAsString(obj)
-                    .replaceAll(EMAIL_REPLACEMENT, VALUE_TO_REPLACE_EMAIL)
-                    .replaceAll(PHONE_REPLACEMENT, VALUE_TO_REPLACE_PHONE);
+            return obj.getClass().equals(Client.class)
+                    ? OBJECT_MAPPER.writeValueAsString(obj)
+                                    .replaceAll(EMAIL_REPLACEMENT, VALUE_TO_REPLACE_EMAIL)
+                                    .replaceAll(PHONE_REPLACEMENT, VALUE_TO_REPLACE_PHONE)
+                    : OBJECT_MAPPER.writeValueAsString(obj);
         } catch (JsonProcessingException e) {
             throw new JsonActionException("Failed creating JSON process!");
         }

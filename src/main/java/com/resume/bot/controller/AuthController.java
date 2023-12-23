@@ -1,7 +1,7 @@
 package com.resume.bot.controller;
 
 import com.resume.bot.json.JsonProcessor;
-import com.resume.bot.json.entity.Token;
+import com.resume.bot.json.entity.common.Token;
 import com.resume.bot.model.entity.TokenHolder;
 import com.resume.bot.model.entity.User;
 import com.resume.bot.service.TokenHolderService;

@@ -1,14 +1,14 @@
-package com.resume.bot.json.entity;
+package com.resume.bot.json.entity.common;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class Salary {
-    private Long amount;
-
-    private String currency;
+public class Id {
+    @NonNull
+    private String id;
 }
