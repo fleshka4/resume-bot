@@ -11,4 +11,5 @@ public interface ApiClient {
     <T> T post(String uri, T body, Class<T> type);
 
     String auth(String uri, String body);
+    <T> T put(String uri, T body, Class<T> type);
 }

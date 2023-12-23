@@ -43,6 +43,16 @@ public class ApiClientImpl implements ApiClient {
                 .block();
     }
 
+    @Override
+    public <T> T put(String uri, T body, Class<T> type) {
+        return webClient.put()
+                .uri(uri)
+                .bodyValue(body)
+                .retrieve()
+                .bodyToMono(type)
+                .block();
+    }
+
     public String auth(String uri, String body) {
         WebClient client = webClient.mutate()
                 .defaultHeader("Content-Type", "application/x-www-form-urlencoded")
