@@ -53,6 +53,7 @@ public class ApiClientImpl implements ApiClient {
                 .block();
     }
 
+    @Override
     public String auth(String uri, String body) {
         WebClient client = webClient.mutate()
                 .defaultHeader("Content-Type", "application/x-www-form-urlencoded")

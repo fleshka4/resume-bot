@@ -6,6 +6,7 @@ import com.resume.bot.display.CallbackActionHandler;
 import com.resume.bot.display.handler.CallbackActionFactory;
 import com.resume.bot.json.JsonValidator;
 import com.resume.bot.json.entity.Client;
+import com.resume.bot.model.entity.User;
 import com.resume.hh_wrapper.HhConfig;
 import com.resume.util.BotUtil;
 import com.vdurmont.emoji.EmojiParser;
@@ -19,11 +20,13 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.resume.bot.json.JsonValidator.ValidationType.*;
 import static com.resume.bot.json.JsonValidator.checks;
-import static com.resume.util.BotUtil.*;
 
 @Slf4j
 @Component
@@ -35,6 +38,8 @@ public class ResumeBot extends TelegramLongPollingBot {
 
     private final HhConfig hhConfig;
 
+    private final UserService userService;
+
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage()) {
@@ -43,6 +48,7 @@ public class ResumeBot extends TelegramLongPollingBot {
 
             if (!BotUtil.userStates.containsKey(chatId)) {
                 BotUtil.userStates.put(chatId, BotState.START);
+                userService.saveUser(new User(chatId));
             }
 
             if (message.hasText()) {
@@ -94,12 +100,12 @@ public class ResumeBot extends TelegramLongPollingBot {
     }
 
     private void loginHandler(Long chatId, SendMessage sendMessageRequest) {
-        long randomValue = generateRandom12DigitNumber(random);
-        while (states.containsKey(randomValue)) {
-            randomValue = generateRandom12DigitNumber(random);
+        long randomValue = BotUtil.generateRandom12DigitNumber(BotUtil.random);
+        while (BotUtil.states.containsKey(randomValue)) {
+            randomValue = BotUtil.generateRandom12DigitNumber(BotUtil.random);
         }
 
-        states.put(randomValue, chatId);
+        BotUtil.states.put(randomValue, chatId);
 
         String link = "https://hh.ru/oauth/authorize?" +
                 "response_type=code&" +
