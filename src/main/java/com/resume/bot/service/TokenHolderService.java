@@ -17,4 +17,12 @@ public class TokenHolderService {
                 () -> new EntityNotFoundException("Token not found")
         );
     }
+
+    public void save(TokenHolder tokenHolder) {
+        if (repository.existsTokenHolderByUser(tokenHolder.getUser())) {
+            repository.updateAccessTokenAndExpiresInAndRefreshTokenByUser(tokenHolder.getAccessToken(), tokenHolder.getExpiresIn(), tokenHolder.getRefreshToken(), tokenHolder.getUser());
+        } else {
+            repository.save(tokenHolder);
+        }
+    }
 }

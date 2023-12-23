@@ -15,7 +15,7 @@ public class UserService {
         return repository.save(user);
     }
 
-    public User getUser(int tgUid) {
+    public User getUser(Long tgUid) {
         return repository.findById(tgUid).orElseThrow(
                 () -> new EntityNotFoundException("User not found")
         );

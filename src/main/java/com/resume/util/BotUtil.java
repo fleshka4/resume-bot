@@ -32,6 +32,10 @@ public class BotUtil {
     public final Map<Long, Client> clientsMap = new HashMap<>();
     public final String ERROR_TEXT = "Error occurred: ";
 
+    public final Map<Long, Long> states = new HashMap<>(); // state, chatId
+
+    public final Random random = new Random();
+
     public InlineKeyboardMarkup createInlineKeyboard(List<String> buttonLabels, List<String> callbackData) {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
@@ -49,5 +53,9 @@ public class BotUtil {
 
         inlineKeyboardMarkup.setKeyboard(rowList);
         return inlineKeyboardMarkup;
+    }
+
+    public static long generateRandom12DigitNumber(Random random) {
+        return (long) (Math.pow(10, 11) + random.nextInt((int) Math.pow(10, 11)));
     }
 }

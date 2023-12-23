@@ -15,12 +15,17 @@ import java.util.List;
 public class User {
 
     @Id
-    private int tgUid;
+    @Column(name = "tg_uid")
+    private Long tgUid;
 
     @OneToOne(mappedBy = "user")
     private TokenHolder tokenHolder;
 
     @OneToMany
-    @JoinColumn(name = "userId")
+    @JoinColumn(name = "user_id")
     private List<Resume> resumes;
+
+    public User(Long id) {
+        tgUid = id;
+    }
 }
