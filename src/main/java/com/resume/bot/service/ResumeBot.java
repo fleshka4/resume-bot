@@ -6,6 +6,7 @@ import com.resume.bot.display.CallbackActionHandler;
 import com.resume.bot.display.handler.CallbackActionFactory;
 import com.resume.bot.json.JsonValidator;
 import com.resume.bot.json.entity.Client;
+import com.resume.hh_wrapper.HhConfig;
 import com.resume.util.BotUtil;
 import com.vdurmont.emoji.EmojiParser;
 import lombok.RequiredArgsConstructor;
@@ -18,13 +19,11 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.resume.bot.json.JsonValidator.ValidationType.*;
 import static com.resume.bot.json.JsonValidator.checks;
+import static com.resume.util.BotUtil.*;
 
 @Slf4j
 @Component
@@ -34,13 +33,14 @@ public class ResumeBot extends TelegramLongPollingBot {
     private final BotConfig botConfig;
     private final CallbackActionFactory callbackActionFactory;
 
+    private final HhConfig hhConfig;
+
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage()) {
             Message message = update.getMessage();
             Long chatId = message.getChatId();
 
-            // todo Удалить и проверить
             if (!BotUtil.userStates.containsKey(chatId)) {
                 BotUtil.userStates.put(chatId, BotState.START);
             }
@@ -50,6 +50,7 @@ public class ResumeBot extends TelegramLongPollingBot {
 
                 BotState currentState = BotUtil.userStates.get(chatId);
 
+                System.out.println(message.getText());
                 if ("/start".equals(message.getText())) {
                     BotUtil.userStates.put(chatId, BotState.START);
                     BotUtil.clientsMap.put(chatId, new Client());
@@ -65,6 +66,8 @@ public class ResumeBot extends TelegramLongPollingBot {
                     if (checkClientExists(chatId, sendMessageRequest)) {
                         editResultClientData(message.getText(), chatId, sendMessageRequest);
                     }
+                } else if ("/login".equals(message.getText())) {
+                    loginHandler(chatId, sendMessageRequest);
                 } else {
                     sendMessage(EmojiParser.parseToUnicode("Извините, я не понимаю эту команду.:cry:"), sendMessageRequest);
                 }
@@ -88,6 +91,24 @@ public class ResumeBot extends TelegramLongPollingBot {
                 }
             }
         }
+    }
+
+    private void loginHandler(Long chatId, SendMessage sendMessageRequest) {
+        long randomValue = generateRandom12DigitNumber(random);
+        while (states.containsKey(randomValue)) {
+            randomValue = generateRandom12DigitNumber(random);
+        }
+
+        states.put(randomValue, chatId);
+
+        String link = "https://hh.ru/oauth/authorize?" +
+                "response_type=code&" +
+                "client_id=" + hhConfig.getClientId() +
+                "&state=" + randomValue
+                + "&redirect_uri=http://localhost:5000/hh/auth";
+        String msg = "Чтобы авторизоваться, перейдите по [ссылке](" + link + ") и следуйте инструкциям";
+
+        sendMessage(msg, sendMessageRequest);
     }
 
     private void startCommandReceived(Message message, SendMessage sendMessageRequest) {

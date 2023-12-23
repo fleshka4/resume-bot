@@ -9,4 +9,6 @@ public interface ApiClient {
     <T> List<T> getList(String uri, Class<T> type);
 
     <T> T post(String uri, T body, Class<T> type);
+
+    String auth(String uri, String body);
 }
