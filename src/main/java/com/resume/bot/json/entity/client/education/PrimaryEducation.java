@@ -1,4 +1,4 @@
-package com.resume.bot.json.entity.client;
+package com.resume.bot.json.entity.client.education;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

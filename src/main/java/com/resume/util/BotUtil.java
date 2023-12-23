@@ -11,9 +11,6 @@ import java.util.*;
 
 @UtilityClass
 public class BotUtil {
-
-    public List<Area> AREAS;
-
     public final List<String> CREATE_RESUME_IDS_LIST = List.of(
             "menu",
             "create_resume",

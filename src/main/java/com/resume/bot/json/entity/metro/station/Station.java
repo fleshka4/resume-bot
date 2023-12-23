@@ -1,25 +1,29 @@
-package com.resume.bot.json.entity.metro;
+package com.resume.bot.json.entity.metro.station;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
-import java.util.List;
-
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class Metro {
+public class Station {
     @NonNull
     private String id;
 
     @NonNull
-    private List<Line> lines;
+    private Double lat;
+
+    @NonNull
+    private Line line;
+
+    @NonNull
+    private Double lng;
 
     @NonNull
     private String name;
 
     @NonNull
-    private String url;
+    private Long order;
 }

@@ -1,8 +1,14 @@
 package com.resume.bot.service;
 
 import com.resume.bot.json.JsonProcessor;
+import com.resume.bot.json.entity.Industry;
+import com.resume.bot.json.entity.Locale;
+import com.resume.bot.json.entity.Skills;
 import com.resume.bot.json.entity.area.Area;
+import com.resume.bot.json.entity.area.Country;
 import com.resume.bot.json.entity.client.Client;
+import com.resume.bot.json.entity.metro.Metro;
+import com.resume.bot.json.entity.roles.ProfessionalRoles;
 import com.resume.hh_wrapper.ApiClient;
 import com.resume.util.HHUriConstants;
 import lombok.RequiredArgsConstructor;
@@ -41,5 +47,33 @@ public class HeadHunterService {
 
     public List<Area> getAreas(String baseUri) {
         return apiClient.getList(baseUri + HHUriConstants.GET_AREAS_URI, Area.class);
+    }
+
+    public List<Country> getCountries(String baseUri) {
+        return apiClient.getList(baseUri + HHUriConstants.GET_COUNTRIES_URI, Country.class);
+    }
+
+    public List<Metro> getMetros(String baseUri) {
+        return apiClient.getList(baseUri + HHUriConstants.GET_METROS_URI, Metro.class);
+    }
+
+    public Metro getMetroByCityId(String baseUri, String cityId) {
+        return apiClient.get(baseUri + HHUriConstants.GET_METRO_BY_CITY_URI.replace("{city_id}", cityId), Metro.class);
+    }
+
+    public List<Industry> getIndustries(String baseUri) {
+        return apiClient.getList(baseUri + HHUriConstants.GET_INDUSTRIES_URI, Industry.class);
+    }
+
+    public ProfessionalRoles getProfessionalRoles(String baseUri) {
+        return apiClient.get(baseUri + HHUriConstants.GET_PROFESSIONAL_ROLES_URI, ProfessionalRoles.class);
+    }
+
+    public Skills getSkills(String baseUri) {
+        return apiClient.get(baseUri + HHUriConstants.GET_SKILLS_URI, Skills.class);
+    }
+
+    public List<Locale> getLocales(String baseUri) {
+        return apiClient.getList(baseUri + HHUriConstants.GET_LOCALES_URI, Locale.class);
     }
 }

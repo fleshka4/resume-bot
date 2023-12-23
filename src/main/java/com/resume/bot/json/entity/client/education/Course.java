@@ -1,4 +1,4 @@
-package com.resume.bot.json.entity.client;
+package com.resume.bot.json.entity.client.education;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

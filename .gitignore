@@ -3,6 +3,7 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 src/resources/logback.xml
+src/resources/application.properties
 
 ### STS ###
 .apt_generated
