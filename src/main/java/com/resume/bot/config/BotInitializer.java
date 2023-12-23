@@ -7,8 +7,10 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
@@ -21,18 +23,17 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class BotInitializer {
+public class BotInitializer implements CommandLineRunner {
     private final ResumeBot resumeBot;
     private final HeadHunterService headHunterService;
 
     @Value("${hh.base-url}")
     private String hhBaseUrl;
 
-    @EventListener({ContextStartedEvent.class})
-    public void initAreas() {
-        BotUtil.AREAS = headHunterService.getAreas(hhBaseUrl);
-        System.out.println(BotUtil.AREAS.get(0).getName());
-    }
+//    @EventListener({ContextStartedEvent.class})
+//    public void initAreas() {
+//
+//    }
 
     @EventListener({ContextRefreshedEvent.class})
     public void init() throws TelegramApiException {
@@ -53,5 +54,11 @@ public class BotInitializer {
         } catch (TelegramApiException e) {
             log.error(BotUtil.ERROR_TEXT + e.getMessage());
         }
+    }
+
+    @Override
+    public void run(String... args) throws Exception {
+        BotUtil.AREAS = headHunterService.getAreas(hhBaseUrl);
+        System.out.println(BotUtil.AREAS.get(0).getName());
     }
 }

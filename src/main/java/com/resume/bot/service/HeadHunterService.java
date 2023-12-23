@@ -3,7 +3,7 @@ package com.resume.bot.service;
 import com.resume.bot.json.JsonProcessor;
 import com.resume.bot.json.entity.area.Area;
 import com.resume.bot.json.entity.client.Client;
-import com.resume.hh_wrapper.ApiClientImpl;
+import com.resume.hh_wrapper.ApiClient;
 import com.resume.util.HHUriConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,9 +15,11 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class HeadHunterService {
-    private TokenHolderService tokenHolderService;
-    private ResumeService resumeService;
-    private ApiClientImpl apiClient;
+    private final TokenHolderService tokenHolderService;
+
+    private final ResumeService resumeService;
+
+    private final ApiClient apiClient;
 
     public void postCreateClient(String baseUri, Client client) {
         apiClient.post(baseUri + HHUriConstants.POST_CREATE_RESUME_URI,
