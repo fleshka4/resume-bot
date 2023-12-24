@@ -1,7 +1,7 @@
 package com.resume.util;
 
 import com.resume.bot.display.BotState;
-import com.resume.bot.json.entity.client.Client;
+import com.resume.bot.json.entity.client.Resume;
 import lombok.experimental.UtilityClass;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -55,7 +55,7 @@ public class BotUtil {
     public final Map<Long, BotState> userStates = new HashMap<>();
     public final Map<Long, BotState> dialogueStates = new HashMap<>();
     public final Map<Long, Map<String, String>> userResumeData = new LinkedHashMap<>();
-    public final Map<Long, Client> clientsMap = new HashMap<>();
+    public final Map<Long, Resume> clientsMap = new HashMap<>();
     public final String ERROR_TEXT = "Error occurred: ";
 
     public final Map<Long, Long> states = new HashMap<>(); // state, chatId

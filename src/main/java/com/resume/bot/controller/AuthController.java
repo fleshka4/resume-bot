@@ -6,8 +6,8 @@ import com.resume.bot.model.entity.TokenHolder;
 import com.resume.bot.model.entity.User;
 import com.resume.bot.service.TokenHolderService;
 import com.resume.bot.service.UserService;
-import com.resume.hh_wrapper.ApiClient;
-import com.resume.hh_wrapper.HhConfig;
+import com.resume.hh_wrapper.config.HhConfig;
+import com.resume.hh_wrapper.impl.AuthApiClient;
 import com.resume.util.BotUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +26,7 @@ import java.nio.charset.StandardCharsets;
 @RequiredArgsConstructor
 @Slf4j
 public class AuthController {
-    private final ApiClient apiClient;
+    private final AuthApiClient authApiClient;
 
     private final HhConfig hhConfig;
 
@@ -38,7 +38,7 @@ public class AuthController {
     public ModelAndView handleAuthorization(@RequestParam String code, @RequestParam String state, ModelMap modelMap) {
         String redirectLink = URLEncoder.encode("http://localhost:5000/hh/auth", StandardCharsets.UTF_8);
 
-        String result = apiClient.auth("https://hh.ru/oauth/token",
+        String result = authApiClient.auth("https://hh.ru/oauth/token",
                 "grant_type=authorization_code&client_id=" + hhConfig.getClientId() +
                         "&client_secret=" + hhConfig.getClientSecret() +
                         "&redirect_uri=" + redirectLink + "&code=" + code);

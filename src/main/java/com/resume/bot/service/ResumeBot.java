@@ -5,9 +5,9 @@ import com.resume.bot.display.BotState;
 import com.resume.bot.display.CallbackActionHandler;
 import com.resume.bot.display.handler.CallbackActionFactory;
 import com.resume.bot.json.JsonValidator;
-import com.resume.bot.json.entity.client.Client;
+import com.resume.bot.json.entity.client.Resume;
 import com.resume.bot.model.entity.User;
-import com.resume.hh_wrapper.HhConfig;
+import com.resume.hh_wrapper.config.HhConfig;
 import com.resume.util.BotUtil;
 import com.vdurmont.emoji.EmojiParser;
 import lombok.RequiredArgsConstructor;
@@ -32,13 +32,15 @@ import static com.resume.bot.json.JsonValidator.checks;
 @Component
 @RequiredArgsConstructor
 public class ResumeBot extends TelegramLongPollingBot {
-
-    private final BotConfig botConfig;
     private final CallbackActionFactory callbackActionFactory;
 
+    private final BotConfig botConfig;
     private final HhConfig hhConfig;
 
+    private final HeadHunterService headHunterService;
     private final UserService userService;
+
+    private final String hhBaseUrl;
 
     @Override
     public void onUpdateReceived(Update update) {
@@ -53,19 +55,18 @@ public class ResumeBot extends TelegramLongPollingBot {
 
             if (message.hasText()) {
                 SendMessage sendMessageRequest = createSendMessageRequest(chatId);
-
                 BotState currentState = BotUtil.userStates.get(chatId);
 
                 if ("/start".equals(message.getText())) {
                     BotUtil.userStates.put(chatId, BotState.START);
-                    BotUtil.clientsMap.put(chatId, new Client());
+                    BotUtil.clientsMap.put(chatId, new Resume());
                     startCommandReceived(message, sendMessageRequest);
                 } else if ("/menu".equals(message.getText())) {
                     if (checkClientExists(chatId, sendMessageRequest)) {
                         menuCommandReceived(sendMessageRequest);
                     }
                 } else if (currentState == BotState.START_DIALOGUE) {
-                    BotUtil.clientsMap.put(chatId, new Client());
+                    BotUtil.clientsMap.put(chatId, new Resume());
                     startDialogueWithClient(message.getText(), chatId, sendMessageRequest);
                 } else if (currentState == BotState.EDIT_CLIENT_RESULT_DATA) {
                     if (checkClientExists(chatId, sendMessageRequest)) {

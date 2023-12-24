@@ -15,17 +15,17 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class Client {
-    private Type access;
-
+public class Resume {
+//    private Type access;
+//
     @JsonProperty("birth_date")
     private String birthDate;
 
-    @JsonProperty("business_trip_readiness")
-    private Id businessTripReadiness;
-
-    private List<Certificate> certificate;
-
+//    @JsonProperty("business_trip_readiness")
+//    private Id businessTripReadiness;
+//
+//    private List<Certificate> certificate;
+//
     @JsonProperty("driver_license_types")
     private List<Id> driverLicenseTypes;
 
@@ -37,38 +37,38 @@ public class Client {
     @JsonProperty("has_vehicle")
     private Boolean hasVehicle;
 
-    @JsonProperty("hidden_fields")
-    private List<Type> hiddenFields;
-
+//    @JsonProperty("hidden_fields")
+//    private List<Type> hiddenFields;
+//
     @JsonProperty("last_name")
     private String lastName;
 
-    private Id metro;
-
+//    private Id metro;
+//
     @JsonProperty("middle_name")
     private String middleName;
 
-    private Photo photo;
-
-    private List<Portfolio> portfolio;
-
+//    private Photo photo;
+//
+//    private List<Portfolio> portfolio;
+//
     @NonNull
     @JsonProperty("professional_roles")
     private List<Id> professionalRoles;
 
     private List<Recommendation> recommendation;
 
-    private Relocation relocation;
-
-    @JsonProperty("resume_locale")
-    private Type resume_locale;
+//    private Relocation relocation;
+//
+//    @JsonProperty("resume_locale")
+//    private Type resume_locale;
 
     private Salary salary;
 
     private List<Type> schedules;
 
-    private List<Site> site;
-
+//    private List<Site> site;
+//
     @JsonProperty("skill_set")
     private Set<String> skillSet;
 
@@ -79,20 +79,20 @@ public class Client {
     @JsonProperty("total_experience")
     private TotalExperience totalExperience;
 
-    @JsonProperty("travel_time")
-    private Id travelTime;
-
-    @JsonProperty("work_ticket")
-    private List<Id> workTicket;
+//    @JsonProperty("travel_time")
+//    private Id travelTime;
+//
+//    @JsonProperty("work_ticket")
+//    private List<Id> workTicket;
 
     @NonNull
     private Id area;
 
-    @NonNull
-    private List<Id> citizenship;
+//    @NonNull
+//    private List<Id> citizenship;
 
-    @NonNull
-    private List<Contact> contact;
+//    @NonNull
+//    private List<Contact> contact;
 
     @NonNull
     private Education education;

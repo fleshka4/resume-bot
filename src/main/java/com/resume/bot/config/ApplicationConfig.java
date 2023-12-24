@@ -1,7 +1,8 @@
 package com.resume.bot.config;
 
-import com.resume.hh_wrapper.ApiClient;
-import com.resume.hh_wrapper.ApiClientImpl;
+import com.resume.hh_wrapper.impl.ApiClientImpl;
+import com.resume.hh_wrapper.impl.ApiClientTokenImpl;
+import com.resume.hh_wrapper.impl.AuthApiClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,9 +13,13 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class ApplicationConfig {
-
     @Value("${hh.base-url}")
     private String hhBaseUrl;
+
+    @Bean
+    public String hhBaseUrl() {
+        return hhBaseUrl;
+    }
 
     @Value("${json.max.size.mb}")
     private int limit;
@@ -28,13 +33,22 @@ public class ApplicationConfig {
         return WebClient.builder()
                 .exchangeStrategies(strategies)
                 .baseUrl(hhBaseUrl)
-                //.defaultCookie("cookieKey", "cookieValue")
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
     }
 
     @Bean
-    public ApiClient apiClient() {
+    public ApiClientImpl apiClientImpl() {
         return new ApiClientImpl(webClient());
+    }
+
+    @Bean
+    public AuthApiClient authApiClient() {
+        return new AuthApiClient(webClient());
+    }
+
+    @Bean
+    public ApiClientTokenImpl apiClientTokenImpl() {
+        return new ApiClientTokenImpl(webClient());
     }
 }
