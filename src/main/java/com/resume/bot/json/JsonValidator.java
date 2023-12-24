@@ -14,6 +14,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class JsonValidator {
     public enum ValidationType {
@@ -42,6 +43,7 @@ public class JsonValidator {
         EDUCATION_LEVEL,
         LANGUAGE_LEVEL,
         COUNTRY_NAME,
+        REGION_NAME,
         CITY_NAME,
         IN_LIST
     }
@@ -74,6 +76,7 @@ public class JsonValidator {
         checks.put(ValidationType.EDUCATION_LEVEL, objects -> checkEducationLevel((String) objects[0]));
         checks.put(ValidationType.LANGUAGE_LEVEL, objects -> checkLanguageLevel((String) objects[0]));
         checks.put(ValidationType.COUNTRY_NAME, objects -> checkCountry((String) objects[0]));
+        checks.put(ValidationType.REGION_NAME, objects -> checkRegion((String) objects[0]));
         checks.put(ValidationType.CITY_NAME, objects -> checkCity((String) objects[0]));
         checks.put(ValidationType.IN_LIST, objects -> isInList((String) objects[0], (String[]) objects[1]));
     }
@@ -84,17 +87,10 @@ public class JsonValidator {
     private static final String DATE_FORMAT = "\\d{2}-\\d{2}-\\d{4}";
 
     private static final String OTHER_COUNTRIES_JSON_ID = "1001";
-    private static final List<String> COUNTRIES_WITHOUT_REGIONS_IDS = List.of(
-            "40",   // Казахстан
-            "9",    // Азербайджан
-            "28",   // Грузия
-            "48",   // Кыргызстан
-            "97"    // Узбекистан
-    );
     private static final List<String> COUNTRIES_WITH_REGIONS_IDS = List.of(
             "113",   // Россия
             "16",    // Беларусь
-            "5"   // Украина
+            "5"      // Украина
     );
 
     public static boolean checkGraduationYear(int year) {
@@ -207,6 +203,12 @@ public class JsonValidator {
 
     public static boolean checkCountry(String text) {
         return isInList(text, Constants.COUNTRIES.stream().map(Country::getName).toArray(String[]::new));
+    }
+
+    public static boolean checkRegion(String text) {
+        return  isInList(text, Constants.AREAS.stream().filter(a -> COUNTRIES_WITH_REGIONS_IDS.contains(a.getId()))
+                .map(Area::getAreas).flatMap(List::stream).filter(a -> a.getAreas() != null)
+                .map(Area::getName).toArray(String[]::new));
     }
 
     public static boolean checkCity(String text) {

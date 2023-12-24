@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @Data
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class ValuePhoneOrEmail {
-    @JsonProperty("emailForContactValue")
+//    @JsonProperty("emailForContactValue")
     private String email;
 
-    @JsonProperty("phoneForContactValue")
+//    @JsonProperty("phoneForContactValue")
     private Phone phone;
 }

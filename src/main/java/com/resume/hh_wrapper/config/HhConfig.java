@@ -1,4 +1,4 @@
-package com.resume.hh_wrapper;
+package com.resume.hh_wrapper.config;
 
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
