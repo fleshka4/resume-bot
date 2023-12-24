@@ -2,8 +2,8 @@ package com.resume.bot.config;
 
 import com.resume.bot.service.HeadHunterService;
 import com.resume.bot.service.ResumeBot;
-import lombok.RequiredArgsConstructor;
 import com.resume.util.BotUtil;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;

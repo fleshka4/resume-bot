@@ -1,7 +1,8 @@
 package com.resume.util;
 
 import com.resume.bot.display.BotState;
-import com.resume.bot.json.entity.Client;
+import com.resume.bot.json.entity.area.Area;
+import com.resume.bot.json.entity.client.Client;
 import lombok.experimental.UtilityClass;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -10,7 +11,6 @@ import java.util.*;
 
 @UtilityClass
 public class BotUtil {
-
     public final List<String> CREATE_RESUME_IDS_LIST = List.of(
             "menu",
             "create_resume",
@@ -37,6 +37,10 @@ public class BotUtil {
     public final Map<Long, Client> clientsMap = new HashMap<>();
     public final String ERROR_TEXT = "Error occurred: ";
 
+    public final Map<Long, Long> states = new HashMap<>(); // state, chatId
+
+    public final Random random = new Random();
+
     public InlineKeyboardMarkup createInlineKeyboard(List<String> buttonLabels, List<String> callbackData) {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
@@ -54,5 +58,9 @@ public class BotUtil {
 
         inlineKeyboardMarkup.setKeyboard(rowList);
         return inlineKeyboardMarkup;
+    }
+
+    public static long generateRandom12DigitNumber(Random random) {
+        return (long) (Math.pow(10, 11) + random.nextInt((int) Math.pow(10, 11)));
     }
 }

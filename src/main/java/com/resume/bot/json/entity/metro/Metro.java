@@ -1,36 +1,25 @@
 package com.resume.bot.json.entity.metro;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+
 import java.util.List;
 
-@SuppressWarnings("unused")
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
 public class Metro {
-
+    @NonNull
     private String id;
+
+    @NonNull
     private List<Line> lines;
+
+    @NonNull
     private String name;
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public List<Line> getLines() {
-        return lines;
-    }
-
-    public void setLines(List<Line> lines) {
-        this.lines = lines;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
+    @NonNull
+    private String url;
 }

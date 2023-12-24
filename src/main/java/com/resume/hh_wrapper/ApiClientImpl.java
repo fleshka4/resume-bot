@@ -2,6 +2,7 @@ package com.resume.hh_wrapper;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.util.List;
 
@@ -10,6 +11,7 @@ public class ApiClientImpl implements ApiClient {
 
     // todo: add error handlers
     private final WebClient webClient;
+
     @Override
     public <T> T get(String uri, Class<T> type) {
         return webClient
@@ -39,5 +41,34 @@ public class ApiClientImpl implements ApiClient {
                 .retrieve()
                 .bodyToMono(type)
                 .block();
+    }
+
+    @Override
+    public <T> T put(String uri, T body, Class<T> type) {
+        return webClient.put()
+                .uri(uri)
+                .bodyValue(body)
+                .retrieve()
+                .bodyToMono(type)
+                .block();
+    }
+
+    @Override
+    public String auth(String uri, String body) {
+        WebClient client = webClient.mutate()
+                .defaultHeader("Content-Type", "application/x-www-form-urlencoded")
+                .build();
+        try {
+            return client.post()
+                    .uri(uri)
+                    .bodyValue(body)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+        } catch (WebClientResponseException ex) {
+            // Log details of the error response for debugging
+            System.err.println(("Error response: status={" + ex.getStatusCode() + "}, body={" + ex.getResponseBodyAsString() + ")}"));
+            throw ex; // Rethrow the exception or handle it according to your application's needs
+        }
     }
 }

@@ -1,47 +1,29 @@
 
 package com.resume.bot.json.entity.metro;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.resume.bot.json.entity.metro.station.Station;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+
 import java.util.List;
 
-@SuppressWarnings("unused")
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
 public class Line {
-
+    @JsonProperty("hex_color")
+    @NonNull
     private String hexColor;
+
+    @NonNull
     private String id;
+
+    @NonNull
     private String name;
 
+    @NonNull
     private List<Station> stations;
-
-    public String getHexColor() {
-        return hexColor;
-    }
-
-    public void setHexColor(String hexColor) {
-        this.hexColor = hexColor;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public List<Station> getStations() {
-        return stations;
-    }
-
-    public void setStations(List<Station> stations) {
-        this.stations = stations;
-    }
-
 }
