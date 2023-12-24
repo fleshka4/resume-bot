@@ -7,7 +7,7 @@ import com.resume.bot.display.handler.CallbackActionFactory;
 import com.resume.bot.json.JsonValidator;
 import com.resume.bot.json.entity.client.Client;
 import com.resume.bot.model.entity.User;
-import com.resume.hh_wrapper.HhConfig;
+import com.resume.hh_wrapper.config.HhConfig;
 import com.resume.util.BotUtil;
 import com.vdurmont.emoji.EmojiParser;
 import lombok.RequiredArgsConstructor;
@@ -194,7 +194,7 @@ public class ResumeBot extends TelegramLongPollingBot {
                 }
             }
             default ->
-                    sendMessage(EmojiParser.parseToUnicode("Что-то пошло не так.\nПопробуйте ещё раз.:cry:"), sendMessageRequest);
+                    sendMessage(EmojiParser.parseToUnicode("Что-то пошло не так.\nПопробуйте ещё раз.:cry:"),sendMessageRequest);
         }
     }
 
