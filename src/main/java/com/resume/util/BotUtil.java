@@ -35,9 +35,7 @@ public class BotUtil {
     public final Map<Long, Map<String, String>> userResumeData = new LinkedHashMap<>();
     public final Map<Long, Resume> clientsMap = new HashMap<>();
     public final String ERROR_TEXT = "Error occurred: ";
-
     public final Map<Long, Long> states = new HashMap<>(); // state, chatId
-
     public final Random random = new Random();
 
     public InlineKeyboardMarkup createInlineKeyboard(List<String> buttonLabels, List<String> callbackData) {

@@ -62,11 +62,13 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             }
             case "skip_education" -> {
                 List<String> buttonLabels = List.of("Хочу", "Пропустить");
-                List<String> buttonIds = List.of("want_enter_work", "skip_work");
+                List<String> buttonIds = List.of("want_enter_work_experience", "skip_work_experience");
                 executeEditMessageWithKeyBoard("Хотите ли Вы указать опыт работы?", messageId, chatId, buttonLabels, buttonIds);
             }
             case "want_enter_work_experience" -> {
                 BotUtil.dialogueStates.put(chatId, BotState.ENTER_PERIOD_OF_WORK);
+                executeEditMessage(EmojiParser.parseToUnicode("Введите период опыта работы в формате ММ-ГГГГ.:necktie:"),
+                        messageId, chatId);
             }
             case "skip_work_experience" -> {
 

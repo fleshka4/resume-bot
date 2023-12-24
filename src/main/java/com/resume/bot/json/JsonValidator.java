@@ -5,11 +5,12 @@ import com.resume.bot.json.entity.area.Country;
 import com.resume.util.Constants;
 import org.apache.commons.lang3.StringUtils;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 public class JsonValidator {
@@ -35,6 +36,7 @@ public class JsonValidator {
         RELOCATION_READINESS,
         CURRENCY,
         SITE_TYPE,
+        LINK,
         CONTACT_TYPE,
         EDUCATION_LEVEL,
         LANGUAGE_LEVEL,
@@ -51,7 +53,7 @@ public class JsonValidator {
         checks.put(ValidationType.GRADUATION_YEAR_WITH_YEAR, objects -> checkGraduationYear((String) objects[0]));
         checks.put(ValidationType.SYMBOLS_LIMIT, objects -> checkSymbolsLimit((String) objects[0], (Long) objects[1]));
         checks.put(ValidationType.BIRTHDAY, objects -> checkBirthday((String) objects[0]));
-        checks.put(ValidationType.EXPERIENCE, objects -> checkExperience((Date) objects[0], (Date) objects[1]));
+        checks.put(ValidationType.EXPERIENCE, objects -> checkExperience((String) objects[0], (String) objects[1]));
         checks.put(ValidationType.ALPHA_FORMAT, objects -> checkAlphaFormat((String) objects[0]));
         checks.put(ValidationType.ALPHANUMERIC_FORMAT, objects -> checkAlphanumericFormat((String) objects[0]));
         checks.put(ValidationType.NUMERIC_FORMAT, objects -> checkNumericFormat((String) objects[0]));
@@ -68,6 +70,7 @@ public class JsonValidator {
         checks.put(ValidationType.RELOCATION_READINESS, objects -> checkRelocationReadiness((String) objects[0]));
         checks.put(ValidationType.CURRENCY, objects -> checkCurrency((String) objects[0]));
         checks.put(ValidationType.SITE_TYPE, objects -> checkSiteType((String) objects[0]));
+        checks.put(ValidationType.LINK, objects -> checkLinkFormat((String) objects[0]));
         checks.put(ValidationType.CONTACT_TYPE, objects -> checkContactType((String) objects[0]));
         checks.put(ValidationType.EDUCATION_LEVEL, objects -> checkEducationLevel((String) objects[0]));
         checks.put(ValidationType.LANGUAGE_LEVEL, objects -> checkLanguageLevel((String) objects[0]));
@@ -83,6 +86,7 @@ public class JsonValidator {
     private static final int BIRTH_DATE_MIN_YEAR = 1900;
     private static final String NUMBER_FORMAT = "\\d{11}";
     private static final String DATE_FORMAT = "\\d{2}-\\d{2}-\\d{4}";
+    private static final String LINK_FORMAT = "(https:\\/\\/www\\.|http:\\/\\/www\\.|https:\\/\\/|http:\\/\\/)?[a-zA-Z0-9]{2,}(\\.[a-zA-Z0-9]{2,})(\\.[a-zA-Z0-9]{2,})?";
 
     private static final String OTHER_COUNTRIES_JSON_ID = "1001";
     private static final List<String> COUNTRIES_WITH_REGIONS_IDS = List.of(
@@ -102,17 +106,28 @@ public class JsonValidator {
         return text.length() < maxLen;
     }
 
+    public static boolean checkLinkFormat(String text) {
+        return text.matches(LINK_FORMAT);
+    }
+
     public static boolean checkBirthday(String birthDateStr) {
         LocalDate birthDate = LocalDate.parse(birthDateStr, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
         boolean isEnoughYears = LocalDate.now().isAfter(birthDate.plusYears(14));
         return isEnoughYears && (birthDate.getYear() >= BIRTH_DATE_MIN_YEAR);
     }
 
-    public static boolean checkExperience(Date experienceDate, Date birthDate) {
-        boolean isEnoughYears = experienceDate.after(Date.from(birthDate.toInstant().plus(14, ChronoUnit.YEARS)));
-        boolean isFutureExp = experienceDate.after(Date.from(Instant.now()));
-
-        return isEnoughYears && !isFutureExp;
+    public static boolean checkExperience(String experienceDateStr, String birthDayStr) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        LocalDate experienceDate;
+        LocalDate birthDate;
+        try {
+            experienceDate = LocalDate.parse("01-" + experienceDateStr, formatter);
+            birthDate = LocalDate.parse(birthDayStr, formatter);
+        } catch (Exception e) {
+            return false;
+        }
+        LocalDate minimumBirthDate = birthDate.plusYears(14);
+        return experienceDate.isAfter(minimumBirthDate) && !experienceDate.isAfter(LocalDate.now());
     }
 
     public static boolean checkAlphaFormat(String text) {

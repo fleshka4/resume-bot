@@ -5,6 +5,7 @@ import com.resume.bot.display.BotState;
 import com.resume.bot.display.CallbackActionHandler;
 import com.resume.bot.display.handler.CallbackActionFactory;
 import com.resume.bot.json.JsonValidator;
+import com.resume.bot.json.entity.Industry;
 import com.resume.bot.json.entity.client.Resume;
 import com.resume.bot.model.entity.User;
 import com.resume.hh_wrapper.config.HhConfig;
@@ -26,7 +27,9 @@ import java.util.List;
 import java.util.Map;
 
 import static com.resume.bot.json.JsonValidator.ValidationType.*;
+import static com.resume.bot.json.JsonValidator.checkExperience;
 import static com.resume.bot.json.JsonValidator.checks;
+import static com.resume.util.Constants.INDUSTRIES;
 import static com.resume.util.Constants.sexTypes;
 
 @Slf4j
@@ -190,7 +193,7 @@ public class ResumeBot extends TelegramLongPollingBot {
                     resumeFields.put("местожительство", receivedText);
 
                     List<String> buttonLabels = List.of("Хочу", "Пропустить");
-                    List<String> callbackData = List.of("want_enter_education", "skip");
+                    List<String> callbackData = List.of("want_enter_education", "skip_education");
                     sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, callbackData));
                     sendMessage("Хотите ли Вы указать в резюме о своём образовании?", sendMessageRequest);
                 }
@@ -238,15 +241,52 @@ public class ResumeBot extends TelegramLongPollingBot {
                     resumeFields.put("год окончания", receivedText);
 
                     List<String> buttonLabels = List.of("Хочу", "Пропустить");
-                    List<String> callbackData = List.of("want_enter_work", "skip_work");
+                    List<String> callbackData = List.of("want_enter_work_experience", "skip_work_experience");
                     sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, callbackData));
                     sendMessage("Хотите ли Вы указать опыт работы?", sendMessageRequest);
                 }
             }
             case ENTER_PERIOD_OF_WORK -> {
-                // todo Должно быть в самом конце диалога
+                if (checkExperience(receivedText, resumeFields.get("дата рождения"))) {
+                    resumeFields.put("опыт работы", receivedText);
+
+                    sendMessage("Введите название организации:", sendMessageRequest);
+                    BotUtil.dialogueStates.put(chatId, BotState.ENTER_NAME_OF_ORGANIZATION);
+                } else {
+                    sendMessage(EmojiParser.parseToUnicode("Вводите корректные данные."), sendMessageRequest);
+                }
+            }
+            case ENTER_NAME_OF_ORGANIZATION -> {
+                if (checkInput(receivedText, sendMessageRequest, ALPHA_FORMAT) &&
+                        checkInput(receivedText, 512L, sendMessageRequest, SYMBOLS_LIMIT)) {
+                    resumeFields.put("название организации", receivedText);
+
+                    sendMessage("Введите город организации:", sendMessageRequest);
+                    BotUtil.dialogueStates.put(chatId, BotState.ENTER_CITY_OF_ORGANIZATION);
+                }
+            }
+            case ENTER_CITY_OF_ORGANIZATION -> {
+                if (checkInput(receivedText, sendMessageRequest, ALPHA_FORMAT) &&
+                        checkInput(receivedText, 256L, sendMessageRequest, SYMBOLS_LIMIT)) {
+                    resumeFields.put("город организации", receivedText);
+
+                    sendMessage("Прикрепите ссылку на сайт организации:", sendMessageRequest);
+                    BotUtil.dialogueStates.put(chatId, BotState.ENTER_SITE_OF_ORGANIZATION);
+                }
+            }
+            case ENTER_SITE_OF_ORGANIZATION -> {
+                if (checkInput(receivedText, sendMessageRequest, LINK) &&
+                        checkInput(receivedText, 256L, sendMessageRequest, SYMBOLS_LIMIT)) {
+                    resumeFields.put("ссылка", receivedText);
+
+                    // todo сфера деятельности
+                    List<String> industriesNameList = INDUSTRIES.stream().map(Industry::getName).toList();
+                    sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(industriesNameList, industriesNameList));
+                    sendMessage("Выберите сферу деятельности компании:", sendMessageRequest);
+                    // todo Должно быть в самом конце диалога
 //                    BotUtil.userStates.put(chatId, BotState.FINISH_DIALOGUE);
 //                    finishDialogueWithClient(chatId, sendMessageRequest);
+                }
             }
             default ->
                     sendMessage(EmojiParser.parseToUnicode("Что-то пошло не так.\nПопробуйте ещё раз.:cry:"), sendMessageRequest);
@@ -301,6 +341,9 @@ public class ResumeBot extends TelegramLongPollingBot {
                 resume.append(currentBlock).append("\n\n");
             } else if (key.equals("уровень образования")) {
                 currentBlock = "*Образование*";
+                resume.append("\n").append(currentBlock).append("\n\n");
+            } else if (key.equals("опыт работы")) {
+                currentBlock = "*Опыт*";
                 resume.append("\n").append(currentBlock).append("\n\n");
             }
 
