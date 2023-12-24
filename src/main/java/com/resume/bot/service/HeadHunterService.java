@@ -25,8 +25,8 @@ public class HeadHunterService {
     private final ResumeService resumeService;
     private final ApiClient apiClient;
 
-    public void postCreateClient(String baseUri, Client client) {
-        apiClient.post(baseUri + HHUriConstants.POST_CREATE_RESUME_URI,
+    public String postCreateClient(String baseUri, Client client) {
+        return apiClient.post(baseUri + HHUriConstants.POST_CREATE_RESUME_URI,
                 JsonProcessor.createJsonFromEntity(client), String.class);
     }
 

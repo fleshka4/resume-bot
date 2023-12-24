@@ -14,10 +14,13 @@ CREATE TABLE resumes (
   resume_id serial PRIMARY KEY,
   resume_data jsonb,
   pdf_path text,
-  linked bool,
+  link text,
+  title varchar,
   user_id integer,
   template_id integer UNIQUE
 );
+
+comment on column resumes.hh_link is 'link to hh resume';
 
 CREATE TABLE templates (
   template_id serial PRIMARY KEY,

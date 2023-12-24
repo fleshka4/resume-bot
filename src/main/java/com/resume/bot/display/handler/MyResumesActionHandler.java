@@ -1,19 +1,33 @@
 package com.resume.bot.display.handler;
 
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.resume.bot.display.BotState;
 import com.resume.bot.display.CallbackActionHandler;
+import com.resume.bot.json.JsonProcessor;
+import com.resume.bot.json.entity.client.Client;
+import com.resume.bot.model.entity.Resume;
+import com.resume.bot.model.entity.User;
+import com.resume.bot.service.HeadHunterService;
+import com.resume.bot.service.ResumeService;
 import com.resume.util.BotUtil;
 import com.vdurmont.emoji.EmojiParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
+import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -21,43 +35,170 @@ public class MyResumesActionHandler implements CallbackActionHandler {
 
     private final TelegramLongPollingBot bot;
 
+    private final ResumeService resumeService;
+
+    private final HeadHunterService headHunterService;
+
+    @Value("${hh.base-url}")
+    private String hhBaseUrl;
+
     @Override
     public void performAction(String callbackData, Integer messageId, Long chatId) {
         switch (callbackData) {
-            case "my_resumes" -> {
+            case "my_resumes", "back_to_my_resumes" -> {
                 BotUtil.userStates.put(chatId, BotState.MY_RESUMES);
-                List<String> buttonLabels = List.of("Назад");
-                List<String> buttonIds = List.of("back_to_menu_3");
+                List<Resume> resumes = resumeService.getResumesByUserId(chatId);
+                List<String> buttonLabels = new ArrayList<>(resumes.stream()
+                        .map(Resume::getTitle)
+                        .toList());
+                buttonLabels.add("Назад");
+
+                List<String> buttonIds = new ArrayList<>();
+                for (int i = 1; i <= resumes.size(); i++) {
+                    buttonIds.add("resume_" + i);
+                }
+                buttonIds.add("back_to_menu_3");
 
                 // todo проецировать список резюме полученных из бд
                 //  с помощью inline клавиатуры (кнопки это номера в списке)
-                executeEditMessageWithKeyBoard(EmojiParser.parseToUnicode("Здесь Вы можете просматривать список всех созданных резюме.:page_with_curl:\n" +
-                        "После выбора конкретного резюме, у вас будет возможность:\n\n" +
-                        "- *Опубликовать его на HeadHunter*\n" +
-                        "- *Скачать ваше резюме*\n" +
-                        "- *Внести изменения в резюме*\n" +
-                        "- *Удалить резюме*\n"), messageId, chatId, buttonLabels, buttonIds);
+                executeEditMessageWithKeyBoard(EmojiParser.parseToUnicode("""
+                        Здесь Вы можете просматривать список всех созданных резюме.:page_with_curl:
+                        После выбора конкретного резюме, у вас будет возможность:
+
+                        - *Опубликовать его на HeadHunter*
+                        - *Скачать ваше резюме*
+                        - *Внести изменения в резюме*
+                        - *Удалить резюме*
+                        """), messageId, chatId, buttonLabels, buttonIds);
             }
             case "back_to_menu_3" -> {
                 List<String> buttonLabels = Arrays.asList("Создать резюме", "Экспорт резюме с hh.ru", "Мои резюме");
                 List<String> buttonIds = Arrays.asList("create_resume", "export_resume_hh", "my_resumes");
 
-                String menuInfo = "Выберите действие:\n\n"
-                        + "*Создать резюме* :memo:\nНачните процесс создания нового резюме с нуля!\n\n"
-                        + "*Экспорт резюме* с hh.ru :inbox_tray:\nЭкспортируйте свои данные с hh.ru для взаимодействия с ними.\n\n"
-                        + "*Мои резюме* :clipboard:\nПосмотрите список ваших созданных резюме.";
+                String menuInfo = """
+                        Выберите действие:
+
+                        *Создать резюме* :memo:
+                        Начните процесс создания нового резюме с нуля!
+
+                        *Экспорт резюме* с hh.ru :inbox_tray:
+                        Экспортируйте свои данные с hh.ru для взаимодействия с ними.
+
+                        *Мои резюме* :clipboard:
+                        Посмотрите список ваших созданных резюме.""";
 
                 executeEditMessageWithKeyBoard(EmojiParser.parseToUnicode(menuInfo), messageId, chatId, buttonLabels, buttonIds);
             }
             //todo действия после выбора одной из резюмешек
-            case "resume_1", "resume_2" -> {
-                List<String> buttonLabels = Arrays.asList("Опубликовать на HH", "Скачать резюме", "Редактировать резюме", "Удалить резюме", "Назад");
-                List<String> buttonIds = Arrays.asList("publish_on_hh", "download_resume", "edit_resume", "back_to_my_resumes");
+            case "resume_1", "resume_2", "resume_3", "resume_4", "resume_5", "resume_6" -> {
+                List<String> buttonLabels = Arrays.asList("Опубликовать на HH", "Скачать резюме",
+                        "Редактировать резюме", "Удалить резюме", "Назад");
+                List<String> buttonIds = Arrays.asList("publish_on_hh_" + callbackData, "download_" + callbackData,
+                        "edit_" + callbackData, "delete_" + callbackData, "back_to_my_resumes");
 
                 executeEditMessageWithKeyBoard(EmojiParser.parseToUnicode("Выберите, что нужно сделать с вашим резюме.:slightly_smiling:"),
                         messageId, chatId, buttonLabels, buttonIds);
             }
+            default -> {
+                if (publishOnHh(callbackData, messageId, chatId) || downloadResume(callbackData, messageId, chatId) ||
+                        editResume(callbackData, messageId, chatId) || deleteResume(callbackData, messageId, chatId)) {
+                    System.out.println("done");
+                }
+            }
         }
+    }
+
+    private boolean publishOnHh(String data, Integer messageId, Long chatId) {
+        Pattern pattern = Pattern.compile("publish_on_hh_resume_([1-6])");
+
+        Matcher matcher = pattern.matcher(data);
+        if (!matcher.matches()) {
+            return false;
+        }
+
+        Resume resume = getResume(matcher, chatId);
+        if (resume != null) {
+            try {
+                String hhLink = resume.getHhLink();
+                if (hhLink == null) {
+                    hhLink = headHunterService.postCreateClient(hhBaseUrl,
+                            JsonProcessor.createEntityFromJson(resume.getResumeData(), Client.class));
+                    resumeService.updateHhLinkByResumeId(hhLink, resume.getResumeId());
+                } else {
+                    String[] split = hhLink.split("/");
+                    String resumeId = split[split.length - 1];
+                    headHunterService.putEditClient(hhBaseUrl, resumeId,
+                            JsonProcessor.createEntityFromJson(resume.getResumeData(), Client.class));
+                }
+            } catch (Exception exception) {
+                log.error(exception.getMessage());
+                sendMessage("Произошла ошибка при отправке резюме. " +
+                        "Попробуйте удалить его и создать заново или выберите другое", chatId);
+            }
+        }
+        return true;
+    }
+
+    private boolean downloadResume(String data, Integer messageId, Long chatId) {
+        Pattern pattern = Pattern.compile("download_resume_([1-6])");
+
+        Matcher matcher = pattern.matcher(data);
+        if (!matcher.matches()) {
+            return false;
+        }
+
+        Resume resume = getResume(matcher, chatId);
+        if (resume == null) {
+            // todo: say its not found etc
+            return true;
+        }
+
+        String filePath = resume.getPdfPath();
+        File file = new File(filePath);
+        try {
+            bot.execute(new SendDocument(String.valueOf(chatId), new InputFile(file)));
+        } catch (TelegramApiException e) {
+            log.error(e.getMessage());
+        }
+
+        return true;
+    }
+
+    private boolean editResume(String data, Integer messageId, Long chatId) {
+        Pattern pattern = Pattern.compile("edit_resume_([1-6])");
+
+        Matcher matcher = pattern.matcher(data);
+        if (!matcher.matches()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean deleteResume(String data, Integer messageId, Long chatId) {
+        Pattern pattern = Pattern.compile("delete_resume_([1-6])");
+
+        Matcher matcher = pattern.matcher(data);
+        if (!matcher.matches()) {
+            return false;
+        }
+
+        Resume resume = getResume(matcher, chatId);
+        if (resume != null) {
+            resumeService.deleteResume(resume);
+        }
+        return true;
+    }
+
+    private Resume getResume(Matcher matcher, Long chatId) {
+        String[] s = matcher.group().split("_");
+
+        int numOfResume = Integer.parseInt(s[s.length - 1]);
+        List<Resume> resumes = resumeService.getResumesByUserId(chatId);
+        if (resumes.size() >= numOfResume) {
+            return resumes.get(numOfResume - 1);
+        }
+        return null;
     }
 
     private void sendMessage(String text, Long chatId) {
