@@ -6,22 +6,23 @@ import com.resume.bot.json.entity.Locale;
 import com.resume.bot.json.entity.Skills;
 import com.resume.bot.json.entity.area.Area;
 import com.resume.bot.json.entity.area.Country;
-import com.resume.bot.json.entity.client.Client;
+import com.resume.bot.json.entity.client.Resume;
+import com.resume.bot.json.entity.client.Resumes;
 import com.resume.bot.json.entity.metro.Metro;
 import com.resume.bot.json.entity.roles.ProfessionalRoles;
-import com.resume.bot.model.entity.User;
 import com.resume.hh_wrapper.impl.ApiClientImpl;
 import com.resume.hh_wrapper.impl.ApiClientTokenImpl;
 import com.resume.util.HHUriConstants;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class HeadHunterService {
     private final ApiClientImpl apiClientImpl;
     private final ApiClientTokenImpl apiClientTokenImpl;
@@ -29,28 +30,28 @@ public class HeadHunterService {
 
     // region: AUTHORIZED REQUESTS
 
-    public void postCreateClient(String baseUri, Long tgUid, Client client) {
+    public void postCreateClient(String baseUri, Long tgUid, Resume resume) {
         apiClientTokenImpl.post(baseUri + HHUriConstants.POST_CREATE_RESUME_URI,
                 userService.getUser(tgUid).getTokenHolder().getAccessToken(),
-                JsonProcessor.createJsonFromEntity(client), String.class);
+                resume, Resume.class);
     }
 
-    public void putEditClient(String baseUri, Long tgUid, String resumeId, Client client) {
+    public void putEditClient(String baseUri, Long tgUid, String resumeId, Resume resume) {
         apiClientTokenImpl.put(baseUri + HHUriConstants.PUT_EDIT_RESUME_URI.replace("{resume_id}", resumeId),
                 userService.getUser(tgUid).getTokenHolder().getAccessToken(),
-                JsonProcessor.createJsonFromEntity(client), String.class);
+                JsonProcessor.createJsonFromEntity(resume), String.class);
     }
 
-    public List<Client> getClientsResume(String baseUri, Long tgUid) {
-        List<String> jsonStrings = apiClientTokenImpl.getList(baseUri + HHUriConstants.GET_RESUMES_URI,
-                userService.getUser(tgUid).getTokenHolder().getAccessToken(), String.class);
-        return jsonStrings.stream().map(json -> JsonProcessor.createEntityFromJson(json, Client.class)).collect(Collectors.toList());
+    public List<Resume> getClientResumes(String baseUri, Long tgUid) {
+        Resumes resumes = apiClientTokenImpl.get(baseUri + HHUriConstants.GET_RESUMES_URI,
+                userService.getUser(tgUid).getTokenHolder().getAccessToken(), Resumes.class);
+        return resumes.getItems();
     }
 
-    public Client getClientResume(String baseUri, Long tgUid, String resumeId) {
+    public Resume getClientResume(String baseUri, Long tgUid, String resumeId) {
         return JsonProcessor.createEntityFromJson(
                 apiClientTokenImpl.get(baseUri + HHUriConstants.GET_RESUME_BY_ID_URI.replace("{resume_id}", resumeId),
-                        userService.getUser(tgUid).getTokenHolder().getAccessToken(), String.class), Client.class);
+                        userService.getUser(tgUid).getTokenHolder().getAccessToken(), String.class), Resume.class);
     }
 
     // endregion

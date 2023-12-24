@@ -3,7 +3,7 @@ package com.resume.bot.display.handler;
 import com.resume.bot.display.BotState;
 import com.resume.bot.display.CallbackActionHandler;
 import com.resume.bot.json.JsonProcessor;
-import com.resume.bot.json.entity.client.Client;
+import com.resume.bot.json.entity.client.Resume;
 import com.resume.bot.json.entity.common.Id;
 import com.resume.util.BotUtil;
 import com.vdurmont.emoji.EmojiParser;
@@ -87,20 +87,20 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
     }
 
     private void fillClientData(Long chatId) {
-        Client client = BotUtil.clientsMap.getOrDefault(chatId, new Client());
+        Resume resume = BotUtil.clientsMap.getOrDefault(chatId, new Resume());
 
         for (Map.Entry<String, String> entry : BotUtil.userResumeData.get(chatId).entrySet()) {
             String fieldLabel = entry.getKey();
             String fieldValue = entry.getValue();
 
             switch (fieldLabel.toLowerCase()) {
-                case "имя" -> client.setFirstName(fieldValue);
-                case "фамилия" -> client.setLastName(fieldValue);
-                case "отчество" -> client.setMiddleName(fieldValue);
+                case "имя" -> resume.setFirstName(fieldValue);
+                case "фамилия" -> resume.setLastName(fieldValue);
+                case "отчество" -> resume.setMiddleName(fieldValue);
                 case "пол" -> {
                     Id genderId = new Id();
                     genderId.setId(fieldValue.equals("Мужской") ? "male" : "female");
-                    client.setGender(genderId);
+                    resume.setGender(genderId);
                 }
                 case "местожительство" -> {
                     // todo
@@ -111,7 +111,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             }
         }
 
-        JsonProcessor.createJsonFromEntity(client);
+        JsonProcessor.createJsonFromEntity(resume);
     }
 
     private void sendMessage(String text, Long chatId) {

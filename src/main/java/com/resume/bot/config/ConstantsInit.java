@@ -14,9 +14,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ConstantsInit {
     private final HeadHunterService headHunterService;
-
-    @Value("${hh.base-url}")
-    private String hhBaseUrl;
+    private final String hhBaseUrl;
 
     @EventListener({ApplicationReadyEvent.class})
     public void initAreas() {

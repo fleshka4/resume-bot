@@ -13,9 +13,13 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class ApplicationConfig {
-
     @Value("${hh.base-url}")
     private String hhBaseUrl;
+
+    @Bean
+    public String hhBaseUrl() {
+        return hhBaseUrl;
+    }
 
     @Value("${json.max.size.mb}")
     private int limit;

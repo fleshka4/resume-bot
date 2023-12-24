@@ -3,7 +3,7 @@ package com.resume.bot.json;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.resume.bot.exception.json.JsonActionException;
-import com.resume.bot.json.entity.client.Client;
+import com.resume.bot.json.entity.client.Resume;
 
 public class JsonProcessor {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -15,11 +15,11 @@ public class JsonProcessor {
 
     public static <T> T createEntityFromJson(String jsonString, Class<T> clazz) {
         try {
-            if (clazz.equals(Client.class)) {
-                jsonString = jsonString
-                        .replaceAll(VALUE_TO_REPLACE_PHONE, PHONE_REPLACEMENT)
-                        .replaceAll(VALUE_TO_REPLACE_EMAIL, EMAIL_REPLACEMENT);
-            }
+//            if (clazz.equals(Resume.class)) {
+//                jsonString = jsonString
+//                        .replaceAll(VALUE_TO_REPLACE_PHONE, PHONE_REPLACEMENT)
+//                        .replaceAll(VALUE_TO_REPLACE_EMAIL, EMAIL_REPLACEMENT);
+//            }
             return OBJECT_MAPPER.readValue(jsonString, clazz);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
@@ -28,11 +28,11 @@ public class JsonProcessor {
 
     public static <T> String createJsonFromEntity(T obj) {
         try {
-            return obj.getClass().equals(Client.class)
+            return /*obj.getClass().equals(Resume.class)
                     ? OBJECT_MAPPER.writeValueAsString(obj)
                                     .replaceAll(EMAIL_REPLACEMENT, VALUE_TO_REPLACE_EMAIL)
                                     .replaceAll(PHONE_REPLACEMENT, VALUE_TO_REPLACE_PHONE)
-                    : OBJECT_MAPPER.writeValueAsString(obj);
+                    :*/ OBJECT_MAPPER.writeValueAsString(obj);
         } catch (JsonProcessingException e) {
             throw new JsonActionException("Failed creating JSON process!");
         }

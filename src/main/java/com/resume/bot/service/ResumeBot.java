@@ -5,10 +5,19 @@ import com.resume.bot.display.BotState;
 import com.resume.bot.display.CallbackActionHandler;
 import com.resume.bot.display.handler.CallbackActionFactory;
 import com.resume.bot.json.JsonValidator;
-import com.resume.bot.json.entity.client.Client;
+import com.resume.bot.json.entity.Industry;
+import com.resume.bot.json.entity.client.Area;
+import com.resume.bot.json.entity.client.Experience;
+import com.resume.bot.json.entity.client.Resume;
+import com.resume.bot.json.entity.client.Salary;
+import com.resume.bot.json.entity.client.education.Education;
+import com.resume.bot.json.entity.common.Id;
+import com.resume.bot.json.entity.common.Type;
 import com.resume.bot.model.entity.User;
 import com.resume.hh_wrapper.config.HhConfig;
 import com.resume.util.BotUtil;
+import com.resume.util.Constants;
+import com.resume.util.HHUriConstants;
 import com.vdurmont.emoji.EmojiParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,10 +29,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.resume.bot.json.JsonValidator.ValidationType.*;
 import static com.resume.bot.json.JsonValidator.checks;
@@ -32,13 +38,15 @@ import static com.resume.bot.json.JsonValidator.checks;
 @Component
 @RequiredArgsConstructor
 public class ResumeBot extends TelegramLongPollingBot {
-
-    private final BotConfig botConfig;
     private final CallbackActionFactory callbackActionFactory;
 
+    private final BotConfig botConfig;
     private final HhConfig hhConfig;
 
+    private final HeadHunterService headHunterService;
     private final UserService userService;
+
+    private final String hhBaseUrl;
 
     @Override
     public void onUpdateReceived(Update update) {
@@ -58,14 +66,14 @@ public class ResumeBot extends TelegramLongPollingBot {
 
                 if ("/start".equals(message.getText())) {
                     BotUtil.userStates.put(chatId, BotState.START);
-                    BotUtil.clientsMap.put(chatId, new Client());
+                    BotUtil.clientsMap.put(chatId, new Resume());
                     startCommandReceived(message, sendMessageRequest);
                 } else if ("/menu".equals(message.getText())) {
                     if (checkClientExists(chatId, sendMessageRequest)) {
                         menuCommandReceived(sendMessageRequest);
                     }
                 } else if (currentState == BotState.START_DIALOGUE) {
-                    BotUtil.clientsMap.put(chatId, new Client());
+                    BotUtil.clientsMap.put(chatId, new Resume());
                     startDialogueWithClient(message.getText(), chatId, sendMessageRequest);
                 } else if (currentState == BotState.EDIT_CLIENT_RESULT_DATA) {
                     if (checkClientExists(chatId, sendMessageRequest)) {
@@ -73,6 +81,43 @@ public class ResumeBot extends TelegramLongPollingBot {
                     }
                 } else if ("/login".equals(message.getText())) {
                     loginHandler(chatId, sendMessageRequest);
+                } else if ("/client".equals(message.getText())) {
+                    Resume resume = new Resume();
+                    resume.setFirstName("Сергей");
+                    resume.setMiddleName("Сергеевич");
+                    resume.setLastName("Романов");
+                    resume.setBirthDate("2002-07-12");
+                    resume.setGender(new Id("male"));
+                    resume.setArea(new Id("1"));
+
+                    Education education = new Education(null, null, null,
+                            new Type("unfinished_higher", Constants.educationLevels[2]), null);
+                    resume.setEducation(education);
+
+                    com.resume.bot.json.entity.area.Area currentArea = Constants.AREAS.get(0);
+                    Industry currentIndustry = Constants.INDUSTRIES.get(0);
+                    Experience experience = new Experience(new Area(currentArea.getId(), currentArea.getName(),
+                                    hhBaseUrl + HHUriConstants.GET_AREAS_URI + "/" + currentArea.getId()),
+                            "Aloha", null, "https://job.nexign.com/bootcamp",
+                            "Rabotal", null, "2023-11-10",
+                            List.of(new Type(currentIndustry.getId(), currentIndustry.getName())), null,
+                            "Razrab", "2023-10-11");
+                    resume.setExperience(List.of(experience));
+
+//                    resume.setSkillSet(Set.of(Constants.SKILLS.getItems().get(0).getName()));
+                    resume.setSkills("abasdgashd");
+                    resume.setHasVehicle(true);
+                    resume.setDriverLicenseTypes(List.of(new Id(Constants.driverLicenseTypes[1])));
+                    resume.setRecommendation(null);
+                    resume.setTitle("Proger");
+                    resume.setProfessionalRoles(List.of(new Id(Constants.PROFESSIONAL_ROLES.getCategories().get(0).getId())));
+                    resume.setSalary(new Salary(100000L, "RUR"));
+                    resume.setEmployments(List.of(new Type("full", Constants.employmentTypes[0])));
+                    resume.setSchedules(List.of(new Type("fullDay", Constants.scheduleTypes[0])));
+
+                    System.out.println(resume);
+                    headHunterService.postCreateClient(hhBaseUrl, chatId, resume);
+//                    List<Resume> cls = headHunterService.getClientResumes(hhBaseUrl, chatId);
                 } else {
                     sendMessage(EmojiParser.parseToUnicode("Извините, я не понимаю эту команду.:cry:"), sendMessageRequest);
                 }
