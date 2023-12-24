@@ -23,6 +23,12 @@ public class Constants {
     public static Skills SKILLS;
     public static List<Locale> LOCALES;
     public static List<Type> LANGUAGES;
+    public static final String OTHER_COUNTRIES_JSON_ID = "1001";
+    public static final List<String> COUNTRIES_WITH_REGIONS_IDS = List.of(
+            "113",   // Россия
+            "16",    // Беларусь
+            "5"      // Украина
+    );
 
     public static Map<String, String> visibilityTypes = Map.of(
             "hidden_to_no_one", "не видно никому",

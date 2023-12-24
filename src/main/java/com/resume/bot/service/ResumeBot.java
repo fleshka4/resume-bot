@@ -264,8 +264,7 @@ public class ResumeBot extends TelegramLongPollingBot {
                 }
             }
             case ENTER_CITY_OF_ORGANIZATION -> {
-                if (checkInput(receivedText, sendMessageRequest, ALPHA_FORMAT) &&
-                        checkInput(receivedText, 256L, sendMessageRequest, SYMBOLS_LIMIT)) {
+                if (checkInput(receivedText, sendMessageRequest, CITY_NAME)) {
                     resumeFields.put("город организации", receivedText);
 
                     sendMessage("Прикрепите ссылку на сайт организации:", sendMessageRequest);
