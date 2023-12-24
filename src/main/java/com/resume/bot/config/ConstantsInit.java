@@ -57,4 +57,10 @@ public class ConstantsInit {
         Constants.LOCALES = headHunterService.getLocales(hhBaseUrl);
         log.info("Locales initialized");
     }
+
+    @EventListener({ApplicationReadyEvent.class})
+    public void initLanguages() {
+        Constants.LANGUAGES = headHunterService.getLanguages(hhBaseUrl);
+        log.info("Languages initialized");
+    }
 }

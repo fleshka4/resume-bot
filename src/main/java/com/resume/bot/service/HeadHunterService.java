@@ -8,6 +8,7 @@ import com.resume.bot.json.entity.area.Area;
 import com.resume.bot.json.entity.area.Country;
 import com.resume.bot.json.entity.client.Resume;
 import com.resume.bot.json.entity.client.Resumes;
+import com.resume.bot.json.entity.common.Type;
 import com.resume.bot.json.entity.metro.Metro;
 import com.resume.bot.json.entity.roles.ProfessionalRoles;
 import com.resume.hh_wrapper.impl.ApiClientImpl;
@@ -84,6 +85,10 @@ public class HeadHunterService {
 
     public List<Locale> getLocales(String baseUri) {
         return apiClientImpl.getList(baseUri + HHUriConstants.GET_LOCALES_URI, Locale.class);
+    }
+
+    public List<Type> getLanguages(String baseUri) {
+        return apiClientImpl.getList(baseUri + HHUriConstants.GET_LANGUAGES_URI, Type.class);
     }
 
     public Metro getMetroByCityId(String baseUri, String cityId) {

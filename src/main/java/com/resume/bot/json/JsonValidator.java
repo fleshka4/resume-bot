@@ -81,20 +81,13 @@ public class JsonValidator {
     private static final int GRADUATION_DATE_MIN_YEAR = 1950;
     private static final int BIRTH_DATE_MIN_YEAR = 1900;
     private static final String NUMBER_FORMAT = "\\d{11}";
-    private static final String DATE_FORMAT = "\\d{4}-\\d{2}-\\d{2}";
+    private static final String DATE_FORMAT = "\\d{2}-\\d{2}-\\d{4}";
 
     private static final String OTHER_COUNTRIES_JSON_ID = "1001";
-    private static final List<String> COUNTRIES_WITHOUT_REGIONS_IDS = List.of(
-            "40",   // Казахстан
-            "9",    // Азербайджан
-            "28",   // Грузия
-            "48",   // Кыргызстан
-            "97"    // Узбекистан
-    );
     private static final List<String> COUNTRIES_WITH_REGIONS_IDS = List.of(
             "113",   // Россия
             "16",    // Беларусь
-            "5"   // Украина
+            "5"      // Украина
     );
 
     public static boolean checkGraduationYear(int year) {

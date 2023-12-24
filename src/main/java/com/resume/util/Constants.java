@@ -5,6 +5,7 @@ import com.resume.bot.json.entity.Locale;
 import com.resume.bot.json.entity.Skills;
 import com.resume.bot.json.entity.area.Area;
 import com.resume.bot.json.entity.area.Country;
+import com.resume.bot.json.entity.common.Type;
 import com.resume.bot.json.entity.metro.Metro;
 import com.resume.bot.json.entity.roles.ProfessionalRoles;
 import lombok.experimental.UtilityClass;
@@ -20,6 +21,7 @@ public class Constants {
     public static ProfessionalRoles PROFESSIONAL_ROLES;
     public static Skills SKILLS;
     public static List<Locale> LOCALES;
+    public static List<Type> LANGUAGES;
 
     public static String[] visibilityTypes = new String[]{
             "не видно никому",

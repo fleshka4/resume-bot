@@ -13,4 +13,5 @@ public interface HHUriConstants {
     String GET_PROFESSIONAL_ROLES_URI = "/professional_roles";
     String GET_SKILLS_URI = "/skills";
     String GET_LOCALES_URI = "/locales";
+    String GET_LANGUAGES_URI = "/languages";
 }
