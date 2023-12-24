@@ -3,6 +3,7 @@ package com.resume.bot.display.handler;
 import com.resume.bot.display.BotState;
 import com.resume.bot.display.CallbackActionHandler;
 import com.resume.bot.json.JsonProcessor;
+import com.resume.bot.json.entity.area.Area;
 import com.resume.bot.json.entity.client.Resume;
 import com.resume.bot.json.entity.client.education.Education;
 import com.resume.bot.json.entity.client.education.ElementaryEducation;
@@ -10,6 +11,7 @@ import com.resume.bot.json.entity.client.education.PrimaryEducation;
 import com.resume.bot.json.entity.common.Id;
 import com.resume.bot.json.entity.common.Type;
 import com.resume.util.BotUtil;
+import com.resume.util.Constants;
 import com.vdurmont.emoji.EmojiParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,13 +21,9 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import static com.resume.util.Constants.educationLevels;
-import static com.resume.util.Constants.sexTypes;
+import static com.resume.util.Constants.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -67,7 +65,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             }
             case "want_enter_work_experience" -> {
                 BotUtil.dialogueStates.put(chatId, BotState.ENTER_PERIOD_OF_WORK);
-                executeEditMessage(EmojiParser.parseToUnicode("Введите период опыта работы в формате ММ-ГГГГ.:necktie:"),
+                executeEditMessage(EmojiParser.parseToUnicode("Введите период опыта работы в формате ММ-ГГГГ - ММ-ГГГГ.:necktie:"),
                         messageId, chatId);
             }
             case "skip_work_experience" -> {
@@ -140,10 +138,11 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                     resume.setGender(genderId);
                 }
                 case "местожительство" -> {
-                    // todo
-//                    Id areaId = new Id();
-//                    areaId.setId(fieldValue);
-//                    client.setArea();
+                    Id areaId = new Id();
+                    String[] items = fieldValue.split(",");
+                    String cityName = items[items.length - 1].trim();
+                    areaId.setId(getCityId(cityName));
+                    resume.setArea(areaId);
                 }
                 case "уровень образования" -> {
                     Type typeEdu = new Type();
@@ -184,6 +183,17 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             case "учебное заведение" -> elementaryEducation.setName(fieldValue);
             case "год окончания" -> elementaryEducation.setYear(Long.parseLong(fieldValue));
         }
+    }
+
+    private String getCityId(String cityName) {
+        Optional<Area> city1 = Constants.AREAS.stream().filter(a -> !a.getId().equals(OTHER_COUNTRIES_JSON_ID))
+                .map(Area::getAreas).flatMap(List::stream).filter(a -> a.getAreas().isEmpty())
+                .filter(area -> area.getName().equals(cityName)).findFirst();
+        Optional<Area> city2 = Constants.AREAS.stream()
+                .filter(a -> COUNTRIES_WITH_REGIONS_IDS.contains(a.getId()) || a.getId().equals(OTHER_COUNTRIES_JSON_ID))
+                .map(Area::getAreas).flatMap(List::stream).map(Area::getAreas).flatMap(List::stream)
+                .filter(area -> area.getName().equals(cityName)).findFirst();
+        return city1.map(Area::getId).orElseGet(() -> city2.get().getId());
     }
 
     public static String getKeyByValue(Map<String, String> map, String fieldValue) {

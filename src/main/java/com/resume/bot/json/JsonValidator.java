@@ -11,6 +11,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Function;
 
+import static com.resume.util.Constants.COUNTRIES_WITH_REGIONS_IDS;
+import static com.resume.util.Constants.OTHER_COUNTRIES_JSON_ID;
+
 public class JsonValidator {
     public enum ValidationType {
         GRADUATION_YEAR_WITH_YEAR,
@@ -88,13 +91,6 @@ public class JsonValidator {
     private static final String DATE_FORMAT = "\\d{2}-\\d{2}-\\d{4}";
     private static final String LINK_FORMAT = "(https:\\/\\/www\\.|http:\\/\\/www\\.|https:\\/\\/|http:\\/\\/)?[a-zA-Z0-9]{2,}(\\.[a-zA-Z0-9]{2,})(\\.[a-zA-Z0-9]{2,})?";
 
-    private static final String OTHER_COUNTRIES_JSON_ID = "1001";
-    private static final List<String> COUNTRIES_WITH_REGIONS_IDS = List.of(
-            "113",   // Россия
-            "16",    // Беларусь
-            "5"      // Украина
-    );
-
     public static boolean checkGraduationYear(String year) {
         int graduationYear = Integer.parseInt(year);
         int currentYear = LocalDate.now().getYear();
@@ -123,17 +119,22 @@ public class JsonValidator {
     }
 
     public static boolean checkExperience(String experienceDateStr, String birthDayStr) {
+        String[] items = experienceDateStr.split(" - ");
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-        LocalDate experienceDate;
+        LocalDate experienceDateStart;
+        LocalDate experienceDateEnd;
         LocalDate birthDate;
         try {
-            experienceDate = LocalDate.parse("01-" + experienceDateStr, formatter);
+            experienceDateStart = LocalDate.parse("01-" + items[0], formatter);
+            experienceDateEnd = LocalDate.parse("01-" + items[1], formatter);
             birthDate = LocalDate.parse(birthDayStr, formatter);
         } catch (Exception e) {
             return false;
         }
         LocalDate minimumBirthDate = birthDate.plusYears(14);
-        return experienceDate.isAfter(minimumBirthDate) && !experienceDate.isAfter(LocalDate.now());
+        return (experienceDateEnd.isAfter(experienceDateStart) || experienceDateEnd.isEqual(experienceDateStart)) &&
+                experienceDateStart.isAfter(minimumBirthDate) &&
+                experienceDateEnd.isBefore(LocalDate.now());
     }
 
     public static boolean checkAlphaFormat(String text) {
