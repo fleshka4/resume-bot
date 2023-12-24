@@ -18,5 +18,14 @@ public enum BotState {
     ENTER_PATRONYMIC,
     ENTER_BIRTHDAY,
     ENTER_GENDER,
-    ENTER_LOCATION
+    ENTER_LOCATION,
+
+    // Education
+    ENTER_INSTITUTION,
+    ENTER_FACULTY,
+    ENTER_SPECIALIZATION,
+    ENTER_END_YEAR,
+
+    // Experience
+    ENTER_PERIOD_OF_WORK
 }

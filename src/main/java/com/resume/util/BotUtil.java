@@ -18,8 +18,13 @@ public class BotUtil {
             "start_dialogue",
             "edit_result_data",
             "result_data_is_correct",
-            "choice_gender_m",
-            "choice_gender_f",
+            // education
+            "want_enter_education",
+            "skip_education",
+            // experience
+            "want_enter_work_experience",
+            "skip_work_experience",
+
             "back_to_menu",
             "back_to_create_resume",
             "yes_go_to_menu",

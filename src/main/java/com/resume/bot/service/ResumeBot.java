@@ -27,6 +27,7 @@ import java.util.Map;
 
 import static com.resume.bot.json.JsonValidator.ValidationType.*;
 import static com.resume.bot.json.JsonValidator.checks;
+import static com.resume.util.Constants.sexTypes;
 
 @Slf4j
 @Component
@@ -141,7 +142,7 @@ public class ResumeBot extends TelegramLongPollingBot {
         BotState currentDialogueState = BotUtil.dialogueStates.get(chatId);
         Map<String, String> resumeFields = checkAvailabilityResumeFields(chatId);
 
-        receivedText = receivedText.toLowerCase().trim();
+        receivedText = receivedText.trim();
 
         switch (currentDialogueState) {
             case ENTER_NAME -> {
@@ -176,9 +177,8 @@ public class ResumeBot extends TelegramLongPollingBot {
                         checkInput(receivedText, sendMessageRequest, BIRTHDAY)) {
                     resumeFields.put("дата рождения", receivedText);
 
-                    List<String> buttonLabels = List.of("М", "Ж");
-                    List<String> callbackData = List.of("choice_gender_m", "choice_gender_f");
-                    sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, callbackData));
+                    sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(sexTypes.values().stream().toList(),
+                            sexTypes.keySet().stream().toList()));
                     BotUtil.dialogueStates.put(chatId, BotState.ENTER_GENDER);
                     sendMessage("Выберите пол", sendMessageRequest);
                 }
@@ -189,10 +189,64 @@ public class ResumeBot extends TelegramLongPollingBot {
                         checkInput(receivedText, 256L, sendMessageRequest, SYMBOLS_LIMIT)) {
                     resumeFields.put("местожительство", receivedText);
 
-                    // todo Должно быть в самом конце диалога
-                    BotUtil.userStates.put(chatId, BotState.FINISH_DIALOGUE);
-                    finishDialogueWithClient(chatId, sendMessageRequest);
+                    List<String> buttonLabels = List.of("Хочу", "Пропустить");
+                    List<String> callbackData = List.of("want_enter_education", "skip");
+                    sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, callbackData));
+                    sendMessage("Хотите ли Вы указать в резюме о своём образовании?", sendMessageRequest);
                 }
+            }
+            case ENTER_INSTITUTION -> {
+                if (checkInput(receivedText, sendMessageRequest, ALPHA_FORMAT) &&
+                        checkInput(receivedText, 512L, sendMessageRequest, SYMBOLS_LIMIT)) {
+                    resumeFields.put("учебное заведение", receivedText);
+
+                    String educationLevel = resumeFields.get("уровень образования");
+
+                    if (!educationLevel.equals("Среднее") && !educationLevel.equals("Среднее специальное")) {
+                        sendMessage("Введите название факультета:", sendMessageRequest);
+                        BotUtil.dialogueStates.put(chatId, BotState.ENTER_FACULTY);
+                    } else if (educationLevel.equals("Среднее специальное")) {
+                        sendMessage("Введите название специализации:", sendMessageRequest);
+                        BotUtil.dialogueStates.put(chatId, BotState.ENTER_SPECIALIZATION);
+                    } else {
+                        sendMessage("Введите год окончания:", sendMessageRequest);
+                        BotUtil.dialogueStates.put(chatId, BotState.ENTER_END_YEAR);
+                    }
+                }
+            }
+            case ENTER_FACULTY -> {
+                if (checkInput(receivedText, sendMessageRequest, ALPHA_FORMAT) &&
+                        checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
+                    resumeFields.put("факультет", receivedText);
+
+                    sendMessage("Введите название специализации:", sendMessageRequest);
+                    BotUtil.dialogueStates.put(chatId, BotState.ENTER_SPECIALIZATION);
+                }
+            }
+            case ENTER_SPECIALIZATION -> {
+                if (checkInput(receivedText, sendMessageRequest, ALPHA_FORMAT) &&
+                        checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
+                    resumeFields.put("специализация", receivedText);
+
+                    sendMessage("Введите год окончания:", sendMessageRequest);
+                    BotUtil.dialogueStates.put(chatId, BotState.ENTER_END_YEAR);
+                }
+            }
+            case ENTER_END_YEAR -> {
+                if (checkInput(receivedText, sendMessageRequest, NUMERIC_FORMAT) &&
+                        checkInput(receivedText, sendMessageRequest, GRADUATION_YEAR_WITH_YEAR)) {
+                    resumeFields.put("год окончания", receivedText);
+
+                    List<String> buttonLabels = List.of("Хочу", "Пропустить");
+                    List<String> callbackData = List.of("want_enter_work", "skip_work");
+                    sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, callbackData));
+                    sendMessage("Хотите ли Вы указать опыт работы?", sendMessageRequest);
+                }
+            }
+            case ENTER_PERIOD_OF_WORK -> {
+                // todo Должно быть в самом конце диалога
+//                    BotUtil.userStates.put(chatId, BotState.FINISH_DIALOGUE);
+//                    finishDialogueWithClient(chatId, sendMessageRequest);
             }
             default ->
                     sendMessage(EmojiParser.parseToUnicode("Что-то пошло не так.\nПопробуйте ещё раз.:cry:"), sendMessageRequest);
@@ -236,9 +290,23 @@ public class ResumeBot extends TelegramLongPollingBot {
 
     private void sendResultMessageAboutClientData(Map<String, String> resumeFields, SendMessage sendMessageRequest) {
         StringBuilder resume = new StringBuilder().append("Пожалуйста, проверьте введенные данные:\n\n");
+        String currentBlock;
+
         for (Map.Entry<String, String> entry : resumeFields.entrySet()) {
-            resume.append("*").append(entry.getKey()).append("*").append(": ").append(entry.getValue()).append("\n");
+            String key = entry.getKey();
+            String value = entry.getValue();
+
+            if (key.equals("имя")) {
+                currentBlock = "*Основная информация*";
+                resume.append(currentBlock).append("\n\n");
+            } else if (key.equals("уровень образования")) {
+                currentBlock = "*Образование*";
+                resume.append("\n").append(currentBlock).append("\n\n");
+            }
+
+            resume.append("*").append(key).append("*").append(": ").append(value).append("\n");
         }
+
         resume.append(EmojiParser.parseToUnicode("\nЕсли есть не соответствие или вы ошиблись, нажмите на кнопку *Редактировать* "
                 + "и введите это поле повторно в формате *Поле - новое значение*\n\n"
                 + "*Пример:*\nИмя - Алексей\n\nИ я автоматически изменю некорректную информацию.:dizzy:"));

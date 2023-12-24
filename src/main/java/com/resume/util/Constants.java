@@ -11,6 +11,7 @@ import com.resume.bot.json.entity.roles.ProfessionalRoles;
 import lombok.experimental.UtilityClass;
 
 import java.util.List;
+import java.util.Map;
 
 @UtilityClass
 public class Constants {
@@ -23,18 +24,18 @@ public class Constants {
     public static List<Locale> LOCALES;
     public static List<Type> LANGUAGES;
 
-    public static String[] visibilityTypes = new String[]{
-            "не видно никому",
-            "видно выбранным компаниям",
-            "скрыто от выбранных компаний",
-            "видно всем компаниям, зарегистрированным на HeadHunter",
-            "видно всему интернету",
-            "доступно только по прямой ссылке"};
-    public static String[] tripReadinessTypes = new String[]{
-            "готов к командировкам",
-            "готов к редким командировкам",
-            "не готов к командировкам"};
-    public static String[] driverLicenseTypes = new String[]{
+    public static Map<String, String> visibilityTypes = Map.of(
+            "hidden_to_no_one", "не видно никому",
+            "visible_to_selected_companies", "видно выбранным компаниям",
+            "hidden_from_selected_companies", "скрыто от выбранных компаний",
+            "visible_to_all_registered_companies", "видно всем компаниям, зарегистрированным на HeadHunter",
+            "visible_to_entire_internet", "видно всему интернету",
+            "accessible_only_by_direct_link", "доступно только по прямой ссылке");
+    public static Map<String, String> tripReadinessTypes = Map.of(
+            "ready", "готов к командировкам",
+            "sometimes", "готов к редким командировкам",
+            "never", "не готов к командировкам");
+    public static List<String> driverLicenseTypes = List.of(
             "A",
             "B",
             "C",
@@ -44,37 +45,37 @@ public class Constants {
             "CE",
             "DE",
             "TM",
-            "TB"};
-    public static String[] employmentTypes = new String[]{
-            "Полная занятость",
-            "Частичная занятость",
-            "Проектная работа",
-            "Волонтерство",
-            "Стажировка"};
-    public static String[] hiddenFieldTypes = new String[]{
-            "ФИО и фотографию",
-            "Все указанные в резюме телефоны",
-            "Электронную почту",
-            "Прочие контакты (Skype, ICQ, соцсети)",
-            "Все места работы"};
-    public static String[] scheduleTypes = new String[]{
-            "Полный день",
-            "Сменный график",
-            "Гибкий график",
-            "Удаленная работа",
-            "Вахтовый метод"};
-    public static String[] travelTimeTypes = new String[]{
-            "Не имеет значения",
-            "Не более часа",
-            "Не более полутора часов"};
-    public static String[] sexTypes = new String[]{
-            "Мужской",
-            "Женский"};
-    public static String[] relocationReadinessTypes = new String[]{
-            "не готов к переезду",
-            "готов к переезду",
-            "хочу переехать"};
-    public static String[] currencies = new String[]{
+            "TB");
+    public static Map<String, String> employmentTypes = Map.of(
+            "full", "Полная занятость",
+            "part", "Частичная занятость",
+            "project", "Проектная работа",
+            "volunteer", "Волонтерство",
+            "probation", "Стажировка");
+    public static Map<String, String> hiddenFieldTypes = Map.of(
+            "name_and_photo", "ФИО и фотографию",
+            "phones", "Все указанные в резюме телефоны",
+            "email", "Электронную почту",
+            "other_contacts", "Прочие контакты (Skype, ICQ, соцсети)",
+            "experience", "Все места работы");
+    public static Map<String, String> scheduleTypes = Map.of(
+            "fullDay", "Полный день",
+            "shift", "Сменный график",
+            "flexible", "Гибкий график",
+            "remote", "Удаленная работа",
+            "flyInFlyOut", "Вахтовый метод");
+    public static Map<String, String> travelTimeTypes = Map.of(
+            "any", "Не имеет значения",
+            "less_than_hour", "Не более часа",
+            "from_hour_to_one_and_half", "Не более полутора часов");
+    public static Map<String, String> sexTypes = Map.of(
+            "male", "Мужской",
+            "female", "Женский");
+    public static Map<String, String> relocationReadinessTypes = Map.of(
+            "no_relocation", "не готов к переезду",
+            "relocation_possible", "готов к переезду",
+            "relocation_desirable", "хочу переехать");
+    public static List<String> currencies = List.of(
             "Манаты",
             "Белорусские рубли",
             "Евро",
@@ -84,35 +85,35 @@ public class Constants {
             "Рубли",
             "Гривны",
             "Доллары",
-            "Узбекский сум"};
-    public static String[] siteTypes = new String[]{
-            "Другой сайт",
-            "Мой круг",
-            "LiveJournal",
-            "LinkedIn",
-            "Free-lance",
-            "Skype",
-            "ICQ"};
-    public static String[] contactTypes = new String[]{
-            "Домашний телефон",
-            "Рабочий телефон",
-            "Мобильный телефон",
-            "Эл. почта"};
-    public static String[] educationLevels = new String[]{
-            "Среднее",
-            "Среднее специальное",
-            "Неоконченное высшее",
-            "Высшее",
-            "Бакалавр",
-            "Магистр",
-            "Кандидат наук",
-            "Доктор наук"};
-    public static String[] languageLevels = new String[]{
-            "A1 — Начальный",
-            "A2 — Элементарный",
-            "B1 — Средний",
-            "B2 — Средне-продвинутый",
-            "C1 — Продвинутый",
-            "C2 — В совершенстве",
-            "Родной"};
+            "Узбекский сум");
+    public static Map<String, String> siteTypes = Map.of(
+            "personal", "Другой сайт",
+            "moi_krug", "Мой круг",
+            "livejournal", "LiveJournal",
+            "linkedin", "LinkedIn",
+            "freelance", "Free-lance",
+            "skype", "Skype",
+            "icq", "ICQ");
+    public static Map<String, String> contactTypes = Map.of(
+            "home", "Домашний телефон",
+            "work", "Рабочий телефон",
+            "cell", "Мобильный телефон",
+            "email", "Эл. почта");
+    public static Map<String, String> educationLevels = Map.of(
+            "secondary", "Среднее",
+            "special_secondary", "Среднее специальное",
+            "unfinished_higher", "Неоконченное высшее",
+            "higher", "Высшее",
+            "bachelor", "Бакалавр",
+            "master", "Магистр",
+            "candidate", "Кандидат наук",
+            "doctor", "Доктор наук");
+    public static Map<String, String> languageLevels = Map.of(
+            "a1", "A1 — Начальный",
+            "a2", "A2 — Элементарный",
+            "b1", "B1 — Средний",
+            "b2", "B2 — Средне-продвинутый",
+            "c1", "C1 — Продвинутый",
+            "c2", "C2 — В совершенстве",
+            "l1", "Родной");
 }

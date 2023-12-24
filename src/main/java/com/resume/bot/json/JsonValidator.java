@@ -2,19 +2,15 @@ package com.resume.bot.json;
 
 import com.resume.bot.json.entity.area.Area;
 import com.resume.bot.json.entity.area.Country;
-import com.resume.util.BotUtil;
 import com.resume.util.Constants;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class JsonValidator {
     public enum ValidationType {
@@ -45,14 +41,14 @@ public class JsonValidator {
         COUNTRY_NAME,
         REGION_NAME,
         CITY_NAME,
-        IN_LIST
+        IN_LIST,
+        IN_MAP
     }
 
     public static final Map<ValidationType, Function<Object[], Boolean>> checks = new HashMap<>();
 
     static {
-        checks.put(ValidationType.GRADUATION_YEAR_WITH_YEAR, objects -> checkGraduationYear((Integer) objects[0]));
-        checks.put(ValidationType.GRADUATION_YEAR_WITH_DATE, objects -> checkGraduationYear((Date) objects[0]));
+        checks.put(ValidationType.GRADUATION_YEAR_WITH_YEAR, objects -> checkGraduationYear((String) objects[0]));
         checks.put(ValidationType.SYMBOLS_LIMIT, objects -> checkSymbolsLimit((String) objects[0], (Long) objects[1]));
         checks.put(ValidationType.BIRTHDAY, objects -> checkBirthday((String) objects[0]));
         checks.put(ValidationType.EXPERIENCE, objects -> checkExperience((Date) objects[0], (Date) objects[1]));
@@ -78,7 +74,9 @@ public class JsonValidator {
         checks.put(ValidationType.COUNTRY_NAME, objects -> checkCountry((String) objects[0]));
         checks.put(ValidationType.REGION_NAME, objects -> checkRegion((String) objects[0]));
         checks.put(ValidationType.CITY_NAME, objects -> checkCity((String) objects[0]));
-        checks.put(ValidationType.IN_LIST, objects -> isInList((String) objects[0], (String[]) objects[1]));
+        checks.put(ValidationType.IN_LIST, objects -> isInList((String) objects[0], List.of((String[]) objects[1])));
+        // fixme норм или нет?
+        checks.put(ValidationType.IN_MAP, objects -> isInMap((String) objects[0], (Map<String, String>) objects[1]));
     }
 
     private static final int GRADUATION_DATE_MIN_YEAR = 1950;
@@ -93,15 +91,11 @@ public class JsonValidator {
             "5"      // Украина
     );
 
-    public static boolean checkGraduationYear(int year) {
-        return checkGraduationYear(Date.from(Instant.from(LocalDate.of(year, 12, 31))));
-    }
+    public static boolean checkGraduationYear(String year) {
+        int graduationYear = Integer.parseInt(year);
+        int currentYear = LocalDate.now().getYear();
 
-    public static boolean checkGraduationYear(Date graduationDate) {
-        int year = graduationDate.toInstant().get(ChronoField.YEAR);
-        boolean isCorrectYears = Date.from(Instant.now()).after(Date.from(graduationDate.toInstant().minus(10, ChronoUnit.YEARS)));
-
-        return (year >= GRADUATION_DATE_MIN_YEAR) && isCorrectYears;
+        return graduationYear >= GRADUATION_DATE_MIN_YEAR && (graduationYear - currentYear) <= 10;
     }
 
     public static boolean checkSymbolsLimit(String text, long maxLen) {
@@ -145,12 +139,20 @@ public class JsonValidator {
         return Arrays.asList(array).contains(value);
     }
 
+    public static boolean isInList(String value, List<String> array) {
+        return array.contains(value);
+    }
+
+    public static boolean isInMap(String value, Map<String, String> map) {
+        return map.containsValue(value);
+    }
+
     public static boolean checkVisibilityType(String text) {
-        return isInList(text, Constants.visibilityTypes);
+        return isInMap(text, Constants.visibilityTypes);
     }
 
     public static boolean checkTripReadiness(String text) {
-        return isInList(text, Constants.tripReadinessTypes);
+        return isInMap(text, Constants.tripReadinessTypes);
     }
 
     public static boolean checkDriverLicenseType(String text) {
@@ -158,27 +160,27 @@ public class JsonValidator {
     }
 
     public static boolean checkEmploymentType(String text) {
-        return isInList(text, Constants.employmentTypes);
+        return isInMap(text, Constants.employmentTypes);
     }
 
     public static boolean checkHiddenField(String text) {
-        return isInList(text, Constants.hiddenFieldTypes);
+        return isInMap(text, Constants.hiddenFieldTypes);
     }
 
     public static boolean checkScheduleType(String text) {
-        return isInList(text, Constants.scheduleTypes);
+        return isInMap(text, Constants.scheduleTypes);
     }
 
     public static boolean checkTravelTime(String text) {
-        return isInList(text, Constants.travelTimeTypes);
+        return isInMap(text, Constants.travelTimeTypes);
     }
 
     public static boolean checkSex(String text) {
-        return isInList(text, Constants.sexTypes);
+        return isInMap(text, Constants.sexTypes);
     }
 
     public static boolean checkRelocationReadiness(String text) {
-        return isInList(text, Constants.relocationReadinessTypes);
+        return isInMap(text, Constants.relocationReadinessTypes);
     }
 
     public static boolean checkCurrency(String text) {
@@ -186,19 +188,19 @@ public class JsonValidator {
     }
 
     public static boolean checkSiteType(String text) {
-        return isInList(text, Constants.siteTypes);
+        return isInMap(text, Constants.siteTypes);
     }
 
     public static boolean checkContactType(String text) {
-        return isInList(text, Constants.contactTypes);
+        return isInMap(text, Constants.contactTypes);
     }
 
     public static boolean checkEducationLevel(String text) {
-        return isInList(text, Constants.educationLevels);
+        return isInMap(text, Constants.educationLevels);
     }
 
     public static boolean checkLanguageLevel(String text) {
-        return isInList(text, Constants.languageLevels);
+        return isInMap(text, Constants.languageLevels);
     }
 
     public static boolean checkCountry(String text) {
@@ -213,11 +215,11 @@ public class JsonValidator {
 
     public static boolean checkCity(String text) {
         return isInList(text, Constants.AREAS.stream().filter(a -> !a.getId().equals(OTHER_COUNTRIES_JSON_ID))
-                    .map(Area::getAreas).flatMap(List::stream).filter(a -> a.getAreas() == null).map(Area::getName)
-                    .toArray(String[]::new))
+                .map(Area::getAreas).flatMap(List::stream).filter(a -> a.getAreas() == null).map(Area::getName)
+                .toArray(String[]::new))
                 || isInList(text, Constants.AREAS.stream()
-                    .filter(a -> COUNTRIES_WITH_REGIONS_IDS.contains(a.getId()) || a.getId().equals(OTHER_COUNTRIES_JSON_ID))
-                    .map(Area::getAreas).flatMap(List::stream).map(Area::getAreas).flatMap(List::stream)
-                    .map(Area::getName).toArray(String[]::new));
+                .filter(a -> COUNTRIES_WITH_REGIONS_IDS.contains(a.getId()) || a.getId().equals(OTHER_COUNTRIES_JSON_ID))
+                .map(Area::getAreas).flatMap(List::stream).map(Area::getAreas).flatMap(List::stream)
+                .map(Area::getName).toArray(String[]::new));
     }
 }
