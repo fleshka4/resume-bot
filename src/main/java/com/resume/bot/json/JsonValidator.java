@@ -4,6 +4,7 @@ import com.resume.bot.json.entity.area.Area;
 import com.resume.bot.json.entity.area.Country;
 import com.resume.util.Constants;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.validator.routines.UrlValidator;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -105,8 +106,9 @@ public class JsonValidator {
         return text.length() < maxLen;
     }
 
-    public static boolean checkLinkFormat(String text) {
-        return text.matches(LINK_FORMAT);
+    public static boolean checkLinkFormat(String url) {
+        UrlValidator validator = new UrlValidator();
+        return validator.isValid(url);
     }
 
     public static boolean checkBirthday(String birthDateStr) {
@@ -284,7 +286,7 @@ public class JsonValidator {
 
     public static boolean checkCity(String text) {
         return isInList(text, Constants.AREAS.stream().filter(a -> !a.getId().equals(OTHER_COUNTRIES_JSON_ID))
-                .map(Area::getAreas).flatMap(List::stream).filter(a -> a.getAreas() == null).map(Area::getName)
+                .map(Area::getAreas).flatMap(List::stream).filter(a -> a.getAreas().isEmpty()).map(Area::getName)
                 .toArray(String[]::new))
                 || isInList(text, Constants.AREAS.stream()
                 .filter(a -> COUNTRIES_WITH_REGIONS_IDS.contains(a.getId()) || a.getId().equals(OTHER_COUNTRIES_JSON_ID))

@@ -57,6 +57,46 @@ public class BotUtil {
         return inlineKeyboardMarkup;
     }
 
+    public InlineKeyboardMarkup createInlineKeyboard(List<String> buttonLabels, List<String> callbackData, int pageSize, int pageNumber) {
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
+
+        int startIndex = pageNumber * pageSize;
+        int endIndex = Math.min((pageNumber + 1) * pageSize, buttonLabels.size());
+
+        for (int i = startIndex; i < endIndex; i++) {
+            List<InlineKeyboardButton> keyboardRow = new ArrayList<>();
+            InlineKeyboardButton button = new InlineKeyboardButton();
+
+            button.setText(buttonLabels.get(i));
+            button.setCallbackData(callbackData.get(i));
+            keyboardRow.add(button);
+
+            rowList.add(keyboardRow);
+        }
+
+        if (pageNumber > 0) {
+            List<InlineKeyboardButton> previousButtonRow = new ArrayList<>();
+            InlineKeyboardButton previousButton = new InlineKeyboardButton();
+            previousButton.setText("⬅️ Предыдущая страница");
+            previousButton.setCallbackData("previous_page");
+            previousButtonRow.add(previousButton);
+            rowList.add(previousButtonRow);
+        }
+
+        if (endIndex < buttonLabels.size()) {
+            List<InlineKeyboardButton> nextButtonRow = new ArrayList<>();
+            InlineKeyboardButton nextButton = new InlineKeyboardButton();
+            nextButton.setText("Следующая страница ➡️");
+            nextButton.setCallbackData("next_page");
+            nextButtonRow.add(nextButton);
+            rowList.add(nextButtonRow);
+        }
+
+        inlineKeyboardMarkup.setKeyboard(rowList);
+        return inlineKeyboardMarkup;
+    }
+
     public static long generateRandom12DigitNumber(Random random) {
         return (long) (Math.pow(10, 11) + random.nextInt((int) Math.pow(10, 11)));
     }

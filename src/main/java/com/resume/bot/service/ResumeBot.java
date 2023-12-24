@@ -283,7 +283,8 @@ public class ResumeBot extends TelegramLongPollingBot {
 
                     // todo сфера деятельности
                     List<String> industriesNameList = INDUSTRIES.stream().map(Industry::getName).toList();
-                    sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(industriesNameList, industriesNameList));
+                    sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(industriesNameList, industriesNameList,
+                            5, 0));
                     sendMessage("Выберите сферу деятельности компании:", sendMessageRequest);
                 }
             }
