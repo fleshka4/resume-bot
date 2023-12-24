@@ -38,6 +38,9 @@ public class BotUtil {
     );
     public final List<String> ACTIONS_WITH_RESUME = List.of(
             "publish_on_hh",
+            "finally_publish_on_hh",
+            "back_to_publish_on_hh",
+            "update",
             "download",
             "edit",
             "delete"

@@ -54,13 +54,12 @@ public class ApiClientTokenImpl {
             WebClient webClientTokened = webClient.mutate()
                     .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + bearerToken)
                     .build();
-            ResponseEntity<T> responseEntity = webClientTokened.post()
+            return webClientTokened.post()
                     .uri(uri)
                     .bodyValue(body)
                     .retrieve()
                     .toEntity(type)
                     .block();
-            return responseEntity;
         } catch (WebClientResponseException ex) {
             log.error(("Error response: status={" + ex.getStatusCode() + "}, body={" + ex.getResponseBodyAsString() + ")}"));
             throw ex;

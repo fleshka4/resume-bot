@@ -97,8 +97,9 @@ public class MyResumesActionHandler implements CallbackActionHandler {
                         messageId, chatId, buttonLabels, buttonIds);
             }
             default -> {
-                if (publishOnHh(callbackData, messageId, chatId) || downloadResume(callbackData, messageId, chatId) ||
-                        editResume(callbackData, messageId, chatId) || deleteResume(callbackData, messageId, chatId)) {
+                if (finallyPublish(callbackData, messageId, chatId) || publishOnHh(callbackData, messageId, chatId) || downloadResume(callbackData, messageId, chatId) ||
+                        editResume(callbackData, messageId, chatId) || deleteResume(callbackData, messageId, chatId) ||
+                         updateResumeOnHh(callbackData, messageId, chatId)){
                     System.out.println("done");
                 }
             }
@@ -113,25 +114,74 @@ public class MyResumesActionHandler implements CallbackActionHandler {
             return false;
         }
 
+        int num = getResumeNumber(matcher);
+
+        List<String> buttonLabels = Arrays.asList("Загрузить новое резюме на hh", "Обновить резюме на hh", "Назад");
+        List<String> buttonIds = Arrays.asList("finally_publish_on_hh_resume_" + num, "update_resume_" + num,
+                "resume_" + num);
+
+        executeEditMessageWithKeyBoard(EmojiParser.parseToUnicode("Опубликовать как новое или обновить существующее"),
+                messageId, chatId, buttonLabels, buttonIds);
+        return true;
+    }
+
+    private boolean updateResumeOnHh(String data, Integer messageId, Long chatId) {
+        Pattern pattern = Pattern.compile("update_resume_([1-6])");
+
+        Matcher matcher = pattern.matcher(data);
+        if (!matcher.matches()) {
+            return false;
+        }
+
+        Resume resume = getResume(matcher, chatId);
+        if (resume == null) {
+            return true;
+        }
+
+        String hhLink = resume.getHhLink();
+        if (hhLink == null || hhLink.isEmpty()) {
+            sendMessage("Резюме не может быть обновлено, так как оно не найдено на hh.ru. Попробуйте сначала опубликовать его", chatId);
+            return true;
+        }
+        try {
+            String[] split = hhLink.split("/");
+            String resumeId = split[split.length - 1];
+            headHunterService.putEditClient(hhBaseUrl, chatId, resumeId,
+                    JsonProcessor.createEntityFromJson(resume.getResumeData(), com.resume.bot.json.entity.client.Resume.class));
+        } catch (Exception exception) {
+            log.error(exception.getMessage());
+            sendMessage("Произошла ошибка при обновлении резюме. " +
+                    "Попробуйте удалить его и создать заново или выберите другое", chatId);
+        }
+        return true;
+    }
+
+    private boolean finallyPublish(String data, Integer messageId, Long chatId) {
+        Pattern pattern = Pattern.compile("finally_publish_on_hh_resume_([1-6])");
+
+        Matcher matcher = pattern.matcher(data);
+        if (!matcher.matches()) {
+            return false;
+        }
+
         Resume resume = getResume(matcher, chatId);
         if (resume == null) {
             return true;
         }
         try {
-            String hhLink = resume.getHhLink();
-            if (hhLink == null) {
-                hhLink = headHunterService.postCreateClient(hhBaseUrl, chatId,
-                        JsonProcessor.createEntityFromJson(resume.getResumeData(), com.resume.bot.json.entity.client.Resume.class));
-                resumeService.updateHhLinkByResumeId(hhLink, resume.getResumeId());
-            } else {
-                String[] split = hhLink.split("/");
-                String resumeId = split[split.length - 1];
-                headHunterService.putEditClient(hhBaseUrl, chatId, resumeId,
-                        JsonProcessor.createEntityFromJson(resume.getResumeData(), com.resume.bot.json.entity.client.Resume.class));
-            }
+            String hhLink = headHunterService.postCreateClient(hhBaseUrl, chatId,
+                    JsonProcessor.createEntityFromJson(resume.getResumeData(), com.resume.bot.json.entity.client.Resume.class));
+            Resume newResume = new Resume();
+            newResume.setResumeData(resume.getResumeData());
+            newResume.setTitle(resume.getTitle());
+            newResume.setUser(resume.getUser());
+            newResume.setTemplate(resume.getTemplate());
+            newResume.setHhLink(hhLink);
+            newResume.setPdfPath(resume.getPdfPath());
+            resumeService.saveResume(newResume);
         } catch (Exception exception) {
             log.error(exception.getMessage());
-            sendMessage("Произошла ошибка при отправке резюме. " +
+            sendMessage("Произошла ошибка при публикации резюме. " +
                     "Попробуйте удалить его и создать заново или выберите другое", chatId);
         }
         return true;
@@ -147,7 +197,6 @@ public class MyResumesActionHandler implements CallbackActionHandler {
 
         Resume resume = getResume(matcher, chatId);
         if (resume == null) {
-            // todo: say its not found etc
             return true;
         }
 
@@ -157,6 +206,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
             bot.execute(new SendDocument(String.valueOf(chatId), new InputFile(file)));
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
+            sendMessage("Не найден файл, содержащий резюме. Попробуйте создать заново", chatId);
         }
 
         return true;
@@ -189,14 +239,18 @@ public class MyResumesActionHandler implements CallbackActionHandler {
     }
 
     private Resume getResume(Matcher matcher, Long chatId) {
-        String[] s = matcher.group().split("_");
-
-        int numOfResume = Integer.parseInt(s[s.length - 1]);
+        int numOfResume = getResumeNumber(matcher);
         List<Resume> resumes = resumeService.getResumesByUserId(chatId);
         if (resumes.size() >= numOfResume) {
             return resumes.get(numOfResume - 1);
         }
+        sendMessage("Резюме не найдено. Попробуйте снова", chatId);
         return null;
+    }
+
+    private int getResumeNumber(Matcher matcher) {
+        String[] s = matcher.group().split("_");
+        return Integer.parseInt(s[s.length - 1]);
     }
 
     private void sendMessage(String text, Long chatId) {
