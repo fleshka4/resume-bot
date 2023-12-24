@@ -187,9 +187,7 @@ public class ResumeBot extends TelegramLongPollingBot {
                 }
             }
             case ENTER_LOCATION -> {
-                // todo Сделать проверку на локацию существует ли такой город?
-                if (checkInput(receivedText, sendMessageRequest, ALPHA_FORMAT) &&
-                        checkInput(receivedText, 256L, sendMessageRequest, SYMBOLS_LIMIT)) {
+                if (checkInput(receivedText, sendMessageRequest, LOCATION)) {
                     resumeFields.put("местожительство", receivedText);
 
                     List<String> buttonLabels = List.of("Хочу", "Пропустить");

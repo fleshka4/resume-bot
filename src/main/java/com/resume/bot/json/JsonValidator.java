@@ -7,10 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 public class JsonValidator {
@@ -43,6 +40,7 @@ public class JsonValidator {
         COUNTRY_NAME,
         REGION_NAME,
         CITY_NAME,
+        LOCATION,
         IN_LIST,
         IN_MAP
     }
@@ -77,6 +75,7 @@ public class JsonValidator {
         checks.put(ValidationType.COUNTRY_NAME, objects -> checkCountry((String) objects[0]));
         checks.put(ValidationType.REGION_NAME, objects -> checkRegion((String) objects[0]));
         checks.put(ValidationType.CITY_NAME, objects -> checkCity((String) objects[0]));
+        checks.put(ValidationType.LOCATION, objects -> checkLocation((String) objects[0]));
         checks.put(ValidationType.IN_LIST, objects -> isInList((String) objects[0], List.of((String[]) objects[1])));
         // fixme норм или нет?
         checks.put(ValidationType.IN_MAP, objects -> isInMap((String) objects[0], (Map<String, String>) objects[1]));
@@ -111,7 +110,12 @@ public class JsonValidator {
     }
 
     public static boolean checkBirthday(String birthDateStr) {
-        LocalDate birthDate = LocalDate.parse(birthDateStr, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+        LocalDate birthDate;
+        try {
+            birthDate = LocalDate.parse(birthDateStr, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+        } catch (Exception e) {
+            return false;
+        }
         boolean isEnoughYears = LocalDate.now().isAfter(birthDate.plusYears(14));
         return isEnoughYears && (birthDate.getYear() >= BIRTH_DATE_MIN_YEAR);
     }
@@ -218,13 +222,63 @@ public class JsonValidator {
         return isInMap(text, Constants.languageLevels);
     }
 
+    public static boolean checkLocation(String text) {
+        List<String> items = Arrays.stream(text.split(",")).map(String::trim).toList();
+
+        if (items.isEmpty()) {
+            return false;
+        }
+
+        String countryName = items.getFirst();
+        Optional<Area> country = getAreaByNameDeep(Constants.AREAS, countryName);
+        if (country.isEmpty()) {
+            return false;
+        }
+
+        if (items.size() == 1) {
+            return checkCountry(countryName) && country.get().getAreas().isEmpty();
+        }
+        if (items.size() == 2) {
+            String cityName = items.get(1);
+            return checkCountry(countryName) && checkCity(cityName) &&
+                    getAreaByNameDeep(country.get().getAreas(), cityName).isPresent();
+        }
+        if (items.size() == 3) {
+            String regionName = items.get(1);
+            String cityName = items.get(2);
+
+            Optional<Area> region = getAreaByName(country.get().getAreas(), regionName);
+            return region.filter(area -> checkCountry(countryName) && checkRegion(regionName) && checkCity(cityName) &&
+                    getAreaByName(area.getAreas(), cityName).isPresent()).isPresent();
+        }
+        return false;
+    }
+
+    private static Optional<Area> getAreaByNameDeep(List<Area> areas, String name) {
+        for (Area area : areas) {
+            if (area.getName().equals(name)) {
+                return Optional.of(area);
+            } else if (!area.getAreas().isEmpty()) {
+                Optional<Area> childArea = getAreaByNameDeep(area.getAreas(), name);
+                if (childArea.isPresent()) {
+                    return childArea;
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
+    private static Optional<Area> getAreaByName(List<Area> areas, String name) {
+        return areas.stream().filter(area -> area.getName().equals(name)).findFirst();
+    }
+
     public static boolean checkCountry(String text) {
         return isInList(text, Constants.COUNTRIES.stream().map(Country::getName).toArray(String[]::new));
     }
 
     public static boolean checkRegion(String text) {
-        return  isInList(text, Constants.AREAS.stream().filter(a -> COUNTRIES_WITH_REGIONS_IDS.contains(a.getId()))
-                .map(Area::getAreas).flatMap(List::stream).filter(a -> a.getAreas() != null)
+        return isInList(text, Constants.AREAS.stream().filter(a -> COUNTRIES_WITH_REGIONS_IDS.contains(a.getId()))
+                .map(Area::getAreas).flatMap(List::stream).filter(a -> !a.getAreas().isEmpty())
                 .map(Area::getName).toArray(String[]::new));
     }
 

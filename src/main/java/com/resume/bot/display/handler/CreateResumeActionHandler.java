@@ -198,7 +198,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
         userData.put("пол", genderName);
         BotUtil.userResumeData.put(chatId, userData);
         BotUtil.dialogueStates.put(chatId, BotState.ENTER_LOCATION);
-        sendMessage("Введите ваше место жительство.\nВ формате *страна, регион, населенный пункт (опционально)*:", chatId);
+        sendMessage("Введите ваше место жительство.\nВ формате *страна, регион (опционально), населенный пункт*:", chatId);
     }
 
     private void processOnChosenLevelEducation(String level, Long chatId, Map<String, String> userData) {
