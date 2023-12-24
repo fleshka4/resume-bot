@@ -3,9 +3,9 @@ package com.resume.bot.service;
 import com.resume.bot.config.BotConfig;
 import com.resume.bot.display.BotState;
 import com.resume.bot.display.CallbackActionHandler;
+import com.resume.bot.display.ResumeField;
 import com.resume.bot.display.handler.CallbackActionFactory;
 import com.resume.bot.json.JsonValidator;
-import com.resume.bot.json.entity.Industry;
 import com.resume.bot.json.entity.client.Resume;
 import com.resume.bot.model.entity.User;
 import com.resume.hh_wrapper.config.HhConfig;
@@ -29,7 +29,6 @@ import java.util.Map;
 import static com.resume.bot.json.JsonValidator.ValidationType.*;
 import static com.resume.bot.json.JsonValidator.checkExperience;
 import static com.resume.bot.json.JsonValidator.checks;
-import static com.resume.util.Constants.INDUSTRIES;
 import static com.resume.util.Constants.sexTypes;
 
 @Slf4j
@@ -151,7 +150,7 @@ public class ResumeBot extends TelegramLongPollingBot {
             case ENTER_NAME -> {
                 if (checkInput(receivedText, sendMessageRequest, ALPHA_FORMAT) &&
                         checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
-                    resumeFields.put("имя", receivedText);
+                    resumeFields.put(ResumeField.NAME.getValue(), receivedText);
 
                     sendMessage("Введите фамилию:", sendMessageRequest);
                     BotUtil.dialogueStates.put(chatId, BotState.ENTER_SURNAME);
@@ -160,7 +159,7 @@ public class ResumeBot extends TelegramLongPollingBot {
             case ENTER_SURNAME -> {
                 if (checkInput(receivedText, sendMessageRequest, ALPHA_FORMAT) &&
                         checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
-                    resumeFields.put("фамилия", receivedText);
+                    resumeFields.put(ResumeField.SURNAME.getValue(), receivedText);
 
                     sendMessage("Введите отчество:", sendMessageRequest);
                     BotUtil.dialogueStates.put(chatId, BotState.ENTER_PATRONYMIC);
@@ -169,7 +168,7 @@ public class ResumeBot extends TelegramLongPollingBot {
             case ENTER_PATRONYMIC -> {
                 if (checkInput(receivedText, sendMessageRequest, ALPHA_FORMAT) &&
                         checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
-                    resumeFields.put("отчество", receivedText);
+                    resumeFields.put(ResumeField.PATRONYMIC.getValue(), receivedText);
 
                     sendMessage("Введите дату рождения в формате ДД-ММ-ГГГГ:", sendMessageRequest);
                     BotUtil.dialogueStates.put(chatId, BotState.ENTER_BIRTHDAY);
@@ -178,7 +177,7 @@ public class ResumeBot extends TelegramLongPollingBot {
             case ENTER_BIRTHDAY -> {
                 if (checkInput(receivedText, sendMessageRequest, DATE_FORMAT) &&
                         checkInput(receivedText, sendMessageRequest, BIRTHDAY)) {
-                    resumeFields.put("дата рождения", receivedText);
+                    resumeFields.put(ResumeField.BIRTHDAY.getValue(), receivedText);
 
                     sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(sexTypes.values().stream().toList(),
                             sexTypes.keySet().stream().toList()));
@@ -188,7 +187,7 @@ public class ResumeBot extends TelegramLongPollingBot {
             }
             case ENTER_LOCATION -> {
                 if (checkInput(receivedText, sendMessageRequest, LOCATION)) {
-                    resumeFields.put("местожительство", receivedText);
+                    resumeFields.put(ResumeField.LIVE_LOCATION.getValue(), receivedText);
 
                     List<String> buttonLabels = List.of("Хочу", "Пропустить");
                     List<String> callbackData = List.of("want_enter_education", "skip_education");
@@ -197,11 +196,11 @@ public class ResumeBot extends TelegramLongPollingBot {
                 }
             }
             case ENTER_INSTITUTION -> {
-                if (checkInput(receivedText, sendMessageRequest, ALPHA_FORMAT) &&
+                if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
                         checkInput(receivedText, 512L, sendMessageRequest, SYMBOLS_LIMIT)) {
-                    resumeFields.put("учебное заведение", receivedText);
+                    resumeFields.put(ResumeField.EDUCATION_INSTITUTION.getValue(), receivedText);
 
-                    String educationLevel = resumeFields.get("уровень образования");
+                    String educationLevel = resumeFields.get(ResumeField.EDUCATION_LEVEL.getValue());
 
                     if (!educationLevel.equals("Среднее") && !educationLevel.equals("Среднее специальное")) {
                         sendMessage("Введите название факультета:", sendMessageRequest);
@@ -216,18 +215,18 @@ public class ResumeBot extends TelegramLongPollingBot {
                 }
             }
             case ENTER_FACULTY -> {
-                if (checkInput(receivedText, sendMessageRequest, ALPHA_FORMAT) &&
+                if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
                         checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
-                    resumeFields.put("факультет", receivedText);
+                    resumeFields.put(ResumeField.EDUCATION_FACULTY.getValue(), receivedText);
 
                     sendMessage("Введите название специализации:", sendMessageRequest);
                     BotUtil.dialogueStates.put(chatId, BotState.ENTER_SPECIALIZATION);
                 }
             }
             case ENTER_SPECIALIZATION -> {
-                if (checkInput(receivedText, sendMessageRequest, ALPHA_FORMAT) &&
+                if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
                         checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
-                    resumeFields.put("специализация", receivedText);
+                    resumeFields.put(ResumeField.EDUCATION_SPECIALIZATION.getValue(), receivedText);
 
                     sendMessage("Введите год окончания:", sendMessageRequest);
                     BotUtil.dialogueStates.put(chatId, BotState.ENTER_END_YEAR);
@@ -236,7 +235,7 @@ public class ResumeBot extends TelegramLongPollingBot {
             case ENTER_END_YEAR -> {
                 if (checkInput(receivedText, sendMessageRequest, NUMERIC_FORMAT) &&
                         checkInput(receivedText, sendMessageRequest, GRADUATION_YEAR_WITH_YEAR)) {
-                    resumeFields.put("год окончания", receivedText);
+                    resumeFields.put(ResumeField.EDUCATION_END_YEAR.getValue(), receivedText);
 
                     List<String> buttonLabels = List.of("Хочу", "Пропустить");
                     List<String> callbackData = List.of("want_enter_work_experience", "skip_work_experience");
@@ -245,19 +244,19 @@ public class ResumeBot extends TelegramLongPollingBot {
                 }
             }
             case ENTER_PERIOD_OF_WORK -> {
-                if (checkExperience(receivedText, resumeFields.get("дата рождения"))) {
-                    resumeFields.put("опыт работы", receivedText);
+                if (checkExperience(receivedText, resumeFields.get(ResumeField.BIRTHDAY.getValue()))) {
+                    resumeFields.put(ResumeField.EXPERIENCE_PERIOD.getValue(), receivedText);
 
                     sendMessage("Введите название организации:", sendMessageRequest);
                     BotUtil.dialogueStates.put(chatId, BotState.ENTER_NAME_OF_ORGANIZATION);
                 } else {
-                    sendMessage(EmojiParser.parseToUnicode("Вводите корректные данные."), sendMessageRequest);
+                    sendMessage(EmojiParser.parseToUnicode("Введите корректные данные."), sendMessageRequest);
                 }
             }
             case ENTER_NAME_OF_ORGANIZATION -> {
-                if (checkInput(receivedText, sendMessageRequest, ALPHA_FORMAT) &&
+                if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
                         checkInput(receivedText, 512L, sendMessageRequest, SYMBOLS_LIMIT)) {
-                    resumeFields.put("название организации", receivedText);
+                    resumeFields.put(ResumeField.EXPERIENCE_ORG_NAME.getValue(), receivedText);
 
                     sendMessage("Введите город организации:", sendMessageRequest);
                     BotUtil.dialogueStates.put(chatId, BotState.ENTER_CITY_OF_ORGANIZATION);
@@ -265,7 +264,7 @@ public class ResumeBot extends TelegramLongPollingBot {
             }
             case ENTER_CITY_OF_ORGANIZATION -> {
                 if (checkInput(receivedText, sendMessageRequest, CITY_NAME)) {
-                    resumeFields.put("город организации", receivedText);
+                    resumeFields.put(ResumeField.EXPERIENCE_ORG_CITY.getValue(), receivedText);
 
                     sendMessage("Прикрепите ссылку на сайт организации:", sendMessageRequest);
                     BotUtil.dialogueStates.put(chatId, BotState.ENTER_SITE_OF_ORGANIZATION);
@@ -274,17 +273,17 @@ public class ResumeBot extends TelegramLongPollingBot {
             case ENTER_SITE_OF_ORGANIZATION -> {
                 if (checkInput(receivedText, sendMessageRequest, LINK) &&
                         checkInput(receivedText, 256L, sendMessageRequest, SYMBOLS_LIMIT)) {
-                    resumeFields.put("ссылка", receivedText);
+                    resumeFields.put(ResumeField.EXPERIENCE_ORG_LINK.getValue(), receivedText);
 
                     // todo Должно быть в самом конце диалога
-//                     BotUtil.userStates.put(chatId, BotState.FINISH_DIALOGUE);
-//                     finishDialogueWithClient(chatId, sendMessageRequest);
+                    BotUtil.userStates.put(chatId, BotState.FINISH_DIALOGUE);
+                    finishDialogueWithClient(chatId, sendMessageRequest);
 
-                    // todo сфера деятельности
-                    List<String> industriesNameList = INDUSTRIES.stream().map(Industry::getName).toList();
-                    sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(industriesNameList, industriesNameList,
-                            5, 0));
-                    sendMessage("Выберите сферу деятельности компании:", sendMessageRequest);
+//                    // todo сфера деятельности
+//                    List<String> industriesNameList = INDUSTRIES.stream().map(Industry::getName).toList();
+//                    sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(industriesNameList, industriesNameList,
+//                            5, 0));
+//                    sendMessage("Выберите сферу деятельности компании:", sendMessageRequest);
                 }
             }
             default ->
@@ -313,12 +312,22 @@ public class ResumeBot extends TelegramLongPollingBot {
                     String fieldValue = parts[1].trim();
 
                     if (resumeFields.containsKey(fieldLabel)) {
-                        resumeFields.put(fieldLabel, fieldValue);
+                        ResumeField field = Arrays.stream(ResumeField.values())
+                                .filter(f -> f.getValue().equals(fieldLabel)).findFirst().orElse(null);
+                        if (field != null) {
+                            if (field.processCheck(fieldValue)) {
+                                resumeFields.put(fieldLabel, fieldValue);
+                            } else {
+                                sendMessage(field.message(), sendMessageRequest);
+                                return;
+                            }
+                        }
                     } else {
-                        sendMessage("Пожалуйста, вводите только существующие поля.", sendMessageRequest);
+                        sendMessage("Пожалуйста, введите только существующие поля.", sendMessageRequest);
+                        return;
                     }
                 } else {
-                    sendMessage("Пожалуйста, вводите данные в формате\n*Поле - Ваше новое значение*.", sendMessageRequest);
+                    sendMessage("Пожалуйста, введите данные в формате\n*Поле - Ваше новое значение*.", sendMessageRequest);
                     return;
                 }
             }
@@ -335,13 +344,13 @@ public class ResumeBot extends TelegramLongPollingBot {
             String key = entry.getKey();
             String value = entry.getValue();
 
-            if (key.equals("имя")) {
+            if (key.equals(ResumeField.NAME.getValue())) {
                 currentBlock = "*Основная информация*";
                 resume.append(currentBlock).append("\n\n");
-            } else if (key.equals("уровень образования")) {
+            } else if (key.equals(ResumeField.EDUCATION_LEVEL.getValue())) {
                 currentBlock = "*Образование*";
                 resume.append("\n").append(currentBlock).append("\n\n");
-            } else if (key.equals("опыт работы")) {
+            } else if (key.equals(ResumeField.EXPERIENCE_PERIOD.getValue())) {
                 currentBlock = "*Опыт*";
                 resume.append("\n").append(currentBlock).append("\n\n");
             }
@@ -411,7 +420,7 @@ public class ResumeBot extends TelegramLongPollingBot {
     private boolean checkInput(String receivedText, Long limit, SendMessage sendMessageRequest, JsonValidator.ValidationType validationType) {
         boolean validationResult = Boolean.TRUE.equals(checks.get(validationType).apply(new Object[]{receivedText, limit}));
         if (!validationResult) {
-            String errorMessage = (limit != null) ? "Допустимо не более " + limit + " символов" : "Вводите корректные данные.";
+            String errorMessage = (limit != null) ? "Допустимо не более " + limit + " символов" : "Введите корректные данные.";
             sendMessage(EmojiParser.parseToUnicode(errorMessage), sendMessageRequest);
         }
         return validationResult;

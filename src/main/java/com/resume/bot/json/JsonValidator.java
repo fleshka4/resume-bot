@@ -22,6 +22,7 @@ public class JsonValidator {
         BIRTHDAY,
         EXPERIENCE,
         ALPHA_FORMAT,
+        ALPHA_SPACE_FORMAT,
         ALPHANUMERIC_FORMAT,
         NUMERIC_FORMAT,
         DATE_FORMAT,
@@ -57,6 +58,7 @@ public class JsonValidator {
         checks.put(ValidationType.BIRTHDAY, objects -> checkBirthday((String) objects[0]));
         checks.put(ValidationType.EXPERIENCE, objects -> checkExperience((String) objects[0], (String) objects[1]));
         checks.put(ValidationType.ALPHA_FORMAT, objects -> checkAlphaFormat((String) objects[0]));
+        checks.put(ValidationType.ALPHA_SPACE_FORMAT, objects -> checkAlphaSpaceFormat((String) objects[0]));
         checks.put(ValidationType.ALPHANUMERIC_FORMAT, objects -> checkAlphanumericFormat((String) objects[0]));
         checks.put(ValidationType.NUMERIC_FORMAT, objects -> checkNumericFormat((String) objects[0]));
         checks.put(ValidationType.DATE_FORMAT, objects -> checkDateFormat((String) objects[0]));
@@ -89,10 +91,15 @@ public class JsonValidator {
     private static final int BIRTH_DATE_MIN_YEAR = 1900;
     private static final String NUMBER_FORMAT = "\\d{11}";
     private static final String DATE_FORMAT = "\\d{2}-\\d{2}-\\d{4}";
-    private static final String LINK_FORMAT = "(https:\\/\\/www\\.|http:\\/\\/www\\.|https:\\/\\/|http:\\/\\/)?[a-zA-Z0-9]{2,}(\\.[a-zA-Z0-9]{2,})(\\.[a-zA-Z0-9]{2,})?";
 
     public static boolean checkGraduationYear(String year) {
-        int graduationYear = Integer.parseInt(year);
+        int graduationYear;
+        try {
+            graduationYear = Integer.parseInt(year);
+        } catch (RuntimeException e) {
+            return false;
+        }
+
         int currentYear = LocalDate.now().getYear();
 
         return graduationYear >= GRADUATION_DATE_MIN_YEAR && (graduationYear - currentYear) <= 10;
@@ -111,7 +118,7 @@ public class JsonValidator {
         LocalDate birthDate;
         try {
             birthDate = LocalDate.parse(birthDateStr, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return false;
         }
         boolean isEnoughYears = LocalDate.now().isAfter(birthDate.plusYears(14));
@@ -128,7 +135,7 @@ public class JsonValidator {
             experienceDateStart = LocalDate.parse("01-" + items[0], formatter);
             experienceDateEnd = LocalDate.parse("01-" + items[1], formatter);
             birthDate = LocalDate.parse(birthDayStr, formatter);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return false;
         }
         LocalDate minimumBirthDate = birthDate.plusYears(14);
@@ -139,6 +146,10 @@ public class JsonValidator {
 
     public static boolean checkAlphaFormat(String text) {
         return StringUtils.isAlpha(text);
+    }
+
+    public static boolean checkAlphaSpaceFormat(String text) {
+        return StringUtils.isAlphaSpace(text);
     }
 
     public static boolean checkAlphanumericFormat(String text) {
