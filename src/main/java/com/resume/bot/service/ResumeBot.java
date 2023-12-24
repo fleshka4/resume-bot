@@ -277,13 +277,14 @@ public class ResumeBot extends TelegramLongPollingBot {
                         checkInput(receivedText, 256L, sendMessageRequest, SYMBOLS_LIMIT)) {
                     resumeFields.put("ссылка", receivedText);
 
+                    // todo Должно быть в самом конце диалога
+//                     BotUtil.userStates.put(chatId, BotState.FINISH_DIALOGUE);
+//                     finishDialogueWithClient(chatId, sendMessageRequest);
+
                     // todo сфера деятельности
                     List<String> industriesNameList = INDUSTRIES.stream().map(Industry::getName).toList();
                     sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(industriesNameList, industriesNameList));
                     sendMessage("Выберите сферу деятельности компании:", sendMessageRequest);
-                    // todo Должно быть в самом конце диалога
-//                    BotUtil.userStates.put(chatId, BotState.FINISH_DIALOGUE);
-//                    finishDialogueWithClient(chatId, sendMessageRequest);
                 }
             }
             default ->
