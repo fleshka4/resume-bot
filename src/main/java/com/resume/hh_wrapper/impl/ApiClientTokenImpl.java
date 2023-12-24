@@ -3,6 +3,7 @@ package com.resume.hh_wrapper.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
@@ -48,17 +49,18 @@ public class ApiClientTokenImpl {
         }
     }
 
-    public <T> T post(String uri, String bearerToken, T body, Class<T> type) {
+    public <T> ResponseEntity<T> post(String uri, String bearerToken, T body, Class<T> type) {
         try {
             WebClient webClientTokened = webClient.mutate()
                     .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + bearerToken)
                     .build();
-            return webClientTokened.post()
+            ResponseEntity<T> responseEntity = webClientTokened.post()
                     .uri(uri)
                     .bodyValue(body)
                     .retrieve()
-                    .bodyToMono(type)
+                    .toEntity(type)
                     .block();
+            return responseEntity;
         } catch (WebClientResponseException ex) {
             log.error(("Error response: status={" + ex.getStatusCode() + "}, body={" + ex.getResponseBodyAsString() + ")}"));
             throw ex;

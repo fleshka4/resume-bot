@@ -16,6 +16,7 @@ import com.resume.hh_wrapper.impl.ApiClientTokenImpl;
 import com.resume.util.HHUriConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,10 +32,10 @@ public class HeadHunterService {
 
     // region: AUTHORIZED REQUESTS
 
-    public Resume postCreateClient(String baseUri, Long tgUid, Resume resume) {
+    public String postCreateClient(String baseUri, Long tgUid, Resume resume) {
         return apiClientTokenImpl.post(baseUri + HHUriConstants.POST_CREATE_RESUME_URI,
                 userService.getUser(tgUid).getTokenHolder().getAccessToken(),
-                resume, Resume.class);
+                resume, Resume.class).getHeaders().getFirst(HttpHeaders.LOCATION);
     }
 
     public void putEditClient(String baseUri, Long tgUid, String resumeId, Resume resume) {

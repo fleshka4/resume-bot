@@ -1,12 +1,9 @@
 package com.resume.bot.display.handler;
 
-import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.resume.bot.display.BotState;
 import com.resume.bot.display.CallbackActionHandler;
 import com.resume.bot.json.JsonProcessor;
-import com.resume.bot.json.entity.client.Client;
 import com.resume.bot.model.entity.Resume;
-import com.resume.bot.model.entity.User;
 import com.resume.bot.service.HeadHunterService;
 import com.resume.bot.service.ResumeService;
 import com.resume.util.BotUtil;
@@ -117,24 +114,25 @@ public class MyResumesActionHandler implements CallbackActionHandler {
         }
 
         Resume resume = getResume(matcher, chatId);
-        if (resume != null) {
-            try {
-                String hhLink = resume.getHhLink();
-                if (hhLink == null) {
-                    hhLink = headHunterService.postCreateClient(hhBaseUrl,
-                            JsonProcessor.createEntityFromJson(resume.getResumeData(), Client.class));
-                    resumeService.updateHhLinkByResumeId(hhLink, resume.getResumeId());
-                } else {
-                    String[] split = hhLink.split("/");
-                    String resumeId = split[split.length - 1];
-                    headHunterService.putEditClient(hhBaseUrl, resumeId,
-                            JsonProcessor.createEntityFromJson(resume.getResumeData(), Client.class));
-                }
-            } catch (Exception exception) {
-                log.error(exception.getMessage());
-                sendMessage("Произошла ошибка при отправке резюме. " +
-                        "Попробуйте удалить его и создать заново или выберите другое", chatId);
+        if (resume == null) {
+            return true;
+        }
+        try {
+            String hhLink = resume.getHhLink();
+            if (hhLink == null) {
+                hhLink = headHunterService.postCreateClient(hhBaseUrl, chatId,
+                        JsonProcessor.createEntityFromJson(resume.getResumeData(), com.resume.bot.json.entity.client.Resume.class));
+                resumeService.updateHhLinkByResumeId(hhLink, resume.getResumeId());
+            } else {
+                String[] split = hhLink.split("/");
+                String resumeId = split[split.length - 1];
+                headHunterService.putEditClient(hhBaseUrl, chatId, resumeId,
+                        JsonProcessor.createEntityFromJson(resume.getResumeData(), com.resume.bot.json.entity.client.Resume.class));
             }
+        } catch (Exception exception) {
+            log.error(exception.getMessage());
+            sendMessage("Произошла ошибка при отправке резюме. " +
+                    "Попробуйте удалить его и создать заново или выберите другое", chatId);
         }
         return true;
     }
