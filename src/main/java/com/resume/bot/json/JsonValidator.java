@@ -91,10 +91,15 @@ public class JsonValidator {
     private static final int BIRTH_DATE_MIN_YEAR = 1900;
     private static final String NUMBER_FORMAT = "\\d{11}";
     private static final String DATE_FORMAT = "\\d{2}-\\d{2}-\\d{4}";
-    private static final String LINK_FORMAT = "(https:\\/\\/www\\.|http:\\/\\/www\\.|https:\\/\\/|http:\\/\\/)?[a-zA-Z0-9]{2,}(\\.[a-zA-Z0-9]{2,})(\\.[a-zA-Z0-9]{2,})?";
 
     public static boolean checkGraduationYear(String year) {
-        int graduationYear = Integer.parseInt(year);
+        int graduationYear;
+        try {
+            graduationYear = Integer.parseInt(year);
+        } catch (RuntimeException e) {
+            return false;
+        }
+
         int currentYear = LocalDate.now().getYear();
 
         return graduationYear >= GRADUATION_DATE_MIN_YEAR && (graduationYear - currentYear) <= 10;
@@ -113,7 +118,7 @@ public class JsonValidator {
         LocalDate birthDate;
         try {
             birthDate = LocalDate.parse(birthDateStr, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return false;
         }
         boolean isEnoughYears = LocalDate.now().isAfter(birthDate.plusYears(14));
@@ -130,7 +135,7 @@ public class JsonValidator {
             experienceDateStart = LocalDate.parse("01-" + items[0], formatter);
             experienceDateEnd = LocalDate.parse("01-" + items[1], formatter);
             birthDate = LocalDate.parse(birthDayStr, formatter);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return false;
         }
         LocalDate minimumBirthDate = birthDate.plusYears(14);

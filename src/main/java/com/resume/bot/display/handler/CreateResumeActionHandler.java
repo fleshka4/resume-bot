@@ -21,6 +21,7 @@ import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import com.resume.bot.display.ResumeField;
 
 import java.util.*;
 
@@ -82,7 +83,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                 BotUtil.userStates.put(chatId, BotState.RESULT_DATA_CORRECT);
                 fillClientData(chatId);
                 sendMessage(EmojiParser.parseToUnicode("Замечательно! Ваши данные успешно получены.:sparkles:\nВот что Вы можете сделать:"), chatId);
-                // todo кнопки "Загрузить новое резюме на hh", "Обновить резюме на hh", "Выбор Latex-шаблона"
+                // todo кнопки "Загрузить новое резюме на hh", "Выбор Latex-шаблона"
             }
             case "back_to_menu" -> {
                 List<String> buttonLabels = Arrays.asList("Создать резюме", "Экспорт резюме с hh.ru", "Мои резюме");
@@ -146,7 +147,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                     genderId.setId(fieldValue.equals("Мужской") ? "male" : "female");
                     resume.setGender(genderId);
                 }
-                case "местожительство" -> {
+                case "место жительства" -> {
                     Id areaId = new Id();
                     String[] items = fieldValue.split(",");
                     String cityName = items[items.length - 1].trim();
@@ -214,14 +215,15 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
     }
 
     private void processOnChosenSex(String genderName, Long chatId, Map<String, String> userData) {
-        userData.put("пол", genderName);
+        userData.put(ResumeField.SEX.getValue(), genderName);
         BotUtil.userResumeData.put(chatId, userData);
         BotUtil.dialogueStates.put(chatId, BotState.ENTER_LOCATION);
-        sendMessage("Введите ваше место жительство.\nВ формате *страна, регион (опционально), населенный пункт*:", chatId);
+        sendMessage("Введите ваше место жительства.\n" +
+                "В формате *страна, регион (опционально), населенный пункт*:", chatId);
     }
 
     private void processOnChosenLevelEducation(String level, Long chatId, Map<String, String> userData) {
-        userData.put("уровень образования", level);
+        userData.put(ResumeField.EDUCATION_LEVEL.getValue(), level);
         BotUtil.userResumeData.put(chatId, userData);
         sendMessage("Введите название учебного заведения:", chatId);
         BotUtil.dialogueStates.put(chatId, BotState.ENTER_INSTITUTION);
