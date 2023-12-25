@@ -97,9 +97,9 @@ public class MyResumesActionHandler implements CallbackActionHandler {
                         messageId, chatId, buttonLabels, buttonIds);
             }
             default -> {
-                if (finallyPublish(callbackData, messageId, chatId) || publishOnHh(callbackData, messageId, chatId) || downloadResume(callbackData, messageId, chatId) ||
-                        editResume(callbackData, messageId, chatId) || deleteResume(callbackData, messageId, chatId) ||
-                         updateResumeOnHh(callbackData, messageId, chatId)){
+                if (finallyPublish(callbackData, chatId) || publishOnHh(callbackData, messageId, chatId) || downloadResume(callbackData, chatId) ||
+                        editResume(callbackData, messageId, chatId) || deleteResume(callbackData, chatId) ||
+                         updateResumeOnHh(callbackData, chatId)){
                     System.out.println("done");
                 }
             }
@@ -125,7 +125,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
         return true;
     }
 
-    private boolean updateResumeOnHh(String data, Integer messageId, Long chatId) {
+    private boolean updateResumeOnHh(String data, Long chatId) {
         Pattern pattern = Pattern.compile("update_resume_([1-6])");
 
         Matcher matcher = pattern.matcher(data);
@@ -156,7 +156,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
         return true;
     }
 
-    private boolean finallyPublish(String data, Integer messageId, Long chatId) {
+    private boolean finallyPublish(String data, Long chatId) {
         Pattern pattern = Pattern.compile("finally_publish_on_hh_resume_([1-6])");
 
         Matcher matcher = pattern.matcher(data);
@@ -187,7 +187,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
         return true;
     }
 
-    private boolean downloadResume(String data, Integer messageId, Long chatId) {
+    private boolean downloadResume(String data, Long chatId) {
         Pattern pattern = Pattern.compile("download_resume_([1-6])");
 
         Matcher matcher = pattern.matcher(data);
@@ -220,10 +220,17 @@ public class MyResumesActionHandler implements CallbackActionHandler {
             return false;
         }
 
+        Resume resume = getResume(matcher, chatId);
+        if (resume == null) {
+            return true;
+        }
+
+        //todo: edit
+
         return true;
     }
 
-    private boolean deleteResume(String data, Integer messageId, Long chatId) {
+    private boolean deleteResume(String data, Long chatId) {
         Pattern pattern = Pattern.compile("delete_resume_([1-6])");
 
         Matcher matcher = pattern.matcher(data);
