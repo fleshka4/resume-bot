@@ -289,7 +289,7 @@ public class ResumeBot extends TelegramLongPollingBot {
             case ENTER_POST_IN_ORGANIZATION -> {
                 if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
                         checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
-                    resumeFields.put("должность", receivedText);
+                    resumeFields.put(ResumeField.EXPERIENCE_POST.getValue(), receivedText);
 
                     sendMessage("Введите свои обязанности в организации:", sendMessageRequest);
                     BotUtil.dialogueStates.put(chatId, BotState.ENTER_DUTIES_IN_ORGANIZATION);
@@ -298,7 +298,7 @@ public class ResumeBot extends TelegramLongPollingBot {
             case ENTER_DUTIES_IN_ORGANIZATION -> {
                 if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
                         checkInput(receivedText, 4096L, sendMessageRequest, SYMBOLS_LIMIT)) {
-                    resumeFields.put("должность", receivedText);
+                    resumeFields.put(ResumeField.EXPERIENCE_DUTIES.getValue(), receivedText);
 
                     List<String> buttonLabels = List.of("Хочу", "Пропустить");
                     List<String> callbackData = List.of("want_enter_skills", "skip_skills");
@@ -309,8 +309,16 @@ public class ResumeBot extends TelegramLongPollingBot {
             case ENTER_SKILL -> {
                 if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
                         checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
+                    resumeFields.put(ResumeField.SKILLS.getValue(), receivedText);
                     // todo цикличность навыков
 
+                }
+            }
+            case ENTER_ABOUT_ME -> {
+                if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
+                        checkInput(receivedText, 4096L, sendMessageRequest, SYMBOLS_LIMIT)) {
+                    resumeFields.put(ResumeField.ABOUT_ME.getValue(), receivedText);
+                    resumeFields.put(ResumeField.ABOUT_ME.getValue(), receivedText);
                 }
             }
             default ->

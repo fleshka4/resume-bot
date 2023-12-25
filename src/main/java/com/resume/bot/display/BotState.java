@@ -37,4 +37,6 @@ public enum BotState {
     // Skills
     ENTER_SKILL,
 
+    // About me
+    ENTER_ABOUT_ME
 }

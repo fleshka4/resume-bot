@@ -190,12 +190,61 @@ public enum ResumeField {
         public String message() {
             return INCORRECT_HYPERLINK_STRING.formatted(MAX_LEN_256);
         }
+    },
+
+    EXPERIENCE_POST("должность") {
+        @Override
+        public boolean processCheck(String checkValue) {
+            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_128) && JsonValidator.checkAlphaSpaceFormat(checkValue);
+        }
+
+        @Override
+        public String message() {
+            return formatLetters(getValue(), MAX_LEN_128);
+        }
+    },
+
+    EXPERIENCE_DUTIES("обязанности") {
+        @Override
+        public boolean processCheck(String checkValue) {
+            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_4096) && JsonValidator.checkAlphaSpaceFormat(checkValue);
+        }
+
+        @Override
+        public String message() {
+            return formatLetters(getValue(), MAX_LEN_4096);
+        }
+    },
+
+    SKILLS("навыки") {
+        @Override
+        public boolean processCheck(String checkValue) {
+            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_128) && JsonValidator.checkAlphaSpaceFormat(checkValue);
+        }
+
+        @Override
+        public String message() {
+            return formatLetters(getValue(), MAX_LEN_128);
+        }
+    },
+
+    ABOUT_ME("о себе") {
+        @Override
+        public boolean processCheck(String checkValue) {
+            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_4096) && JsonValidator.checkAlphaSpaceFormat(checkValue);
+        }
+
+        @Override
+        public String message() {
+            return formatLetters(getValue(), MAX_LEN_4096);
+        }
     };
 
 
     private static final short MAX_LEN_128 = 128;
     private static final short MAX_LEN_256 = 256;
     private static final short MAX_LEN_512 = 512;
+    private static final short MAX_LEN_4096 = 4096;
 
     private static final String MUST_CONTAIN_LETTERS_STRING = "Параметр \"%s\" должен состоять только из букв! Также, число символов не должно превышать %d!";
     private static final String INCORRECT_PARAM_WITH_SYMBOLS_STRING = "Параметр \"%s\" указан некорректно! Также, число символов не должно превышать %d!";
