@@ -14,7 +14,7 @@ public class CallbackActionFactory {
     public CallbackActionHandler createCallbackActionHandler(TelegramLongPollingBot pollingBot, String callbackData) {
         if (BotUtil.CREATE_RESUME_IDS_LIST.contains(callbackData) ||
                 sexTypes.containsKey(callbackData) ||
-                educationLevels.containsKey(callbackData)) {
+                educationLevels.containsKey(callbackData)) { //todo сферы деятельности компании
             return new CreateResumeActionHandler(pollingBot);
         } else if ("export_resume_hh".equals(callbackData)) {
             return new ExportResumeActionHandler(pollingBot);

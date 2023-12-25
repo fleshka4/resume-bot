@@ -24,6 +24,9 @@ public class BotUtil {
             // experience
             "want_enter_work_experience",
             "skip_work_experience",
+            // skills
+            "want_enter_skills",
+            "skip_skills",
 
             "back_to_menu",
             "back_to_create_resume",
@@ -78,7 +81,7 @@ public class BotUtil {
         if (pageNumber > 0) {
             List<InlineKeyboardButton> previousButtonRow = new ArrayList<>();
             InlineKeyboardButton previousButton = new InlineKeyboardButton();
-            previousButton.setText("⬅️ Предыдущая страница");
+            previousButton.setText("Предыдущая страница");
             previousButton.setCallbackData("previous_page");
             previousButtonRow.add(previousButton);
             rowList.add(previousButtonRow);
@@ -87,7 +90,7 @@ public class BotUtil {
         if (endIndex < buttonLabels.size()) {
             List<InlineKeyboardButton> nextButtonRow = new ArrayList<>();
             InlineKeyboardButton nextButton = new InlineKeyboardButton();
-            nextButton.setText("Следующая страница ➡️");
+            nextButton.setText("Следующая страница");
             nextButton.setCallbackData("next_page");
             nextButtonRow.add(nextButton);
             rowList.add(nextButtonRow);

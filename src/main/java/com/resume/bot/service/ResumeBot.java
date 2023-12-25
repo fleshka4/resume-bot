@@ -197,7 +197,7 @@ public class ResumeBot extends TelegramLongPollingBot {
                 }
             }
             case ENTER_INSTITUTION -> {
-                if (checkInput(receivedText, sendMessageRequest, ALPHA_FORMAT) &&
+                if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
                         checkInput(receivedText, 512L, sendMessageRequest, SYMBOLS_LIMIT)) {
                     resumeFields.put("учебное заведение", receivedText);
 
@@ -216,7 +216,7 @@ public class ResumeBot extends TelegramLongPollingBot {
                 }
             }
             case ENTER_FACULTY -> {
-                if (checkInput(receivedText, sendMessageRequest, ALPHA_FORMAT) &&
+                if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
                         checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
                     resumeFields.put("факультет", receivedText);
 
@@ -225,7 +225,7 @@ public class ResumeBot extends TelegramLongPollingBot {
                 }
             }
             case ENTER_SPECIALIZATION -> {
-                if (checkInput(receivedText, sendMessageRequest, ALPHA_FORMAT) &&
+                if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
                         checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
                     resumeFields.put("специализация", receivedText);
 
@@ -255,7 +255,7 @@ public class ResumeBot extends TelegramLongPollingBot {
                 }
             }
             case ENTER_NAME_OF_ORGANIZATION -> {
-                if (checkInput(receivedText, sendMessageRequest, ALPHA_FORMAT) &&
+                if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
                         checkInput(receivedText, 512L, sendMessageRequest, SYMBOLS_LIMIT)) {
                     resumeFields.put("название организации", receivedText);
 
@@ -280,11 +280,38 @@ public class ResumeBot extends TelegramLongPollingBot {
 //                     BotUtil.userStates.put(chatId, BotState.FINISH_DIALOGUE);
 //                     finishDialogueWithClient(chatId, sendMessageRequest);
 
-                    // todo сфера деятельности
+                    // todo сфера деятельности!!!!!!!!!!!!!!!! проблема с клавой хз как сделать 30 кнопок
                     List<String> industriesNameList = INDUSTRIES.stream().map(Industry::getName).toList();
                     sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(industriesNameList, industriesNameList,
                             5, 0));
                     sendMessage("Выберите сферу деятельности компании:", sendMessageRequest);
+                }
+            }
+            case ENTER_POST_IN_ORGANIZATION -> {
+                if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
+                        checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
+                    resumeFields.put("должность", receivedText);
+
+                    sendMessage("Введите свои обязанности в организации:", sendMessageRequest);
+                    BotUtil.dialogueStates.put(chatId, BotState.ENTER_DUTIES_IN_ORGANIZATION);
+                }
+            }
+            case ENTER_DUTIES_IN_ORGANIZATION -> {
+                if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
+                        checkInput(receivedText, 4096L, sendMessageRequest, SYMBOLS_LIMIT)) {
+                    resumeFields.put("должность", receivedText);
+
+                    List<String> buttonLabels = List.of("Хочу", "Пропустить");
+                    List<String> callbackData = List.of("want_enter_skills", "skip_skills");
+                    sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, callbackData));
+                    sendMessage("Хотите ли Вы указать навыки?", sendMessageRequest);
+                }
+            }
+            case ENTER_SKILL -> {
+                if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
+                        checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
+                    // todo цикличность навыков
+
                 }
             }
             default ->

@@ -22,6 +22,7 @@ public class JsonValidator {
         BIRTHDAY,
         EXPERIENCE,
         ALPHA_FORMAT,
+        ALPHA_SPACE_FORMAT,
         ALPHANUMERIC_FORMAT,
         NUMERIC_FORMAT,
         DATE_FORMAT,
@@ -57,6 +58,7 @@ public class JsonValidator {
         checks.put(ValidationType.BIRTHDAY, objects -> checkBirthday((String) objects[0]));
         checks.put(ValidationType.EXPERIENCE, objects -> checkExperience((String) objects[0], (String) objects[1]));
         checks.put(ValidationType.ALPHA_FORMAT, objects -> checkAlphaFormat((String) objects[0]));
+        checks.put(ValidationType.ALPHA_SPACE_FORMAT, objects -> checkAlphaSpaceFormat((String) objects[0]));
         checks.put(ValidationType.ALPHANUMERIC_FORMAT, objects -> checkAlphanumericFormat((String) objects[0]));
         checks.put(ValidationType.NUMERIC_FORMAT, objects -> checkNumericFormat((String) objects[0]));
         checks.put(ValidationType.DATE_FORMAT, objects -> checkDateFormat((String) objects[0]));
@@ -139,6 +141,10 @@ public class JsonValidator {
 
     public static boolean checkAlphaFormat(String text) {
         return StringUtils.isAlpha(text);
+    }
+
+    public static boolean checkAlphaSpaceFormat(String text) {
+        return StringUtils.isAlphaSpace(text);
     }
 
     public static boolean checkAlphanumericFormat(String text) {

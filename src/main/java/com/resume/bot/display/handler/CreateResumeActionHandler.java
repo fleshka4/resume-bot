@@ -3,6 +3,7 @@ package com.resume.bot.display.handler;
 import com.resume.bot.display.BotState;
 import com.resume.bot.display.CallbackActionHandler;
 import com.resume.bot.json.JsonProcessor;
+import com.resume.bot.json.entity.Industry;
 import com.resume.bot.json.entity.area.Area;
 import com.resume.bot.json.entity.client.Resume;
 import com.resume.bot.json.entity.client.education.Education;
@@ -69,7 +70,9 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                         messageId, chatId);
             }
             case "skip_work_experience" -> {
-
+                List<String> buttonLabels = List.of("Хочу", "Пропустить");
+                List<String> buttonIds = List.of("want_enter_skills", "skip_skills");
+                executeEditMessageWithKeyBoard("Хотите ли Вы указать навыки?", messageId, chatId, buttonLabels, buttonIds);
             }
             case "edit_result_data" -> {
                 BotUtil.userStates.put(chatId, BotState.EDIT_CLIENT_RESULT_DATA);
@@ -113,6 +116,12 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                 isPrimaryEdu = false;
             }
             processOnChosenLevelEducation(chosenEducationLevel, chatId, userData);
+        }
+
+        if (INDUSTRIES.stream().map(Industry::getName).toList().contains(callbackData)) {
+            // todo логика после выбора сферы деятельности организации
+            BotUtil.dialogueStates.put(chatId, BotState.ENTER_POST_IN_ORGANIZATION);
+            sendMessage(EmojiParser.parseToUnicode("Введите свою должность:"), chatId);
         }
     }
 
