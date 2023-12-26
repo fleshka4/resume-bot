@@ -35,7 +35,7 @@ public enum BotState {
     ENTER_DUTIES_IN_ORGANIZATION,
 
     // Skills
-    ENTER_SKILL,
+    ENTER_SKILLS,
 
     // About me
     ENTER_ABOUT_ME

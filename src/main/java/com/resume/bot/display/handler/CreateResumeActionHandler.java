@@ -2,9 +2,11 @@ package com.resume.bot.display.handler;
 
 import com.resume.bot.display.BotState;
 import com.resume.bot.display.CallbackActionHandler;
+import com.resume.bot.display.ResumeField;
 import com.resume.bot.json.JsonProcessor;
 import com.resume.bot.json.entity.Industry;
 import com.resume.bot.json.entity.area.Area;
+import com.resume.bot.json.entity.client.Experience;
 import com.resume.bot.json.entity.client.Resume;
 import com.resume.bot.json.entity.client.education.Education;
 import com.resume.bot.json.entity.client.education.ElementaryEducation;
@@ -21,7 +23,6 @@ import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import com.resume.bot.display.ResumeField;
 
 import java.util.*;
 
@@ -54,6 +55,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             case "start_dialogue" -> {
                 BotUtil.userStates.put(chatId, BotState.START_DIALOGUE);
                 BotUtil.dialogueStates.put(chatId, BotState.ENTER_NAME);
+
                 sendMessage("Введите имя:", chatId);
             }
             case "want_enter_education" -> {
@@ -63,20 +65,40 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             case "skip_education" -> {
                 List<String> buttonLabels = List.of("Хочу", "Пропустить");
                 List<String> buttonIds = List.of("want_enter_work_experience", "skip_work_experience");
+
                 executeEditMessageWithKeyBoard("Хотите ли Вы указать опыт работы?", messageId, chatId, buttonLabels, buttonIds);
             }
             case "want_enter_work_experience" -> {
                 BotUtil.dialogueStates.put(chatId, BotState.ENTER_PERIOD_OF_WORK);
+
                 executeEditMessage(EmojiParser.parseToUnicode("Введите период опыта работы в формате ММ-ГГГГ - ММ-ГГГГ.:necktie:"),
                         messageId, chatId);
             }
             case "skip_work_experience" -> {
                 List<String> buttonLabels = List.of("Хочу", "Пропустить");
                 List<String> buttonIds = List.of("want_enter_skills", "skip_skills");
+
                 executeEditMessageWithKeyBoard("Хотите ли Вы указать навыки?", messageId, chatId, buttonLabels, buttonIds);
+            }
+            case "want_enter_skills" -> {
+                BotUtil.dialogueStates.put(chatId, BotState.ENTER_SKILLS);
+                sendMessage("Введите навыки:", chatId);
+            }
+            case "skip_skills" -> {
+                List<String> buttonLabels = List.of("Хочу", "Пропустить");
+                List<String> buttonIds = List.of("want_enter_about_me", "skip_about_me");
+
+                executeEditMessageWithKeyBoard("Хотите ли Вы рассказать о себе?", messageId, chatId, buttonLabels, buttonIds);
+            }
+            case "want_enter_about_me" -> {
+                BotUtil.dialogueStates.put(chatId, BotState.ENTER_ABOUT_ME);
+            }
+            case "skip_about_me" -> {
+
             }
             case "edit_result_data" -> {
                 BotUtil.userStates.put(chatId, BotState.EDIT_CLIENT_RESULT_DATA);
+
                 sendMessage(EmojiParser.parseToUnicode("Жду исправлений:eyes:"), chatId);
             }
             case "result_data_is_correct" -> {
@@ -133,6 +155,8 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
         List<ElementaryEducation> elementaryEducationsList = new ArrayList<>();
         PrimaryEducation primaryEducation = new PrimaryEducation();
         ElementaryEducation elementaryEducation = new ElementaryEducation();
+        List<Experience> workExperienceList = new ArrayList<>();
+        Experience workExperience = new Experience();
 
         for (Map.Entry<String, String> entry : BotUtil.userResumeData.get(chatId).entrySet()) {
             String fieldLabel = entry.getKey();
@@ -167,20 +191,29 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                         addElementaryEducation(elementaryEducation, fieldLabel, fieldValue);
                     }
                 }
+                case "опыт работы", "название организации", "город организации", "ссылка", "должность", "обязанности" ->
+                        processOnWorkExperience(workExperience, fieldLabel, fieldValue);
+                case "навыки" -> resume.setSkills(fieldValue); // todo сюда должна приходить строка состоящая из нескольких навыков или одного
+                // todo "о себе" видимо не нужно передавать в json это чисто наше поле
             }
         }
 
+        /* todo это по идее циклично должно быть
         primaryEducationsList.add(primaryEducation);
         elementaryEducationsList.add(elementaryEducation);
         education.setPrimary(primaryEducationsList);
         education.setElementary(elementaryEducationsList);
+        workExperienceList.add(workExperience);
+        */
+
         resume.setEducation(education);
+        resume.setExperience(workExperienceList);
 
         JsonProcessor.createJsonFromEntity(resume);
     }
 
     private void addPrimaryEducation(PrimaryEducation primaryEducation, String fieldLabel, String fieldValue) {
-        switch (fieldLabel.toLowerCase()) {
+        switch (fieldLabel) {
             case "учебное заведение" -> primaryEducation.setName(fieldValue);
             case "факультет" -> primaryEducation.setOrganization(fieldValue);
             case "специализация" -> primaryEducation.setResult(fieldValue);
@@ -189,7 +222,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
     }
 
     private void addElementaryEducation(ElementaryEducation elementaryEducation, String fieldLabel, String fieldValue) {
-        switch (fieldLabel.toLowerCase()) {
+        switch (fieldLabel) {
             case "учебное заведение" -> elementaryEducation.setName(fieldValue);
             case "год окончания" -> elementaryEducation.setYear(Long.parseLong(fieldValue));
         }
@@ -206,14 +239,6 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
         return city1.map(Area::getId).orElseGet(() -> city2.get().getId());
     }
 
-    public static String getKeyByValue(Map<String, String> map, String fieldValue) {
-        return map.entrySet().stream()
-                .filter(entry -> fieldValue.equals(entry.getValue()))
-                .map(Map.Entry::getKey)
-                .findFirst()
-                .orElse("");
-    }
-
     private void processOnChosenSex(String genderName, Long chatId, Map<String, String> userData) {
         userData.put(ResumeField.SEX.getValue(), genderName);
         BotUtil.userResumeData.put(chatId, userData);
@@ -227,6 +252,27 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
         BotUtil.userResumeData.put(chatId, userData);
         sendMessage("Введите название учебного заведения:", chatId);
         BotUtil.dialogueStates.put(chatId, BotState.ENTER_INSTITUTION);
+    }
+
+    private void processOnWorkExperience(Experience workExperience, String fieldLabel, String fieldValue) {
+        switch (fieldLabel) {
+            case "опыт работы" -> {
+                String[] dates = fieldValue.split(" - ");
+                workExperience.setStart(dates[0]);
+                workExperience.setEnd(dates[1]);
+            }
+            case "название организации" -> workExperience.setCompany(fieldValue);
+            case "город организации" -> {
+                com.resume.bot.json.entity.client.Area area = new com.resume.bot.json.entity.client.Area(
+                        getCityId(fieldValue), fieldValue);
+                workExperience.setArea(area);
+            }
+            case "ссылка" -> workExperience.setCompanyUrl(fieldValue);
+            case "должность" -> workExperience.setPosition(fieldValue);
+            case "обязанности" -> workExperience.setDescription(fieldValue);
+            // todo case "отрасль" -> workExperience.setIndustries();
+            // пользователь должен протыкать на клавиатуре отрасли своей компании
+        }
     }
 
     private void sendMessage(String text, Long chatId) {
@@ -268,5 +314,13 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
         } catch (TelegramApiException e) {
             log.error(BotUtil.ERROR_TEXT + e.getMessage());
         }
+    }
+
+    private String getKeyByValue(Map<String, String> map, String fieldValue) {
+        return map.entrySet().stream()
+                .filter(entry -> fieldValue.equals(entry.getValue()))
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .orElse("");
     }
 }

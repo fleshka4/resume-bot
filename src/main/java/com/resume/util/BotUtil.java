@@ -27,6 +27,9 @@ public class BotUtil {
             // skills
             "want_enter_skills",
             "skip_skills",
+            // about me
+            "want_enter_about_me",
+            "skip_about_me",
 
             "back_to_menu",
             "back_to_create_resume",

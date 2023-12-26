@@ -180,6 +180,18 @@ public enum ResumeField {
         }
     },
 
+    EXPERIENCE_ORG_INDUSTRY("отрасль") {
+        @Override
+        public boolean processCheck(String checkValue) {
+            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_256) && JsonValidator.checkCity(checkValue);
+        }
+
+        @Override
+        public String message() {
+            return formatLocation(getValue());
+        }
+    },
+
     EXPERIENCE_ORG_LINK("ссылка") {
         @Override
         public boolean processCheck(String checkValue) {

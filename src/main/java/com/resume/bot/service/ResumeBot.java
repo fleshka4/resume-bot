@@ -306,18 +306,22 @@ public class ResumeBot extends TelegramLongPollingBot {
                     sendMessage("Хотите ли Вы указать навыки?", sendMessageRequest);
                 }
             }
-            case ENTER_SKILL -> {
+            case ENTER_SKILLS -> {
                 if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
                         checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
                     resumeFields.put(ResumeField.SKILLS.getValue(), receivedText);
-                    // todo цикличность навыков
-
+                    // todo цикличность навыков я думаю их нужно записывать в лист и передавать одной строкой в json (поле skills)
+                    //  так как skill_set не работает https://api.hh.ru/suggests/skill_set
+                    //  пользователь будет вводить по одному навыку а ему нужно будет каждый раз предлагать еще раз
+                    List<String> buttonLabels = List.of("Хочу", "Пропустить");
+                    List<String> callbackData = List.of("want_enter_about_me", "skip_about_me");
+                    sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, callbackData));
+                    sendMessage("Хотите ли Вы рассказать о себе?", sendMessageRequest);
                 }
             }
             case ENTER_ABOUT_ME -> {
                 if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
                         checkInput(receivedText, 4096L, sendMessageRequest, SYMBOLS_LIMIT)) {
-                    resumeFields.put(ResumeField.ABOUT_ME.getValue(), receivedText);
                     resumeFields.put(ResumeField.ABOUT_ME.getValue(), receivedText);
                 }
             }
@@ -333,8 +337,6 @@ public class ResumeBot extends TelegramLongPollingBot {
         }
     }
 
-    // todo У клиента тоже значения должны обновляться, чтобы получить обновленный json
-    //  Нужно как то добавить здесь проверки те что и в начале диалога чекают что в имени только символы и т д??
     private void editResultClientData(String receivedText, Long chatId, SendMessage sendMessageRequest) {
         Map<String, String> resumeFields = checkAvailabilityResumeFields(chatId);
 
@@ -387,6 +389,12 @@ public class ResumeBot extends TelegramLongPollingBot {
                 resume.append("\n").append(currentBlock).append("\n\n");
             } else if (key.equals(ResumeField.EXPERIENCE_PERIOD.getValue())) {
                 currentBlock = "*Опыт*";
+                resume.append("\n").append(currentBlock).append("\n\n");
+            } else if (key.equals(ResumeField.SKILLS.getValue())) {
+                currentBlock = "*Навыки*";
+                resume.append("\n").append(currentBlock).append("\n\n");
+            } else if (key.equals(ResumeField.ABOUT_ME.getValue())) {
+                currentBlock = "*Обо мне*";
                 resume.append("\n").append(currentBlock).append("\n\n");
             }
 
