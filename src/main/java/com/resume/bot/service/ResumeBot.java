@@ -239,7 +239,7 @@ public class ResumeBot extends TelegramLongPollingBot {
         for (Map.Entry<String, String> entry : resumeFields.entrySet()) {
             resume.append("*").append(entry.getKey()).append("*").append(": ").append(entry.getValue()).append("\n");
         }
-        resume.append(EmojiParser.parseToUnicode("\nЕсли есть не соответствие или вы ошиблись, нажмите на кнопку *Редактировать* "
+        resume.append(EmojiParser.parseToUnicode("\nЕсли есть не соответствие или Вы ошиблись, нажмите на кнопку *Редактировать* "
                 + "и введите это поле повторно в формате *Поле - новое значение*\n\n"
                 + "*Пример:*\nИмя - Алексей\n\nИ я автоматически изменю некорректную информацию.:dizzy:"));
         List<String> buttonLabels = List.of("Редактировать", "Всё верно!");
