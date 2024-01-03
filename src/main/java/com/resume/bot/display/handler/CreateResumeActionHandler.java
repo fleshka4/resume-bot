@@ -92,9 +92,24 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             }
             case "want_enter_about_me" -> {
                 BotUtil.dialogueStates.put(chatId, BotState.ENTER_ABOUT_ME);
+
+                executeEditMessage(EmojiParser.parseToUnicode("Введите краткую информацию о себе.:eyes: (Не больше 4096 символов)"),
+                        messageId, chatId);
             }
             case "skip_about_me" -> {
+                List<String> buttonLabels = List.of("Да", "Нет");
+                List<String> buttonIds = List.of("yes_enter_car", "no_enter_car");
 
+                executeEditMessageWithKeyBoard("Есть ли у вас автомобиль?", messageId, chatId, buttonLabels, buttonIds);
+            }
+            case "yes_enter_car" -> {
+                BotUtil.dialogueStates.put(chatId, BotState.ENTER_CAR_AVAILABILITY);
+
+                executeEditMessageWithKeyBoard(EmojiParser.parseToUnicode("Выберите категорию прав.:car:"),
+                        messageId, chatId, driverLicenseTypes, driverLicenseTypes);
+            }
+            case "no_enter_car" -> {
+                // todo переходим к рекомендации человека
             }
             case "edit_result_data" -> {
                 BotUtil.userStates.put(chatId, BotState.EDIT_CLIENT_RESULT_DATA);
@@ -146,6 +161,11 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             BotUtil.dialogueStates.put(chatId, BotState.ENTER_POST_IN_ORGANIZATION);
             sendMessage(EmojiParser.parseToUnicode("Введите свою должность:"), chatId);
         }
+
+        if (driverLicenseTypes.contains(callbackData)) {
+//            processOnChosenDriverLicense();
+            // todo цикличность выбора категории прав
+        }
     }
 
     private void fillClientData(Long chatId) {
@@ -193,8 +213,11 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                 }
                 case "опыт работы", "название организации", "город организации", "ссылка", "должность", "обязанности" ->
                         processOnWorkExperience(workExperience, fieldLabel, fieldValue);
-                case "навыки" -> resume.setSkills(fieldValue); // todo сюда должна приходить строка состоящая из нескольких навыков или одного
-                // todo "о себе" видимо не нужно передавать в json это чисто наше поле
+                case "навыки" ->
+                        resume.setSkills(fieldValue); // todo сюда должна приходить строка состоящая из нескольких навыков или одного
+                case "категория прав" -> {
+
+                }
             }
         }
 
@@ -252,6 +275,10 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
         BotUtil.userResumeData.put(chatId, userData);
         sendMessage("Введите название учебного заведения:", chatId);
         BotUtil.dialogueStates.put(chatId, BotState.ENTER_INSTITUTION);
+    }
+
+    private void processOnChosenDriverLicense(String license, Long chatId, Map<String, String> userData) {
+        // todo
     }
 
     private void processOnWorkExperience(Experience workExperience, String fieldLabel, String fieldValue) {

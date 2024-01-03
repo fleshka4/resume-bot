@@ -255,6 +255,7 @@ public class ResumeBot extends TelegramLongPollingBot {
             }
             case ENTER_NAME_OF_ORGANIZATION -> {
                 if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
+                        checkInput(receivedText, sendMessageRequest, ALPHANUMERIC_FORMAT) &&
                         checkInput(receivedText, 512L, sendMessageRequest, SYMBOLS_LIMIT)) {
                     resumeFields.put(ResumeField.EXPERIENCE_ORG_NAME.getValue(), receivedText);
 
@@ -275,6 +276,8 @@ public class ResumeBot extends TelegramLongPollingBot {
                         checkInput(receivedText, 256L, sendMessageRequest, SYMBOLS_LIMIT)) {
                     resumeFields.put(ResumeField.EXPERIENCE_ORG_LINK.getValue(), receivedText);
 
+                    sendMessage("Введите свою должность в организации:", sendMessageRequest);
+                    BotUtil.dialogueStates.put(chatId, BotState.ENTER_POST_IN_ORGANIZATION);
                     // todo Должно быть в самом конце диалога
 //                     BotUtil.userStates.put(chatId, BotState.FINISH_DIALOGUE);
 //                     finishDialogueWithClient(chatId, sendMessageRequest);
@@ -323,6 +326,11 @@ public class ResumeBot extends TelegramLongPollingBot {
                 if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
                         checkInput(receivedText, 4096L, sendMessageRequest, SYMBOLS_LIMIT)) {
                     resumeFields.put(ResumeField.ABOUT_ME.getValue(), receivedText);
+
+                    List<String> buttonLabels = List.of("Да", "Нет");
+                    List<String> callbackData = List.of("yes_enter_car", "no_enter_car");
+                    sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, callbackData));
+                    sendMessage("Есть ли у вас автомобиль?", sendMessageRequest);
                 }
             }
             default ->

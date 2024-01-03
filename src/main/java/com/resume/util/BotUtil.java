@@ -30,6 +30,9 @@ public class BotUtil {
             // about me
             "want_enter_about_me",
             "skip_about_me",
+            // availability of a car
+            "yes_enter_car",
+            "no_enter_car",
 
             "back_to_menu",
             "back_to_create_resume",
