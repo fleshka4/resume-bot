@@ -1,0 +1,56 @@
+package com.resume.bot.display;
+
+import com.resume.util.BotUtil;
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
+import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
+import org.telegram.telegrambots.meta.api.methods.ParseMode;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
+import java.io.Serializable;
+import java.util.List;
+
+@Slf4j
+@UtilityClass
+public class MessageUtil {
+    public static void executeEditMessageWithKeyBoard(TelegramLongPollingBot bot, String editMessageToSend, Integer messageId,
+                                                      Long chatId, List<String> buttonLabels, List<String> buttonIds) {
+        EditMessageText editMessage = new EditMessageText();
+        editMessage.setParseMode(ParseMode.MARKDOWN);
+        editMessage.setChatId(chatId.toString());
+        editMessage.setMessageId(messageId);
+        editMessage.setText(editMessageToSend);
+
+        editMessage.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, buttonIds));
+        executeMessage(bot, editMessage);
+    }
+
+    public static void sendMessage(TelegramLongPollingBot bot, String text, Long chatId) {
+        SendMessage message = new SendMessage();
+        message.setParseMode(ParseMode.MARKDOWN);
+        message.setChatId(chatId.toString());
+        message.setText(text);
+        executeMessage(bot, message);
+    }
+
+    public static void executeEditMessage(TelegramLongPollingBot bot, String editMessageToSend, Integer messageId, Long chatId) {
+        EditMessageText editMessage = new EditMessageText();
+        editMessage.setParseMode(ParseMode.MARKDOWN);
+        editMessage.setChatId(chatId.toString());
+        editMessage.setMessageId(messageId);
+        editMessage.setText(editMessageToSend);
+
+        executeMessage(bot, editMessage);
+    }
+
+    public static <T extends Serializable, Method extends BotApiMethod<T>> void executeMessage(TelegramLongPollingBot bot, Method message) {
+        try {
+            bot.execute(message);
+        } catch (TelegramApiException e) {
+            log.error(BotUtil.ERROR_TEXT + e.getMessage());
+        }
+    }
+}

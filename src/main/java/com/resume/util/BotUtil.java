@@ -14,7 +14,6 @@ public class BotUtil {
             "menu",
             "create_resume",
             "create_resume_from_scratch",
-            "export_data_hh",
             "start_dialogue",
             "edit_result_data",
             "result_data_is_correct",
@@ -59,6 +58,12 @@ public class BotUtil {
             "download",
             "edit",
             "delete"
+    );
+
+    public final List<String> EXPORT_RESUME_IDS_LIST = List.of(
+            "export_data_hh",
+            "auth",
+            "choose_resume"
     );
 
     public boolean checkIfAction(String suspectAction) {

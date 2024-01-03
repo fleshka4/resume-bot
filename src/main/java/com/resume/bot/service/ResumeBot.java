@@ -431,10 +431,14 @@ public class ResumeBot extends TelegramLongPollingBot {
 
             resume.append("*").append(key).append("*").append(": ").append(value).append("\n");
         }
+        resume.append(EmojiParser.parseToUnicode("""
 
-        resume.append(EmojiParser.parseToUnicode("\nЕсли есть несоответствие или Вы ошиблись, нажмите на кнопку *Редактировать* "
-                + "и введите это поле повторно в формате *Поле - новое значение*\n\n"
-                + "*Пример:*\nИмя - Алексей\n\nИ я автоматически изменю некорректную информацию.:dizzy:"));
+                Если есть не соответствие или Вы ошиблись, нажмите на кнопку *Редактировать* и введите это поле повторно в формате *Поле - новое значение*
+
+                *Пример:*
+                Имя - Алексей
+
+                И я автоматически изменю некорректную информацию.:dizzy:"""));
         List<String> buttonLabels = List.of("Редактировать", "Всё верно!");
         List<String> callbackData = List.of("edit_result_data", "result_data_is_correct");
 
@@ -453,15 +457,22 @@ public class ResumeBot extends TelegramLongPollingBot {
     }
 
     private void createMenu(SendMessage sendMessageRequest) {
-        List<String> buttonLabels = Arrays.asList("Создать резюме", "Экспорт резюме с hh.ru", "Мои резюме");
+        List<String> buttonLabels = Arrays.asList("Создать резюме", "Использовать резюме с hh.ru", "Мои резюме");
         List<String> callbackData = Arrays.asList("create_resume", "export_resume_hh", "my_resumes");
 
         sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, callbackData));
 
-        String menuInfo = "Выберите действие:\n\n"
-                + "*Создать резюме* :memo:\nНачните процесс создания нового резюме с нуля!\n\n"
-                + "*Экспорт резюме с hh.ru* :inbox_tray:\nЭкспортируйте свои данные с hh.ru для взаимодействия с ними.\n\n"
-                + "*Мои резюме* :clipboard:\nПосмотрите список ваших созданных резюме.";
+        String menuInfo = """
+                Выберите действие:
+
+                *Создать резюме* :memo:
+                Начните процесс создания нового резюме с нуля!
+
+                *Экспорт резюме с hh.ru* :inbox_tray:
+                Экспортируйте свои данные с hh.ru для взаимодействия с ними.
+
+                *Мои резюме* :clipboard:
+                Посмотрите список ваших созданных резюме.""";
 
         sendMessage(EmojiParser.parseToUnicode(menuInfo), sendMessageRequest);
     }
