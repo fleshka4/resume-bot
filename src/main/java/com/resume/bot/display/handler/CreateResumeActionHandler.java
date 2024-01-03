@@ -10,15 +10,13 @@ import com.vdurmont.emoji.EmojiParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.meta.api.methods.ParseMode;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.resume.bot.display.MessageUtil.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -34,7 +32,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                 List<String> buttonLabels = Arrays.asList("У меня нет резюме, хочу его сделать с нуля!", "Экспорт данных с hh.ru", "Назад");
                 List<String> buttonIds = Arrays.asList("create_resume_from_scratch", "export_data_hh", "back_to_menu");
 
-                executeEditMessageWithKeyBoard(EmojiParser.parseToUnicode("Супер! С чего начнем?:sparkles:\n"),
+                executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode("Супер! С чего начнем?:sparkles:\n"),
                         messageId, chatId, buttonLabels, buttonIds);
             }
             case "create_resume_from_scratch" -> {
@@ -42,13 +40,13 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                 List<String> buttonLabels = Arrays.asList("Начать", "Назад");
                 List<String> buttonIds = Arrays.asList("start_dialogue", "back_to_create_resume");
 
-                executeEditMessageWithKeyBoard(EmojiParser.parseToUnicode("Отлично! Давайте заполним поля в вашем резюме.:lower_left_fountain_pen:"),
+                executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode("Отлично! Давайте заполним поля в вашем резюме.:lower_left_fountain_pen:"),
                         messageId, chatId, buttonLabels, buttonIds);
             }
             case "start_dialogue" -> {
                 BotUtil.userStates.put(chatId, BotState.START_DIALOGUE);
                 BotUtil.dialogueStates.put(chatId, BotState.ENTER_NAME);
-                sendMessage("Введите имя:", chatId);
+                sendMessage(bot, "Введите имя:", chatId);
             }
             case "choice_gender_m", "choice_gender_f" -> {
                 String genderName = callbackData.equals("choice_gender_m") ? "Мужской" : "Женский";
@@ -56,20 +54,20 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                 userData.put("пол", genderName);
                 BotUtil.userResumeData.put(chatId, userData);
                 BotUtil.dialogueStates.put(chatId, BotState.ENTER_LOCATION);
-                sendMessage("Введите ваше место жительство.\nВ формате *страна, регион, населенный пункт (опционально)*:", chatId);
+                sendMessage(bot, "Введите ваше место жительство.\nВ формате *страна, регион, населенный пункт (опционально)*:", chatId);
             }
             case "edit_result_data" -> {
                 BotUtil.userStates.put(chatId, BotState.EDIT_CLIENT_RESULT_DATA);
-                sendMessage(EmojiParser.parseToUnicode("Жду исправлений:eyes:"), chatId);
+                sendMessage(bot, EmojiParser.parseToUnicode("Жду исправлений:eyes:"), chatId);
             }
             case "result_data_is_correct" -> {
                 BotUtil.userStates.put(chatId, BotState.RESULT_DATA_CORRECT);
                 fillClientData(chatId);
-                sendMessage(EmojiParser.parseToUnicode("Замечательно! Ваши данные успешно получены.:sparkles:\nВот что Вы можете сделать:"), chatId);
+                sendMessage(bot, EmojiParser.parseToUnicode("Замечательно! Ваши данные успешно получены.:sparkles:\nВот что Вы можете сделать:"), chatId);
                 // todo кнопки "Загрузить новое резюме на hh", "Обновить резюме на hh", "Выбор Latex-шаблона"
             }
             case "back_to_menu" -> {
-                List<String> buttonLabels = Arrays.asList("Создать резюме", "Экспорт резюме с hh.ru", "Мои резюме");
+                List<String> buttonLabels = Arrays.asList("Создать резюме", "Использовать резюме с hh.ru", "Мои резюме");
                 List<String> buttonIds = Arrays.asList("create_resume", "export_resume_hh", "my_resumes");
 
                 String menuInfo = "Выберите действие:\n\n"
@@ -77,13 +75,13 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                         + "*Экспорт резюме с hh.ru* :inbox_tray:\nЭкспортируйте свои данные с hh.ru для взаимодействия с ними.\n\n"
                         + "*Мои резюме* :clipboard:\nПосмотрите список ваших созданных резюме.";
 
-                executeEditMessageWithKeyBoard(EmojiParser.parseToUnicode(menuInfo), messageId, chatId, buttonLabels, buttonIds);
+                executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode(menuInfo), messageId, chatId, buttonLabels, buttonIds);
             }
             case "back_to_create_resume" -> {
                 List<String> buttonLabels = Arrays.asList("У меня нет резюме, хочу его сделать с нуля!", "Экспорт данных с hh.ru", "Назад");
                 List<String> buttonIds = Arrays.asList("create_resume_from_scratch", "export_data_hh", "back_to_menu");
 
-                executeEditMessageWithKeyBoard(EmojiParser.parseToUnicode("Супер! С чего начнем?:sparkles:\n"),
+                executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode("Супер! С чего начнем?:sparkles:\n"),
                         messageId, chatId, buttonLabels, buttonIds);
             }
         }
@@ -115,46 +113,5 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
         }
 
         JsonProcessor.createJsonFromEntity(resume);
-    }
-
-    private void sendMessage(String text, Long chatId) {
-        SendMessage message = new SendMessage();
-        message.setParseMode(ParseMode.MARKDOWN);
-        message.setChatId(chatId.toString());
-        message.setText(text);
-        try {
-            bot.execute(message);
-        } catch (TelegramApiException e) {
-            log.error(BotUtil.ERROR_TEXT + e.getMessage());
-        }
-    }
-
-    private void executeEditMessage(String editMessageToSend, Integer messageId, Long chatId) {
-        EditMessageText editMessage = new EditMessageText();
-        editMessage.setParseMode(ParseMode.MARKDOWN);
-        editMessage.setChatId(chatId.toString());
-        editMessage.setMessageId(messageId);
-        editMessage.setText(editMessageToSend);
-
-        executeMessage(editMessage);
-    }
-
-    private void executeEditMessageWithKeyBoard(String editMessageToSend, Integer messageId, Long chatId, List<String> buttonLabels, List<String> buttonIds) {
-        EditMessageText editMessage = new EditMessageText();
-        editMessage.setParseMode(ParseMode.MARKDOWN);
-        editMessage.setChatId(chatId.toString());
-        editMessage.setMessageId(messageId);
-        editMessage.setText(editMessageToSend);
-
-        editMessage.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, buttonIds));
-        executeMessage(editMessage);
-    }
-
-    private void executeMessage(EditMessageText message) {
-        try {
-            bot.execute(message);
-        } catch (TelegramApiException e) {
-            log.error(BotUtil.ERROR_TEXT + e.getMessage());
-        }
     }
 }
