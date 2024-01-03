@@ -1,6 +1,5 @@
 package com.resume.bot.model.entity;
 
-import com.resume.bot.model.ResumeData;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,12 +16,19 @@ public class Resume {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int resumeId;
 
-    // private ResumeData resumeData;
+    private String resumeData;
 
     private String pdfPath;
 
-    private boolean linked;
+    private String hhLink;
+
+    private String title;
 
     @ManyToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "tg_uid")
+    private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "template_id")
     private Template template;
 }

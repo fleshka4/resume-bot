@@ -43,14 +43,16 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                 List<String> buttonLabels = Arrays.asList("У меня нет резюме, хочу его сделать с нуля!", "Экспорт данных с hh.ru", "Назад");
                 List<String> buttonIds = Arrays.asList("create_resume_from_scratch", "export_data_hh", "back_to_menu");
 
-                executeEditMessageWithKeyBoard(EmojiParser.parseToUnicode("Супер! С чего начнем?:sparkles:\n"), messageId, chatId, buttonLabels, buttonIds);
+                executeEditMessageWithKeyBoard(EmojiParser.parseToUnicode("Супер! С чего начнем?:sparkles:\n"),
+                        messageId, chatId, buttonLabels, buttonIds);
             }
             case "create_resume_from_scratch" -> {
                 BotUtil.userStates.put(chatId, BotState.CREATE_RESUME_SCRATCH);
                 List<String> buttonLabels = Arrays.asList("Начать", "Назад");
                 List<String> buttonIds = Arrays.asList("start_dialogue", "back_to_create_resume");
 
-                executeEditMessageWithKeyBoard(EmojiParser.parseToUnicode("Отлично! Давайте заполним поля в вашем резюме.:lower_left_fountain_pen:"), messageId, chatId, buttonLabels, buttonIds);
+                executeEditMessageWithKeyBoard(EmojiParser.parseToUnicode("Отлично! Давайте заполним поля в вашем резюме.:lower_left_fountain_pen:"),
+                        messageId, chatId, buttonLabels, buttonIds);
             }
             case "start_dialogue" -> {
                 BotUtil.userStates.put(chatId, BotState.START_DIALOGUE);
@@ -149,7 +151,8 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                 List<String> buttonLabels = Arrays.asList("У меня нет резюме, хочу его сделать с нуля!", "Экспорт данных с hh.ru", "Назад");
                 List<String> buttonIds = Arrays.asList("create_resume_from_scratch", "export_data_hh", "back_to_menu");
 
-                executeEditMessageWithKeyBoard(EmojiParser.parseToUnicode("Супер! С чего начнем?:sparkles:\n"), messageId, chatId, buttonLabels, buttonIds);
+                executeEditMessageWithKeyBoard(EmojiParser.parseToUnicode("Супер! С чего начнем?:sparkles:\n"),
+                        messageId, chatId, buttonLabels, buttonIds);
             }
         }
 
