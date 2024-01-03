@@ -36,6 +36,36 @@ public class BotUtil {
             "yes_go_to_menu",
             "no_go_to_menu"
     );
+    public final List<String> MY_RESUMES_IDS_LIST = List.of(
+            "my_resumes",
+            "back_to_menu_3",
+            "back_to_my_resumes",
+            "resume_1",
+            "resume_2",
+            "resume_3",
+            "resume_4",
+            "resume_5",
+            "resume_6"
+    );
+    public final List<String> ACTIONS_WITH_RESUME = List.of(
+            "publish_on_hh",
+            "finally_publish_on_hh",
+            "back_to_publish_on_hh",
+            "update",
+            "download",
+            "edit",
+            "delete"
+    );
+
+    public boolean checkIfAction(String suspectAction) {
+        for (String s : ACTIONS_WITH_RESUME) {
+            if (suspectAction.startsWith(s)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public final Map<Long, BotState> userStates = new HashMap<>();
     public final Map<Long, BotState> dialogueStates = new HashMap<>();
     public final Map<Long, Map<String, String>> userResumeData = new LinkedHashMap<>();

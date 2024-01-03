@@ -13,6 +13,7 @@ import lombok.Setter;
 public class Template {
 
     @Id
+    @Column(name = "template_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int templateId;
 

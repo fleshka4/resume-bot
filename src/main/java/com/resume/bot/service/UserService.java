@@ -6,13 +6,16 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository repository;
 
     public User saveUser(User user) {
-        return repository.save(user);
+        Optional<User> u = repository.findById(user.getTgUid());
+        return u.orElseGet(() -> repository.save(user));
     }
 
     public User getUser(Long tgUid) {
