@@ -33,7 +33,8 @@ public class BotUtil {
             // availability of a car
             "yes_enter_car",
             "no_enter_car",
-
+            "want_enter_salary",
+            "skip_salary",
             "back_to_menu",
             "back_to_create_resume",
             "yes_go_to_menu",

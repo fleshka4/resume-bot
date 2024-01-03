@@ -41,5 +41,9 @@ public enum BotState {
     ENTER_ABOUT_ME,
 
     // Availability of a car
-    ENTER_CAR_AVAILABILITY
+    ENTER_CAR_AVAILABILITY,
+
+    ENTER_WISH_POSITION,
+    ENTER_WISH_SALARY,
+    ENTER_WISH_BUSYNESS
 }

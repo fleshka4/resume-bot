@@ -250,6 +250,30 @@ public enum ResumeField {
         public String message() {
             return formatLetters(getValue(), MAX_LEN_4096);
         }
+    },
+
+    WISH_POSITION("желаемая позиция") {
+        @Override
+        public boolean processCheck(String checkValue) {
+            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_128) && JsonValidator.checkAlphaSpaceFormat(checkValue);
+        }
+
+        @Override
+        public String message() {
+            return formatLetters(getValue(), MAX_LEN_128);
+        }
+    },
+
+    WISH_SALARY("желаемая зарплата") {
+        @Override
+        public boolean processCheck(String checkValue) {
+            return JsonValidator.checkNumericFormat(checkValue);
+        }
+
+        @Override
+        public String message() {
+            return INCORRECT_SALARY_STRING.formatted(getValue());
+        }
     };
 
 
@@ -267,6 +291,7 @@ public enum ResumeField {
     private static final String INCORRECT_NUMBER_STRING = "В параметре \"%s\" указан некорректный год!";
     private static final String INCORRECT_PERIOD_STRING = "В параметре \"%s\" указан некорректный период!";
     private static final String INCORRECT_DATE_STRING = "Параметр \"%s\" содержит в себе некорректную дату!";
+    private static final String INCORRECT_SALARY_STRING = "В параметре \"%s\" указано некорректное значение!";
 
     private final String value;
 

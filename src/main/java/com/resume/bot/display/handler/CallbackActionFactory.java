@@ -14,7 +14,8 @@ public class CallbackActionFactory {
         if (BotUtil.CREATE_RESUME_IDS_LIST.contains(callbackData) ||
                 sexTypes.containsKey(callbackData) ||
                 educationLevels.containsKey(callbackData) ||
-                driverLicenseTypes.contains(callbackData)) { //todo сферы деятельности компании
+                driverLicenseTypes.contains(callbackData) ||
+                employmentTypes.containsKey(callbackData)) { //todo сферы деятельности компании
             return new CreateResumeActionHandler(pollingBot);
         } else if ("export_resume_hh".equals(callbackData)) {
             return new ExportResumeActionHandler(pollingBot);

@@ -111,6 +111,18 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             case "no_enter_car" -> {
                 // todo переходим к рекомендации человека
             }
+            case "want_enter_salary" -> {
+                BotUtil.dialogueStates.put(chatId, BotState.ENTER_WISH_SALARY);
+
+                executeEditMessage(EmojiParser.parseToUnicode("Введите желаемую зарплату в виде числа.:moneybag:"),
+                        messageId, chatId);
+            }
+            case "skip_salary" -> {
+                BotUtil.dialogueStates.put(chatId, BotState.ENTER_WISH_BUSYNESS);
+
+                executeEditMessageWithKeyBoard("Выберите желаемую занятость.", messageId, chatId,
+                        employmentTypes.values().stream().toList(), employmentTypes.keySet().stream().toList());
+            }
             case "edit_result_data" -> {
                 BotUtil.userStates.put(chatId, BotState.EDIT_CLIENT_RESULT_DATA);
 
@@ -166,6 +178,11 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
 //            processOnChosenDriverLicense();
             // todo цикличность выбора категории прав
         }
+
+        if (employmentTypes.containsKey(callbackData)) {
+//            processOnChosenBusyness();
+            // todo цикличность выбора занятости
+        }
     }
 
     private void fillClientData(Long chatId) {
@@ -216,6 +233,19 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                 case "навыки" ->
                         resume.setSkills(fieldValue); // todo сюда должна приходить строка состоящая из нескольких навыков или одного
                 case "категория прав" -> {
+
+                }
+                case "желаемая позиция" -> resume.setTitle(fieldValue);
+                case "профессиональная роль" -> {
+
+                }
+                case "желаемая зарплата" -> {
+
+                }
+                case "желаемая занятость" -> {
+
+                }
+                case "желаемый график работы" -> {
 
                 }
             }
@@ -278,6 +308,10 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
     }
 
     private void processOnChosenDriverLicense(String license, Long chatId, Map<String, String> userData) {
+        // todo
+    }
+
+    private void processOnChosenBusyness(String busyness, Long chatId, Map<String, String> userData) {
         // todo
     }
 

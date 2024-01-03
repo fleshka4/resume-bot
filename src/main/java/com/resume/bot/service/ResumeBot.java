@@ -29,6 +29,7 @@ import java.util.Map;
 import static com.resume.bot.json.JsonValidator.ValidationType.*;
 import static com.resume.bot.json.JsonValidator.checkExperience;
 import static com.resume.bot.json.JsonValidator.checks;
+import static com.resume.util.Constants.employmentTypes;
 import static com.resume.util.Constants.sexTypes;
 
 @Slf4j
@@ -331,6 +332,28 @@ public class ResumeBot extends TelegramLongPollingBot {
                     List<String> callbackData = List.of("yes_enter_car", "no_enter_car");
                     sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, callbackData));
                     sendMessage("Есть ли у вас автомобиль?", sendMessageRequest);
+                }
+            }
+            // todo после ввода рекомендаций вводит желаемую позицию  sendMessage("Введите желаемую позицию/должность:", sendMessageRequest);
+            case ENTER_WISH_POSITION -> {
+                if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
+                        checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
+                    resumeFields.put(ResumeField.WISH_POSITION.getValue(), receivedText);
+
+                    List<String> buttonLabels = List.of("Хочу", "Пропустить");
+                    List<String> callbackData = List.of("want_enter_salary", "skip_salary");
+                    sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, callbackData));
+                    sendMessage("Хотите ли Вы указать желаемую зарплату?", sendMessageRequest);
+                }
+            }
+            case ENTER_WISH_SALARY -> {
+                if (checkInput(receivedText, sendMessageRequest, NUMERIC_FORMAT)) {
+                    resumeFields.put(ResumeField.WISH_SALARY.getValue(), receivedText);
+
+                    sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(employmentTypes.values().stream().toList(),
+                            employmentTypes.keySet().stream().toList()));
+                    BotUtil.dialogueStates.put(chatId, BotState.ENTER_WISH_BUSYNESS);
+                    sendMessage("Выберите желаемую занятость", sendMessageRequest);
                 }
             }
             default ->
