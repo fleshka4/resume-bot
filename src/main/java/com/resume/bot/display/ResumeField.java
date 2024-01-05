@@ -252,6 +252,18 @@ public enum ResumeField {
         }
     },
 
+    DRIVER_LICENCE("категория прав") {
+        @Override
+        public boolean processCheck(String checkValue) {
+            return JsonValidator.checkDriverLicenseType(checkValue);
+        }
+
+        @Override
+        public String message() {
+            return INCORRECT_PARAM_STRING.formatted(getValue());
+        }
+    },
+
     WISH_POSITION("желаемая позиция") {
         @Override
         public boolean processCheck(String checkValue) {

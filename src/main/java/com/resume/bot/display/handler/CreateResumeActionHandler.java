@@ -175,7 +175,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
         }
 
         if (driverLicenseTypes.contains(callbackData)) {
-//            processOnChosenDriverLicense();
+            processOnChosenDriverLicense(callbackData, chatId, userData);
             // todo цикличность выбора категории прав
         }
 
@@ -308,7 +308,8 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
     }
 
     private void processOnChosenDriverLicense(String license, Long chatId, Map<String, String> userData) {
-        // todo
+        userData.put(ResumeField.DRIVER_LICENCE.getValue(), license);
+        BotUtil.userResumeData.put(chatId, userData);
     }
 
     private void processOnChosenBusyness(String busyness, Long chatId, Map<String, String> userData) {

@@ -425,7 +425,7 @@ public class ResumeBot extends TelegramLongPollingBot {
                 currentBlock = "*Навыки*";
                 resume.append("\n").append(currentBlock).append("\n\n");
             } else if (key.equals(ResumeField.ABOUT_ME.getValue())) {
-                currentBlock = "*Обо мне*";
+                currentBlock = "*Дополнительная информация*";
                 resume.append("\n").append(currentBlock).append("\n\n");
             }
 
