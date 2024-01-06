@@ -121,4 +121,8 @@ public class BotUtil {
             return resumeFields.put(key, value);
         }
     }
+
+    public static SortedMap<String, String> createSortedMap(Map<String, String> originalMap) {
+        return new TreeMap<>(originalMap);
+    }
 }

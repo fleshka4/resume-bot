@@ -114,8 +114,8 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             case "yes_enter_car" -> {
                 BotUtil.dialogueStates.put(chatId, BotState.ENTER_CAR_AVAILABILITY);
 
-                List<String> keys = new ArrayList<>(driverLicenseTypes.keySet().stream().sorted().toList());
-                List<String> values = new ArrayList<>(driverLicenseTypes.values().stream().sorted().toList());
+                List<String> keys = new ArrayList<>(driverLicenseTypes.keySet().stream().toList());
+                List<String> values = new ArrayList<>(driverLicenseTypes.values().stream().toList());
                 keys.add("no_enter_car");
                 values.add("Продолжить");
                 executeEditMessageWithKeyBoard(EmojiParser.parseToUnicode("Выберите категорию прав.:car:"),
@@ -194,8 +194,8 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                     .stream().filter(license -> !chosenDriverLicenses.contains(license.getKey()))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-            List<String> keys = new ArrayList<>(unchosenDriverLicenseTypes.keySet().stream().sorted().toList());
-            List<String> values = new ArrayList<>(unchosenDriverLicenseTypes.values().stream().sorted().toList());
+            List<String> keys = new ArrayList<>(unchosenDriverLicenseTypes.keySet().stream().toList());
+            List<String> values = new ArrayList<>(unchosenDriverLicenseTypes.values().stream().toList());
             keys.add("no_enter_car");
             values.add("Продолжить");
             executeEditMessageWithKeyBoard(EmojiParser.parseToUnicode("Выберите категорию прав.:car:"),

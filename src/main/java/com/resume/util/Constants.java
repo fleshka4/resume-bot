@@ -12,6 +12,9 @@ import lombok.experimental.UtilityClass;
 
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
+
+import static com.resume.util.BotUtil.createSortedMap;
 
 @UtilityClass
 public class Constants {
@@ -33,18 +36,18 @@ public class Constants {
             "5"      // Украина
     );
 
-    public static Map<String, String> visibilityTypes = Map.of(
+    public static Map<String, String> visibilityTypes = createSortedMap(Map.of(
             "hidden_to_no_one", "не видно никому",
             "visible_to_selected_companies", "видно выбранным компаниям",
             "hidden_from_selected_companies", "скрыто от выбранных компаний",
             "visible_to_all_registered_companies", "видно всем компаниям, зарегистрированным на HeadHunter",
             "visible_to_entire_internet", "видно всему интернету",
-            "accessible_only_by_direct_link", "доступно только по прямой ссылке");
-    public static Map<String, String> tripReadinessTypes = Map.of(
+            "accessible_only_by_direct_link", "доступно только по прямой ссылке"));
+    public static Map<String, String> tripReadinessTypes = createSortedMap(Map.of(
             "ready", "готов к командировкам",
             "sometimes", "готов к редким командировкам",
-            "never", "не готов к командировкам");
-    public static Map<String, String> driverLicenseTypes = Map.of(
+            "never", "не готов к командировкам"));
+    public static Map<String, String> driverLicenseTypes = createSortedMap(Map.of(
             "A", "A",
             "B", "B",
             "C", "C",
@@ -54,36 +57,36 @@ public class Constants {
             "CE", "CE",
             "DE", "DE",
             "TM", "TM",
-            "TB", "TB");
-    public static Map<String, String> employmentTypes = Map.of(
+            "TB", "TB"));
+    public static Map<String, String> employmentTypes = createSortedMap(Map.of(
             "full", "Полная занятость",
             "part", "Частичная занятость",
             "project", "Проектная работа",
             "volunteer", "Волонтерство",
-            "probation", "Стажировка");
-    public static Map<String, String> hiddenFieldTypes = Map.of(
+            "probation", "Стажировка"));
+    public static Map<String, String> hiddenFieldTypes = createSortedMap(Map.of(
             "name_and_photo", "ФИО и фотографию",
             "phones", "Все указанные в резюме телефоны",
             "email", "Электронную почту",
             "other_contacts", "Прочие контакты (Skype, ICQ, соцсети)",
-            "experience", "Все места работы");
-    public static Map<String, String> scheduleTypes = Map.of(
+            "experience", "Все места работы"));
+    public static Map<String, String> scheduleTypes = createSortedMap(Map.of(
             "fullDay", "Полный день",
             "shift", "Сменный график",
             "flexible", "Гибкий график",
             "remote", "Удаленная работа",
-            "flyInFlyOut", "Вахтовый метод");
-    public static Map<String, String> travelTimeTypes = Map.of(
+            "flyInFlyOut", "Вахтовый метод"));
+    public static Map<String, String> travelTimeTypes = createSortedMap(Map.of(
             "any", "Не имеет значения",
             "less_than_hour", "Не более часа",
-            "from_hour_to_one_and_half", "Не более полутора часов");
-    public static Map<String, String> sexTypes = Map.of(
+            "from_hour_to_one_and_half", "Не более полутора часов"));
+    public static Map<String, String> sexTypes = createSortedMap(Map.of(
             "male", "Мужской",
-            "female", "Женский");
-    public static Map<String, String> relocationReadinessTypes = Map.of(
+            "female", "Женский"));
+    public static Map<String, String> relocationReadinessTypes = createSortedMap(Map.of(
             "no_relocation", "не готов к переезду",
             "relocation_possible", "готов к переезду",
-            "relocation_desirable", "хочу переехать");
+            "relocation_desirable", "хочу переехать"));
     public static List<String> currencies = List.of(
             "Манаты",
             "Белорусские рубли",
@@ -95,20 +98,20 @@ public class Constants {
             "Гривны",
             "Доллары",
             "Узбекский сум");
-    public static Map<String, String> siteTypes = Map.of(
+    public static Map<String, String> siteTypes = createSortedMap(Map.of(
             "personal", "Другой сайт",
             "moi_krug", "Мой круг",
             "livejournal", "LiveJournal",
             "linkedin", "LinkedIn",
             "freelance", "Free-lance",
             "skype", "Skype",
-            "icq", "ICQ");
-    public static Map<String, String> contactTypes = Map.of(
+            "icq", "ICQ"));
+    public static Map<String, String> contactTypes = createSortedMap(Map.of(
             "home", "Домашний телефон",
             "work", "Рабочий телефон",
             "cell", "Мобильный телефон",
-            "email", "Эл. почта");
-    public static Map<String, String> educationLevels = Map.of(
+            "email", "Эл. почта"));
+    public static Map<String, String> educationLevels = createSortedMap(Map.of(
             "secondary", "Среднее",
             "special_secondary", "Среднее специальное",
             "unfinished_higher", "Неоконченное высшее",
@@ -116,13 +119,13 @@ public class Constants {
             "bachelor", "Бакалавр",
             "master", "Магистр",
             "candidate", "Кандидат наук",
-            "doctor", "Доктор наук");
-    public static Map<String, String> languageLevels = Map.of(
+            "doctor", "Доктор наук"));
+    public static Map<String, String> languageLevels = createSortedMap(Map.of(
             "a1", "A1 — Начальный",
             "a2", "A2 — Элементарный",
             "b1", "B1 — Средний",
             "b2", "B2 — Средне-продвинутый",
             "c1", "C1 — Продвинутый",
             "c2", "C2 — В совершенстве",
-            "l1", "Родной");
+            "l1", "Родной"));
 }
