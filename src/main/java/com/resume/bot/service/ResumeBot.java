@@ -465,7 +465,7 @@ public class ResumeBot extends TelegramLongPollingBot {
                 resume.append("\n").append(currentBlock).append("\n\n");
             } else if (key.equals(ResumeField.REC_NAME.getValue())) {
                 currentBlock = "*Список рекомендаций*";
-                resume.append("\n").append(currentBlock).append("\n\n");
+                resume.append("\n").append(currentBlock).append("\n");
             }
 
             // For fields with multiple values
@@ -505,9 +505,9 @@ public class ResumeBot extends TelegramLongPollingBot {
     }
 
     private boolean isEndOfFieldsBlock(String key) {
-        return
-                key.equals(ResumeField.EDUCATION_END_YEAR.getValue()) ||
-                key.equals(ResumeField.EXPERIENCE_DUTIES.getValue());
+        return key.equals(ResumeField.EDUCATION_END_YEAR.getValue()) ||
+                key.equals(ResumeField.EXPERIENCE_DUTIES.getValue()) ||
+                key.equals(ResumeField.REC_NAME.getValue());
     }
 
     @Override
