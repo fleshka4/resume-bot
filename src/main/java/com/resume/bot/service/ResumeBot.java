@@ -180,8 +180,8 @@ public class ResumeBot extends TelegramLongPollingBot {
                         checkInput(receivedText, sendMessageRequest, BIRTHDAY)) {
                     resumeFields.put(ResumeField.BIRTHDAY.getValue(), receivedText);
 
-                    sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(sexTypes.values().stream().toList(),
-                            sexTypes.keySet().stream().toList()));
+                    sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(sexTypes.values().stream().sorted().toList(),
+                            sexTypes.keySet().stream().sorted().toList()));
                     BotUtil.dialogueStates.put(chatId, BotState.ENTER_GENDER);
                     sendMessage("Выберите пол", sendMessageRequest);
                 }

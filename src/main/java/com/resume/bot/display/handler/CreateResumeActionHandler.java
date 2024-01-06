@@ -60,7 +60,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             }
             case "want_enter_education" -> {
                 executeEditMessageWithKeyBoard(EmojiParser.parseToUnicode("Выберите уровень образования.:nerd:"),
-                        messageId, chatId, educationLevels.values().stream().toList(), educationLevels.keySet().stream().toList());
+                        messageId, chatId, educationLevels.values().stream().sorted().toList(), educationLevels.keySet().stream().sorted().toList());
             }
             case "skip_education" -> {
                 List<String> buttonLabels = List.of("Хочу", "Пропустить");
