@@ -68,7 +68,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                     processOnChosenLevelEducation(educationLevel, chatId, userData);
                 } else {
                     executeEditMessageWithKeyBoard(EmojiParser.parseToUnicode("Выберите уровень образования.:nerd:"),
-                            messageId, chatId, educationLevels.values().stream().sorted().toList(), educationLevels.keySet().stream().sorted().toList());
+                            messageId, chatId, educationLevels.values().stream().toList(), educationLevels.keySet().stream().toList());
                 }
             }
             case "skip_education" -> {
