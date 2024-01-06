@@ -264,6 +264,42 @@ public enum ResumeField {
         }
     },
 
+    REC_NAME("имя выдавшего рекомендацию") {
+        @Override
+        public boolean processCheck(String checkValue) {
+            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_512) && JsonValidator.checkAlphaSpaceFormat(checkValue);
+        }
+
+        @Override
+        public String message() {
+            return formatLetters(getValue(), MAX_LEN_512);
+        }
+    },
+
+    REC_POST("должность выдавшего рекомендацию") {
+        @Override
+        public boolean processCheck(String checkValue) {
+            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_128) && JsonValidator.checkAlphaSpaceFormat(checkValue);
+        }
+
+        @Override
+        public String message() {
+            return formatLetters(getValue(), MAX_LEN_128);
+        }
+    },
+
+    REC_ORGANIZATION("организация выдавшего рекомендацию") {
+        @Override
+        public boolean processCheck(String checkValue) {
+            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_128) && JsonValidator.checkAlphaSpaceFormat(checkValue);
+        }
+
+        @Override
+        public String message() {
+            return formatLetters(getValue(), MAX_LEN_128);
+        }
+    },
+
     WISH_POSITION("желаемая позиция") {
         @Override
         public boolean processCheck(String checkValue) {

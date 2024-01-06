@@ -35,6 +35,10 @@ public class BotUtil {
             // availability of a car
             "yes_enter_car",
             "no_enter_car",
+            // person's recommendation
+            "want_enter_rec",
+            "skip_rec",
+
             "want_enter_salary",
             "skip_salary",
             "back_to_menu",

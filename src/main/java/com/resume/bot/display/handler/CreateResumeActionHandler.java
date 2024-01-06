@@ -7,6 +7,7 @@ import com.resume.bot.json.JsonProcessor;
 import com.resume.bot.json.entity.Industry;
 import com.resume.bot.json.entity.area.Area;
 import com.resume.bot.json.entity.client.Experience;
+import com.resume.bot.json.entity.client.Recommendation;
 import com.resume.bot.json.entity.client.Resume;
 import com.resume.bot.json.entity.client.education.Education;
 import com.resume.bot.json.entity.client.education.ElementaryEducation;
@@ -80,8 +81,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             case "want_enter_work_experience" -> {
                 BotUtil.dialogueStates.put(chatId, BotState.ENTER_PERIOD_OF_WORK);
 
-                executeEditMessage(EmojiParser.parseToUnicode("Введите период опыта работы в формате ММ-ГГГГ - ММ-ГГГГ.:necktie:"),
-                        messageId, chatId);
+                sendMessage(EmojiParser.parseToUnicode("Введите период опыта работы в формате ММ-ГГГГ - ММ-ГГГГ::necktie:"), chatId);
             }
             case "skip_work_experience" -> {
                 List<String> buttonLabels = List.of("Хочу", "Пропустить");
@@ -102,7 +102,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             case "want_enter_about_me" -> {
                 BotUtil.dialogueStates.put(chatId, BotState.ENTER_ABOUT_ME);
 
-                executeEditMessage(EmojiParser.parseToUnicode("Введите краткую информацию о себе.:eyes: (Не больше 4096 символов)"),
+                executeEditMessage(EmojiParser.parseToUnicode("Введите краткую информацию о себе::eyes: (Не больше 4096 символов)"),
                         messageId, chatId);
             }
             case "skip_about_me" -> {
@@ -122,13 +122,26 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                         messageId, chatId, values, keys);
             }
             case "no_enter_car" -> {
-                System.out.println(userData.get(ResumeField.DRIVER_LICENCE.getValue()));
-                // todo переходим к рекомендации человека
+                List<String> buttonLabels = List.of("Хочу", "Пропустить");
+                List<String> buttonIds = List.of("want_enter_rec", "skip_rec");
+
+                executeEditMessageWithKeyBoard(EmojiParser.parseToUnicode("Хотите ли Вы добавить список рекомендаций?\n\n" +
+                                "Список рекомендаций - это перечень людей, которые высоко оценивают вас в качестве профессионала или сотрудника.:first_place_medal:"),
+                        messageId, chatId, buttonLabels, buttonIds);
+            }
+            case "want_enter_rec" -> {
+                BotUtil.dialogueStates.put(chatId, BotState.ENTER_REC_NAME);
+
+                sendMessage("Введите ФИО:", chatId);
+            }
+            case "skip_rec" -> {
+                BotUtil.dialogueStates.put(chatId, BotState.ENTER_WISH_POSITION);
+                sendMessage("Введите желаемую позицию:", chatId);
             }
             case "want_enter_salary" -> {
                 BotUtil.dialogueStates.put(chatId, BotState.ENTER_WISH_SALARY);
 
-                executeEditMessage(EmojiParser.parseToUnicode("Введите желаемую зарплату в виде числа.:moneybag:"),
+                executeEditMessage(EmojiParser.parseToUnicode("Введите желаемую зарплату в виде числа::moneybag:"),
                         messageId, chatId);
             }
             case "skip_salary" -> {
@@ -180,11 +193,11 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             processOnChosenLevelEducation(chosenEducationLevel, chatId, userData);
         }
 
-        if (INDUSTRIES.stream().map(Industry::getName).toList().contains(callbackData)) {
-            // todo логика после выбора сферы деятельности организации
-            BotUtil.dialogueStates.put(chatId, BotState.ENTER_POST_IN_ORGANIZATION);
-            sendMessage(EmojiParser.parseToUnicode("Введите свою должность:"), chatId);
-        }
+//        if (INDUSTRIES.stream().map(Industry::getName).toList().contains(callbackData)) {
+//            // todo логика после выбора сферы деятельности организации
+//            BotUtil.dialogueStates.put(chatId, BotState.ENTER_POST_IN_ORGANIZATION);
+//            sendMessage(EmojiParser.parseToUnicode("Введите свою должность:"), chatId);
+//        }
 
         if (driverLicenseTypes.containsKey(callbackData)) {
             processOnChosenDriverLicense(callbackData, chatId, userData);
@@ -215,6 +228,8 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
         List<ElementaryEducation> elementaryEducations = new ArrayList<>();
         List<Experience> workExperiences = new ArrayList<>();
         List<Id> driverLicenseTypes = new ArrayList<>();
+        Recommendation recommendation = new Recommendation();
+        List<Recommendation> recommendationList = new ArrayList<>();
 
         for (Map.Entry<String, String> entry : BotUtil.userResumeData.get(chatId).entrySet()) {
             String fieldLabel = entry.getKey();
@@ -281,6 +296,15 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                         driverLicenseTypes.add(idLicense);
                     }
                 }
+                case "имя выдавшего рекомендацию", "должность выдавшего рекомендацию",  "организация выдавшего рекомендацию"-> {
+                    List<String> items = Arrays.stream(fieldValue.split(ITEMS_DELIMITER)).toList();
+                    initList(recommendationList, Recommendation.class, items.size());
+
+                    for (String item : items) {
+                        processOnRecommendations(recommendation, fieldLabel, item);
+                        recommendationList.add(recommendation);
+                    }
+                }
                 case "желаемая позиция" -> resume.setTitle(fieldValue);
                 case "профессиональная роль" -> {
 
@@ -303,6 +327,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
         resume.setEducation(education);
         resume.setExperience(workExperiences);
         resume.setDriverLicenseTypes(driverLicenseTypes);
+        resume.setRecommendation(recommendationList);
 
         JsonProcessor.createJsonFromEntity(resume);
     }
@@ -365,6 +390,14 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
         appendToField(userData, ResumeField.DRIVER_LICENCE.getValue(), license);
         BotUtil.userResumeData.put(chatId, userData);
         // todo рекомендация
+    }
+
+    private void processOnRecommendations(Recommendation recommendation, String fieldLabel, String fieldValue) {
+        switch (fieldLabel) {
+            case "имя выдавшего рекомендацию" -> recommendation.setName(fieldValue);
+            case "должность выдавшего рекомендацию" -> recommendation.setPosition(fieldValue);
+            case "организация выдавшего рекомендацию" -> recommendation.setOrganization(fieldValue);
+        }
     }
 
     private void processOnChosenBusyness(String busyness, Long chatId, Map<String, String> userData) {
