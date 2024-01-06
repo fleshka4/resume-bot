@@ -26,7 +26,7 @@ public class Constants {
     public static Skills SKILLS;
     public static List<Locale> LOCALES;
     public static List<Type> LANGUAGES;
-    public static final String ITEMS_DELIMITER = ";";
+    public static final String ITEMS_DELIMITER = ";;;";
     public static final String EXPERIENCE_DELIMITER = " - ";
 
     public static final String OTHER_COUNTRIES_JSON_ID = "1001";

@@ -81,7 +81,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             case "want_enter_work_experience" -> {
                 BotUtil.dialogueStates.put(chatId, BotState.ENTER_PERIOD_OF_WORK);
 
-                sendMessage(EmojiParser.parseToUnicode("Введите период опыта работы в формате ММ-ГГГГ - ММ-ГГГГ::necktie:"), chatId);
+                sendMessage(EmojiParser.parseToUnicode("Введите период опыта работы в формате ММ-ГГГГ - ММ-ГГГГ::necktie:\nЕсли вы работаете по настоящее время введите только дату начала работы"), chatId);
             }
             case "skip_work_experience" -> {
                 List<String> buttonLabels = List.of("Хочу", "Пропустить");
@@ -91,7 +91,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             }
             case "want_enter_skills" -> {
                 BotUtil.dialogueStates.put(chatId, BotState.ENTER_SKILLS);
-                sendMessage("Введите навыки:", chatId);
+                sendMessage("Введите навыки через запятую:", chatId);
             }
             case "skip_skills" -> {
                 List<String> buttonLabels = List.of("Хочу", "Пропустить");
@@ -285,7 +285,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                     }
                 }
                 case "навыки" ->
-                        resume.setSkills(fieldValue); // todo сюда должна приходить строка состоящая из нескольких навыков или одного
+                        resume.setSkillSet(Arrays.stream(fieldValue.split(",")).map(String::trim).collect(Collectors.toSet()));
                 case "категория прав" -> {
                     List<String> items = Arrays.stream(fieldValue.split(ITEMS_DELIMITER)).toList();
                     initList(driverLicenseTypes, Id.class, items.size());
@@ -409,7 +409,9 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             case "опыт работы" -> {
                 String[] dates = fieldValue.split(EXPERIENCE_DELIMITER);
                 workExperience.setStart(dates[0]);
-                workExperience.setEnd(dates[1]);
+                if (dates.length == 2) {
+                    workExperience.setEnd(dates[1]);
+                }
             }
             case "название организации" -> workExperience.setCompany(fieldValue);
             case "город организации" -> {

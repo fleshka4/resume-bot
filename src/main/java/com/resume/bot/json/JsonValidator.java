@@ -8,11 +8,11 @@ import org.apache.commons.validator.routines.UrlValidator;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Function;
 
-import static com.resume.util.Constants.COUNTRIES_WITH_REGIONS_IDS;
-import static com.resume.util.Constants.OTHER_COUNTRIES_JSON_ID;
+import static com.resume.util.Constants.*;
 
 public class JsonValidator {
     public enum ValidationType {
@@ -46,6 +46,7 @@ public class JsonValidator {
         REGION_NAME,
         CITY_NAME,
         LOCATION,
+        SKILLS,
         IN_LIST,
         IN_MAP
     }
@@ -82,6 +83,7 @@ public class JsonValidator {
         checks.put(ValidationType.REGION_NAME, objects -> checkRegion((String) objects[0]));
         checks.put(ValidationType.CITY_NAME, objects -> checkCity((String) objects[0]));
         checks.put(ValidationType.LOCATION, objects -> checkLocation((String) objects[0]));
+        checks.put(ValidationType.SKILLS, objects -> checkSkills((String) objects[0]));
         checks.put(ValidationType.IN_LIST, objects -> isInList((String) objects[0], List.of((String[]) objects[1])));
         // fixme норм или нет?
         checks.put(ValidationType.IN_MAP, objects -> isInMap((String) objects[0], (Map<String, String>) objects[1]));
@@ -133,7 +135,13 @@ public class JsonValidator {
         LocalDate birthDate;
         try {
             experienceDateStart = LocalDate.parse("01-" + items[0], formatter);
-            experienceDateEnd = LocalDate.parse("01-" + items[1], formatter);
+            if (items.length == 1) {
+                experienceDateEnd = LocalDate.now().minusDays(1);
+            } else if (items.length == 2) {
+                experienceDateEnd = LocalDate.parse("01-" + items[1], formatter);
+            } else {
+                return false;
+            }
             birthDate = LocalDate.parse(birthDayStr, formatter);
         } catch (RuntimeException e) {
             return false;
@@ -304,5 +312,15 @@ public class JsonValidator {
                 .filter(a -> COUNTRIES_WITH_REGIONS_IDS.contains(a.getId()) || a.getId().equals(OTHER_COUNTRIES_JSON_ID))
                 .map(Area::getAreas).flatMap(List::stream).map(Area::getAreas).flatMap(List::stream)
                 .map(Area::getName).toArray(String[]::new));
+    }
+
+    public static boolean checkSkills(String text) {
+        List<String> skills = Arrays.stream(text.split(",")).map(String::trim).toList();
+        for (String skill : skills) {
+            if (skill.contains(ITEMS_DELIMITER)) { // Restricted symbol
+                return false;
+            }
+        }
+        return true;
     }
 }

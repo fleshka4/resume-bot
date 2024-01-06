@@ -318,12 +318,9 @@ public class ResumeBot extends TelegramLongPollingBot {
                 }
             }
             case ENTER_SKILLS -> {
-                if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
+                if (checkInput(receivedText, sendMessageRequest, SKILLS) &&
                         checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
                     appendToField(resumeFields, ResumeField.SKILLS.getValue(), receivedText);
-                    // todo цикличность навыков я думаю их нужно записывать в лист и передавать одной строкой в json (поле skills)
-                    //  так как skill_set не работает https://api.hh.ru/suggests/skill_set
-                    //  пользователь будет вводить по одному навыку а ему нужно будет каждый раз предлагать еще раз
                     List<String> buttonLabels = List.of("Хочу", "Пропустить");
                     List<String> callbackData = List.of("want_enter_about_me", "skip_about_me");
                     sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, callbackData));
@@ -371,6 +368,8 @@ public class ResumeBot extends TelegramLongPollingBot {
                 }
             }
             case ENTER_WISH_POSITION -> {
+                BotUtil.userStates.put(chatId, BotState.FINISH_DIALOGUE);
+                finishDialogueWithClient(chatId, sendMessageRequest);
                 if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
                         checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
                     appendToField(resumeFields, ResumeField.WISH_POSITION.getValue(), receivedText);
@@ -450,22 +449,22 @@ public class ResumeBot extends TelegramLongPollingBot {
 
             if (key.equals(ResumeField.NAME.getValue())) {
                 currentBlock = "*Основная информация*";
-                resume.append(currentBlock).append("\n\n");
+                resume.append(currentBlock).append("\n");
             } else if (key.equals(ResumeField.EDUCATION_LEVEL.getValue())) {
                 currentBlock = "*Образование*";
-                resume.append("\n").append(currentBlock).append("\n\n");
+                resume.append("\n\n").append(currentBlock).append("\n");
             } else if (key.equals(ResumeField.EXPERIENCE_PERIOD.getValue())) {
                 currentBlock = "*Опыт*";
-                resume.append("\n").append(currentBlock).append("\n");
+                resume.append("\n\n").append(currentBlock).append("\n");
             } else if (key.equals(ResumeField.SKILLS.getValue())) {
                 currentBlock = "*Навыки*";
-                resume.append("\n").append(currentBlock).append("\n\n");
+                resume.append("\n\n").append(currentBlock).append("\n");
             } else if (key.equals(ResumeField.ABOUT_ME.getValue())) {
                 currentBlock = "*Дополнительная информация*";
-                resume.append("\n").append(currentBlock).append("\n\n");
+                resume.append("\n\n").append(currentBlock).append("\n");
             } else if (key.equals(ResumeField.REC_NAME.getValue())) {
                 currentBlock = "*Список рекомендаций*";
-                resume.append("\n").append(currentBlock).append("\n");
+                resume.append("\n\n").append(currentBlock).append("\n");
             }
 
             // For fields with multiple values
@@ -473,12 +472,11 @@ public class ResumeBot extends TelegramLongPollingBot {
             resumeFieldToValues.put(key, items);
 
             if (isEndOfFieldsBlock(key)) {
-                resume.append("\n");
                 for (int i = 0; i < items.size(); i++) {
                     for (Map.Entry<String, List<String>> resumeFieldEntry : resumeFieldToValues.entrySet()) {
                         String currentKey = resumeFieldEntry.getKey();
                         String currentValue = resumeFieldEntry.getValue().get(i);
-                        resume.append("*").append(currentKey).append("*").append(": ").append(currentValue).append("\n");
+                        resume.append("\n").append("*").append(currentKey).append("*").append(": ").append(currentValue);
                     }
                     if (i < items.size() - 1) {
                         resume.append("\n");
@@ -488,13 +486,13 @@ public class ResumeBot extends TelegramLongPollingBot {
             } else {
                 // For fields with single value
                 if (items.size() == 1) {
-                    resume.append("*").append(key).append("*").append(": ").append(value).append("\n");
+                    resume.append("\n").append("*").append(key).append("*").append(": ").append(value);
                     resumeFieldToValues.clear();
                 }
             }
         }
 
-        resume.append(EmojiParser.parseToUnicode("\nЕсли есть не соответствие или вы ошиблись, нажмите на кнопку *Редактировать* "
+        resume.append(EmojiParser.parseToUnicode("\n\nЕсли есть не соответствие или вы ошиблись, нажмите на кнопку *Редактировать* "
                 + "и введите это поле повторно в формате *Поле - новое значение*\n\n"
                 + "*Пример:*\nИмя - Алексей\n\nИ я автоматически изменю некорректную информацию.:dizzy:"));
         List<String> buttonLabels = List.of("Редактировать", "Всё верно!");
