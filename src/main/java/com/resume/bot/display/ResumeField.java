@@ -322,6 +322,30 @@ public enum ResumeField {
         public String message() {
             return INCORRECT_SALARY_STRING.formatted(getValue());
         }
+    },
+
+    BUSYNESS("желаемая занятость") {
+        @Override
+        public boolean processCheck(String checkValue) {
+            return JsonValidator.checkEmploymentType(checkValue);
+        }
+
+        @Override
+        public String message() {
+            return INCORRECT_PARAM_STRING.formatted(getValue());
+        }
+    },
+
+    SCHEDULE("желаемый график") {
+        @Override
+        public boolean processCheck(String checkValue) {
+            return JsonValidator.checkScheduleType(checkValue);
+        }
+
+        @Override
+        public String message() {
+            return INCORRECT_PARAM_STRING.formatted(getValue());
+        }
     };
 
 

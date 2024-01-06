@@ -13,7 +13,6 @@ import com.resume.util.BotUtil;
 import com.vdurmont.emoji.EmojiParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.map.LinkedMap;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -28,9 +27,7 @@ import static com.resume.bot.json.JsonValidator.ValidationType.*;
 import static com.resume.bot.json.JsonValidator.checkExperience;
 import static com.resume.bot.json.JsonValidator.checks;
 import static com.resume.util.BotUtil.appendToField;
-import static com.resume.util.Constants.ITEMS_DELIMITER;
-import static com.resume.util.Constants.employmentTypes;
-import static com.resume.util.Constants.sexTypes;
+import static com.resume.util.Constants.*;
 
 @Slf4j
 @Component
@@ -384,11 +381,19 @@ public class ResumeBot extends TelegramLongPollingBot {
                 if (checkInput(receivedText, sendMessageRequest, NUMERIC_FORMAT)) {
                     appendToField(resumeFields, ResumeField.WISH_SALARY.getValue(), receivedText);
 
-                    sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(employmentTypes.values().stream().toList(),
-                            employmentTypes.keySet().stream().toList()));
+                    List<String> keys = new ArrayList<>(employmentTypes.keySet().stream().toList());
+                    List<String> values = new ArrayList<>(employmentTypes.values().stream().toList());
+                    keys.add("skip_busyness");
+                    values.add("Продолжить");
+                    sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(values, keys));
+
                     BotUtil.dialogueStates.put(chatId, BotState.ENTER_WISH_BUSYNESS);
                     sendMessage("Выберите желаемую занятость", sendMessageRequest);
                 }
+            }
+            case FINISH_DIALOGUE -> {
+                BotUtil.userStates.put(chatId, BotState.FINISH_DIALOGUE);
+                finishDialogueWithClient(chatId, sendMessageRequest);
             }
             default ->
                     sendMessage(EmojiParser.parseToUnicode("Что-то пошло не так.\nПопробуйте ещё раз.:cry:"), sendMessageRequest);

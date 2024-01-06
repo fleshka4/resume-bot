@@ -15,7 +15,8 @@ public class CallbackActionFactory {
                 sexTypes.containsKey(callbackData) ||
                 educationLevels.containsKey(callbackData) ||
                 driverLicenseTypes.containsKey(callbackData) ||
-                employmentTypes.containsKey(callbackData)) { //todo сферы деятельности компании
+                employmentTypes.containsKey(callbackData) ||
+                scheduleTypes.containsKey(callbackData)) { //todo сферы деятельности компании
             return new CreateResumeActionHandler(pollingBot);
         } else if ("export_resume_hh".equals(callbackData)) {
             return new ExportResumeActionHandler(pollingBot);

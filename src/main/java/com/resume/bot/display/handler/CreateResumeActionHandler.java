@@ -9,6 +9,7 @@ import com.resume.bot.json.entity.area.Area;
 import com.resume.bot.json.entity.client.Experience;
 import com.resume.bot.json.entity.client.Recommendation;
 import com.resume.bot.json.entity.client.Resume;
+import com.resume.bot.json.entity.client.Salary;
 import com.resume.bot.json.entity.client.education.Education;
 import com.resume.bot.json.entity.client.education.ElementaryEducation;
 import com.resume.bot.json.entity.client.education.PrimaryEducation;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
 
 import static com.resume.util.BotUtil.appendToField;
 import static com.resume.util.Constants.*;
+import static org.apache.commons.lang3.math.NumberUtils.createLong;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -114,12 +116,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             case "yes_enter_car" -> {
                 BotUtil.dialogueStates.put(chatId, BotState.ENTER_CAR_AVAILABILITY);
 
-                List<String> keys = new ArrayList<>(driverLicenseTypes.keySet().stream().toList());
-                List<String> values = new ArrayList<>(driverLicenseTypes.values().stream().toList());
-                keys.add("no_enter_car");
-                values.add("Продолжить");
-                executeEditMessageWithKeyBoard(EmojiParser.parseToUnicode("Выберите категорию прав.:car:"),
-                        messageId, chatId, values, keys);
+                executeContinueKeyboardMessage(EmojiParser.parseToUnicode("Выберите категорию прав.:car:"), messageId, chatId, driverLicenseTypes, "no_enter_car");
             }
             case "no_enter_car" -> {
                 List<String> buttonLabels = List.of("Хочу", "Пропустить");
@@ -147,8 +144,15 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             case "skip_salary" -> {
                 BotUtil.dialogueStates.put(chatId, BotState.ENTER_WISH_BUSYNESS);
 
-                executeEditMessageWithKeyBoard("Выберите желаемую занятость.", messageId, chatId,
-                        employmentTypes.values().stream().toList(), employmentTypes.keySet().stream().toList());
+                executeContinueKeyboardMessage("Выберите желаемую занятость.", messageId, chatId, employmentTypes, "skip_busyness");
+            }
+            case "skip_busyness" -> {
+                BotUtil.dialogueStates.put(chatId, BotState.ENTER_WISH_SCHEDULE);
+
+                executeContinueKeyboardMessage("Выберите желаемый график.", messageId, chatId, scheduleTypes, "skip_schedule");
+            }
+            case "skip_schedule" -> {
+                BotUtil.dialogueStates.put(chatId, BotState.FINISH_DIALOGUE);
             }
             case "edit_result_data" -> {
                 BotUtil.userStates.put(chatId, BotState.EDIT_CLIENT_RESULT_DATA);
@@ -201,23 +205,29 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
 
         if (driverLicenseTypes.containsKey(callbackData)) {
             processOnChosenDriverLicense(callbackData, chatId, userData);
+
             List<String> chosenDriverLicenses = Arrays.stream(userData.get(ResumeField.DRIVER_LICENCE.getValue()).split(ITEMS_DELIMITER)).toList();
+            Map<String, String> unchosenDriverLicenseTypes = getUnchosenItems(driverLicenseTypes, chosenDriverLicenses);
 
-            Map<String, String> unchosenDriverLicenseTypes = driverLicenseTypes.entrySet()
-                    .stream().filter(license -> !chosenDriverLicenses.contains(license.getKey()))
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-            List<String> keys = new ArrayList<>(unchosenDriverLicenseTypes.keySet().stream().toList());
-            List<String> values = new ArrayList<>(unchosenDriverLicenseTypes.values().stream().toList());
-            keys.add("no_enter_car");
-            values.add("Продолжить");
-            executeEditMessageWithKeyBoard(EmojiParser.parseToUnicode("Выберите категорию прав.:car:"),
-                    messageId, chatId, values, keys);
+            executeContinueKeyboardMessage(EmojiParser.parseToUnicode("Выберите категорию прав.:car:"), messageId, chatId, unchosenDriverLicenseTypes, "no_enter_car");
         }
 
         if (employmentTypes.containsKey(callbackData)) {
-//            processOnChosenBusyness();
-            // todo цикличность выбора занятости
+            processOnChosenBusyness(callbackData, chatId, userData);
+
+            List<String> chosenBusyness = Arrays.stream(userData.get(ResumeField.BUSYNESS.getValue()).split(ITEMS_DELIMITER)).toList();
+            Map<String, String> unchosenBusyness = getUnchosenItems(employmentTypes, chosenBusyness);
+
+            executeContinueKeyboardMessage("Выберите желаемую занятость.", messageId, chatId, unchosenBusyness, "skip_busyness");
+        }
+
+        if (scheduleTypes.containsKey(callbackData)) {
+            processOnChosenSchedule(callbackData, chatId, userData);
+
+            List<String> chosenSchedule = Arrays.stream(userData.get(ResumeField.SCHEDULE.getValue()).split(ITEMS_DELIMITER)).toList();
+            Map<String, String> unchosenSchedule = getUnchosenItems(scheduleTypes, chosenSchedule);
+
+            executeContinueKeyboardMessage("Выберите желаемый график.", messageId, chatId, unchosenSchedule, "skip_schedule");
         }
     }
 
@@ -230,6 +240,8 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
         List<Id> driverLicenseTypes = new ArrayList<>();
         Recommendation recommendation = new Recommendation();
         List<Recommendation> recommendationList = new ArrayList<>();
+        List<Type> bussynes = new ArrayList<>();
+        List<Type> schedules = new ArrayList<>();
 
         for (Map.Entry<String, String> entry : BotUtil.userResumeData.get(chatId).entrySet()) {
             String fieldLabel = entry.getKey();
@@ -296,7 +308,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                         driverLicenseTypes.add(idLicense);
                     }
                 }
-                case "имя выдавшего рекомендацию", "должность выдавшего рекомендацию",  "организация выдавшего рекомендацию"-> {
+                case "имя выдавшего рекомендацию", "должность выдавшего рекомендацию", "организация выдавшего рекомендацию" -> {
                     List<String> items = Arrays.stream(fieldValue.split(ITEMS_DELIMITER)).toList();
                     initList(recommendationList, Recommendation.class, items.size());
 
@@ -310,13 +322,31 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
 
                 }
                 case "желаемая зарплата" -> {
-
+                    Salary salary = new Salary();
+                    salary.setAmount(createLong(fieldValue));
+                    resume.setSalary(salary);
                 }
                 case "желаемая занятость" -> {
+                    List<String> items = Arrays.stream(fieldValue.split(ITEMS_DELIMITER)).toList();
+                    initList(bussynes, Type.class, items.size());
 
+                    for (String item : items) {
+                        Type typeBusyness = new Type();
+                        typeBusyness.setId(getKeyByValue(employmentTypes, item));
+                        typeBusyness.setName(item);
+                        bussynes.add(typeBusyness);
+                    }
                 }
                 case "желаемый график работы" -> {
+                    List<String> items = Arrays.stream(fieldValue.split(ITEMS_DELIMITER)).toList();
+                    initList(schedules, Type.class, items.size());
 
+                    for (String item : items) {
+                        Type typeSchedules = new Type();
+                        typeSchedules.setId(getKeyByValue(scheduleTypes, item));
+                        typeSchedules.setName(item);
+                        schedules.add(typeSchedules);
+                    }
                 }
             }
         }
@@ -328,6 +358,8 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
         resume.setExperience(workExperiences);
         resume.setDriverLicenseTypes(driverLicenseTypes);
         resume.setRecommendation(recommendationList);
+        resume.setEmployments(bussynes);
+        resume.setSchedules(schedules);
 
         JsonProcessor.createJsonFromEntity(resume);
     }
@@ -372,7 +404,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
     }
 
     private void processOnChosenSex(String genderName, Long chatId, Map<String, String> userData) {
-        userData.put(ResumeField.SEX.getValue(), genderName);
+        appendToField(userData, ResumeField.SEX.getValue(), genderName);
         BotUtil.userResumeData.put(chatId, userData);
         BotUtil.dialogueStates.put(chatId, BotState.ENTER_LOCATION);
         sendMessage("Введите ваше место жительства.\n" +
@@ -380,7 +412,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
     }
 
     private void processOnChosenLevelEducation(String level, Long chatId, Map<String, String> userData) {
-        userData.put(ResumeField.EDUCATION_LEVEL.getValue(), level);
+        appendToField(userData, ResumeField.EDUCATION_LEVEL.getValue(), level);
         BotUtil.userResumeData.put(chatId, userData);
         sendMessage("Введите название учебного заведения:", chatId);
         BotUtil.dialogueStates.put(chatId, BotState.ENTER_INSTITUTION);
@@ -389,7 +421,16 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
     private void processOnChosenDriverLicense(String license, Long chatId, Map<String, String> userData) {
         appendToField(userData, ResumeField.DRIVER_LICENCE.getValue(), license);
         BotUtil.userResumeData.put(chatId, userData);
-        // todo рекомендация
+    }
+
+    private void processOnChosenBusyness(String busyness, Long chatId, Map<String, String> userData) {
+        appendToField(userData, ResumeField.BUSYNESS.getValue(), busyness);
+        BotUtil.userResumeData.put(chatId, userData);
+    }
+
+    private void processOnChosenSchedule(String schedule, Long chatId, Map<String, String> userData) {
+        appendToField(userData, ResumeField.SCHEDULE.getValue(), schedule);
+        BotUtil.userResumeData.put(chatId, userData);
     }
 
     private void processOnRecommendations(Recommendation recommendation, String fieldLabel, String fieldValue) {
@@ -398,10 +439,6 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             case "должность выдавшего рекомендацию" -> recommendation.setPosition(fieldValue);
             case "организация выдавшего рекомендацию" -> recommendation.setOrganization(fieldValue);
         }
-    }
-
-    private void processOnChosenBusyness(String busyness, Long chatId, Map<String, String> userData) {
-        // todo
     }
 
     private void processOnWorkExperience(Experience workExperience, String fieldLabel, String fieldValue) {
@@ -474,5 +511,21 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                 .map(Map.Entry::getKey)
                 .findFirst()
                 .orElse("");
+    }
+
+    private Map<String, String> getUnchosenItems(Map<String, String> allItems, List<String> chosenItems) {
+        return allItems.entrySet()
+                .stream()
+                .filter(item -> !chosenItems.contains(item.getKey()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    // it is necessary in order to work with an immutable map
+    private void executeContinueKeyboardMessage(String messageText, Integer messageId, Long chatId, Map<String, String> data, String continueButtonLabel) {
+        List<String> keys = new ArrayList<>(data.keySet().stream().toList());
+        List<String> values = new ArrayList<>(data.values().stream().toList());
+        keys.add(continueButtonLabel);
+        values.add("Продолжить");
+        executeEditMessageWithKeyBoard(messageText, messageId, chatId, values, keys);
     }
 }

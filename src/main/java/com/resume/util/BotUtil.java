@@ -38,9 +38,11 @@ public class BotUtil {
             // person's recommendation
             "want_enter_rec",
             "skip_rec",
-
             "want_enter_salary",
             "skip_salary",
+            "skip_busyness",
+            "skip_schedule",
+
             "back_to_menu",
             "back_to_create_resume",
             "yes_go_to_menu",
