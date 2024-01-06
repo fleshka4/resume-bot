@@ -214,6 +214,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
         List<PrimaryEducation> primaryEducations = new ArrayList<>();
         List<ElementaryEducation> elementaryEducations = new ArrayList<>();
         List<Experience> workExperiences = new ArrayList<>();
+        List<Id> driverLicenseTypes = new ArrayList<>();
 
         for (Map.Entry<String, String> entry : BotUtil.userResumeData.get(chatId).entrySet()) {
             String fieldLabel = entry.getKey();
@@ -271,7 +272,15 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                 case "навыки" ->
                         resume.setSkills(fieldValue); // todo сюда должна приходить строка состоящая из нескольких навыков или одного
                 case "категория прав" -> {
+                    List<String> items = Arrays.stream(fieldValue.split(ITEMS_DELIMITER)).toList();
+                    initList(driverLicenseTypes, Id.class, items.size());
 
+                    for (String item : items) {
+                        Id idLicense = new Id();
+                        idLicense.setId(item);
+                        driverLicenseTypes.add(idLicense);
+                    }
+                    resume.setDriverLicenseTypes(driverLicenseTypes);
                 }
                 case "желаемая позиция" -> resume.setTitle(fieldValue);
                 case "профессиональная роль" -> {
@@ -355,6 +364,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
     private void processOnChosenDriverLicense(String license, Long chatId, Map<String, String> userData) {
         appendToField(userData, ResumeField.DRIVER_LICENCE.getValue(), license);
         BotUtil.userResumeData.put(chatId, userData);
+        // todo рекомендация
     }
 
     private void processOnChosenBusyness(String busyness, Long chatId, Map<String, String> userData) {
