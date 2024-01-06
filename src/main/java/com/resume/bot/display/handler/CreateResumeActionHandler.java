@@ -280,7 +280,6 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                         idLicense.setId(item);
                         driverLicenseTypes.add(idLicense);
                     }
-                    resume.setDriverLicenseTypes(driverLicenseTypes);
                 }
                 case "желаемая позиция" -> resume.setTitle(fieldValue);
                 case "профессиональная роль" -> {
@@ -303,6 +302,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
 
         resume.setEducation(education);
         resume.setExperience(workExperiences);
+        resume.setDriverLicenseTypes(driverLicenseTypes);
 
         JsonProcessor.createJsonFromEntity(resume);
     }
