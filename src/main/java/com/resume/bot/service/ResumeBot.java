@@ -507,7 +507,7 @@ public class ResumeBot extends TelegramLongPollingBot {
     private boolean isEndOfFieldsBlock(String key) {
         return key.equals(ResumeField.EDUCATION_END_YEAR.getValue()) ||
                 key.equals(ResumeField.EXPERIENCE_DUTIES.getValue()) ||
-                key.equals(ResumeField.REC_NAME.getValue());
+                key.equals(ResumeField.REC_ORGANIZATION.getValue());
     }
 
     @Override
