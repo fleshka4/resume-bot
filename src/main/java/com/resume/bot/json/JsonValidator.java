@@ -189,7 +189,7 @@ public class JsonValidator {
     }
 
     public static boolean checkDriverLicenseType(String text) {
-        return isInList(text, Constants.driverLicenseTypes);
+        return isInMap(text, Constants.driverLicenseTypes);
     }
 
     public static boolean checkEmploymentType(String text) {

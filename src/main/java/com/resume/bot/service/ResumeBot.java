@@ -29,6 +29,8 @@ import java.util.Map;
 import static com.resume.bot.json.JsonValidator.ValidationType.*;
 import static com.resume.bot.json.JsonValidator.checkExperience;
 import static com.resume.bot.json.JsonValidator.checks;
+import static com.resume.util.BotUtil.appendToField;
+import static com.resume.util.Constants.ITEMS_DELIMITER;
 import static com.resume.util.Constants.employmentTypes;
 import static com.resume.util.Constants.sexTypes;
 
@@ -199,7 +201,7 @@ public class ResumeBot extends TelegramLongPollingBot {
             case ENTER_INSTITUTION -> {
                 if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
                         checkInput(receivedText, 512L, sendMessageRequest, SYMBOLS_LIMIT)) {
-                    resumeFields.put(ResumeField.EDUCATION_INSTITUTION.getValue(), receivedText);
+                    appendToField(resumeFields, ResumeField.EDUCATION_INSTITUTION.getValue(), receivedText);
 
                     String educationLevel = resumeFields.get(ResumeField.EDUCATION_LEVEL.getValue());
 
@@ -218,7 +220,7 @@ public class ResumeBot extends TelegramLongPollingBot {
             case ENTER_FACULTY -> {
                 if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
                         checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
-                    resumeFields.put(ResumeField.EDUCATION_FACULTY.getValue(), receivedText);
+                    appendToField(resumeFields, ResumeField.EDUCATION_FACULTY.getValue(), receivedText);
 
                     sendMessage("Введите название специализации:", sendMessageRequest);
                     BotUtil.dialogueStates.put(chatId, BotState.ENTER_SPECIALIZATION);
@@ -227,7 +229,7 @@ public class ResumeBot extends TelegramLongPollingBot {
             case ENTER_SPECIALIZATION -> {
                 if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
                         checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
-                    resumeFields.put(ResumeField.EDUCATION_SPECIALIZATION.getValue(), receivedText);
+                    appendToField(resumeFields, ResumeField.EDUCATION_SPECIALIZATION.getValue(), receivedText);
 
                     sendMessage("Введите год окончания:", sendMessageRequest);
                     BotUtil.dialogueStates.put(chatId, BotState.ENTER_END_YEAR);
@@ -236,17 +238,17 @@ public class ResumeBot extends TelegramLongPollingBot {
             case ENTER_END_YEAR -> {
                 if (checkInput(receivedText, sendMessageRequest, NUMERIC_FORMAT) &&
                         checkInput(receivedText, sendMessageRequest, GRADUATION_YEAR_WITH_YEAR)) {
-                    resumeFields.put(ResumeField.EDUCATION_END_YEAR.getValue(), receivedText);
+                    appendToField(resumeFields, ResumeField.EDUCATION_END_YEAR.getValue(), receivedText);
 
-                    List<String> buttonLabels = List.of("Хочу", "Пропустить");
-                    List<String> callbackData = List.of("want_enter_work_experience", "skip_work_experience");
+                    List<String> buttonLabels = List.of("Указать еще одно место обучения", "Продолжить");
+                    List<String> callbackData = List.of("want_enter_education", "skip_education");
                     sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, callbackData));
-                    sendMessage("Хотите ли Вы указать опыт работы?", sendMessageRequest);
+                    sendMessage("Хотите ли Вы указать еще одно образование?", sendMessageRequest);
                 }
             }
             case ENTER_PERIOD_OF_WORK -> {
                 if (checkExperience(receivedText, resumeFields.get(ResumeField.BIRTHDAY.getValue()))) {
-                    resumeFields.put(ResumeField.EXPERIENCE_PERIOD.getValue(), receivedText);
+                    appendToField(resumeFields, ResumeField.EXPERIENCE_PERIOD.getValue(), receivedText);
 
                     sendMessage("Введите название организации:", sendMessageRequest);
                     BotUtil.dialogueStates.put(chatId, BotState.ENTER_NAME_OF_ORGANIZATION);
@@ -258,7 +260,7 @@ public class ResumeBot extends TelegramLongPollingBot {
                 if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
                         checkInput(receivedText, sendMessageRequest, ALPHANUMERIC_FORMAT) &&
                         checkInput(receivedText, 512L, sendMessageRequest, SYMBOLS_LIMIT)) {
-                    resumeFields.put(ResumeField.EXPERIENCE_ORG_NAME.getValue(), receivedText);
+                    appendToField(resumeFields, ResumeField.EXPERIENCE_ORG_NAME.getValue(), receivedText);
 
                     sendMessage("Введите город организации:", sendMessageRequest);
                     BotUtil.dialogueStates.put(chatId, BotState.ENTER_CITY_OF_ORGANIZATION);
@@ -266,7 +268,7 @@ public class ResumeBot extends TelegramLongPollingBot {
             }
             case ENTER_CITY_OF_ORGANIZATION -> {
                 if (checkInput(receivedText, sendMessageRequest, CITY_NAME)) {
-                    resumeFields.put(ResumeField.EXPERIENCE_ORG_CITY.getValue(), receivedText);
+                    appendToField(resumeFields, ResumeField.EXPERIENCE_ORG_CITY.getValue(), receivedText);
 
                     sendMessage("Прикрепите ссылку на сайт организации:", sendMessageRequest);
                     BotUtil.dialogueStates.put(chatId, BotState.ENTER_SITE_OF_ORGANIZATION);
@@ -275,7 +277,7 @@ public class ResumeBot extends TelegramLongPollingBot {
             case ENTER_SITE_OF_ORGANIZATION -> {
                 if (checkInput(receivedText, sendMessageRequest, LINK) &&
                         checkInput(receivedText, 256L, sendMessageRequest, SYMBOLS_LIMIT)) {
-                    resumeFields.put(ResumeField.EXPERIENCE_ORG_LINK.getValue(), receivedText);
+                    appendToField(resumeFields, ResumeField.EXPERIENCE_ORG_LINK.getValue(), receivedText);
 
                     sendMessage("Введите свою должность в организации:", sendMessageRequest);
                     BotUtil.dialogueStates.put(chatId, BotState.ENTER_POST_IN_ORGANIZATION);
@@ -283,6 +285,11 @@ public class ResumeBot extends TelegramLongPollingBot {
 //                     BotUtil.userStates.put(chatId, BotState.FINISH_DIALOGUE);
 //                     finishDialogueWithClient(chatId, sendMessageRequest);
 
+                    // todo сфера деятельности
+                    // List<String> industriesNameList = INDUSTRIES.stream().map(Industry::getName).toList();
+                    // sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(industriesNameList, industriesNameList,
+                    //         5, 0));
+                    // sendMessage("Выберите сферу деятельности компании:", sendMessageRequest);
                     // todo сфера деятельности!!!!!!!!!!!!!!!! проблема с клавой хз как сделать 30 кнопок
 //                    List<String> industriesNameList = INDUSTRIES.stream().map(Industry::getName).toList();
 //                    sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(industriesNameList, industriesNameList,
@@ -293,7 +300,7 @@ public class ResumeBot extends TelegramLongPollingBot {
             case ENTER_POST_IN_ORGANIZATION -> {
                 if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
                         checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
-                    resumeFields.put(ResumeField.EXPERIENCE_POST.getValue(), receivedText);
+                    appendToField(resumeFields, ResumeField.EXPERIENCE_POST.getValue(), receivedText);
 
                     sendMessage("Введите свои обязанности в организации:", sendMessageRequest);
                     BotUtil.dialogueStates.put(chatId, BotState.ENTER_DUTIES_IN_ORGANIZATION);
@@ -302,12 +309,12 @@ public class ResumeBot extends TelegramLongPollingBot {
             case ENTER_DUTIES_IN_ORGANIZATION -> {
                 if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
                         checkInput(receivedText, 4096L, sendMessageRequest, SYMBOLS_LIMIT)) {
-                    resumeFields.put(ResumeField.EXPERIENCE_DUTIES.getValue(), receivedText);
+                    appendToField(resumeFields, ResumeField.EXPERIENCE_DUTIES.getValue(), receivedText);
 
-                    List<String> buttonLabels = List.of("Хочу", "Пропустить");
-                    List<String> callbackData = List.of("want_enter_skills", "skip_skills");
+                    List<String> buttonLabels = List.of("Указать еще одно место работы", "Продолжить");
+                    List<String> callbackData = List.of("want_enter_work_experience", "skip_work_experience");
                     sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, callbackData));
-                    sendMessage("Хотите ли Вы указать навыки?", sendMessageRequest);
+                    sendMessage("Хотите ли Вы указать еще одно место работы?", sendMessageRequest);
                 }
             }
             case ENTER_SKILLS -> {

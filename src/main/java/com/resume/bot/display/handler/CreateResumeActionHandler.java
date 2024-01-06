@@ -25,7 +25,9 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageTe
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
+import static com.resume.util.BotUtil.appendToField;
 import static com.resume.util.Constants.*;
 
 @Slf4j
@@ -37,6 +39,8 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
 
     @Override
     public void performAction(String callbackData, Integer messageId, Long chatId) {
+        Map<String, String> userData = BotUtil.userResumeData.get(chatId);
+
         switch (callbackData) {
             case "create_resume" -> {
                 BotUtil.userStates.put(chatId, BotState.CREATE_RESUME);
@@ -59,8 +63,13 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                 sendMessage("Введите имя:", chatId);
             }
             case "want_enter_education" -> {
-                executeEditMessageWithKeyBoard(EmojiParser.parseToUnicode("Выберите уровень образования.:nerd:"),
-                        messageId, chatId, educationLevels.values().stream().sorted().toList(), educationLevels.keySet().stream().sorted().toList());
+                String educationLevel = userData.get(ResumeField.EDUCATION_LEVEL.getValue());
+                if (educationLevel != null) {
+                    processOnChosenLevelEducation(educationLevel, chatId, userData);
+                } else {
+                    executeEditMessageWithKeyBoard(EmojiParser.parseToUnicode("Выберите уровень образования.:nerd:"),
+                            messageId, chatId, educationLevels.values().stream().sorted().toList(), educationLevels.keySet().stream().sorted().toList());
+                }
             }
             case "skip_education" -> {
                 List<String> buttonLabels = List.of("Хочу", "Пропустить");
@@ -105,10 +114,15 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             case "yes_enter_car" -> {
                 BotUtil.dialogueStates.put(chatId, BotState.ENTER_CAR_AVAILABILITY);
 
+                List<String> keys = driverLicenseTypes.keySet().stream().sorted().toList();
+                List<String> values = driverLicenseTypes.values().stream().sorted().toList();
+                keys.add("no_enter_car");
+                values.add("Продолжить");
                 executeEditMessageWithKeyBoard(EmojiParser.parseToUnicode("Выберите категорию прав.:car:"),
-                        messageId, chatId, driverLicenseTypes, driverLicenseTypes);
+                        messageId, chatId, values, keys);
             }
             case "no_enter_car" -> {
+                System.out.println(userData.get(ResumeField.DRIVER_LICENCE.getValue()));
                 // todo переходим к рекомендации человека
             }
             case "want_enter_salary" -> {
@@ -153,8 +167,6 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             }
         }
 
-        Map<String, String> userData = BotUtil.userResumeData.get(chatId);
-
         if (sexTypes.containsKey(callbackData)) {
             String genderName = sexTypes.get(callbackData);
             processOnChosenSex(genderName, chatId, userData);
@@ -174,9 +186,20 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             sendMessage(EmojiParser.parseToUnicode("Введите свою должность:"), chatId);
         }
 
-        if (driverLicenseTypes.contains(callbackData)) {
+        if (driverLicenseTypes.containsKey(callbackData)) {
             processOnChosenDriverLicense(callbackData, chatId, userData);
-            // todo цикличность выбора категории прав
+            List<String> chosenDriverLicenses = Arrays.stream(userData.get(ResumeField.DRIVER_LICENCE.getValue()).split(ITEMS_DELIMITER)).toList();
+
+            Map<String, String> unchosenDriverLicenseTypes = driverLicenseTypes.entrySet()
+                    .stream().filter(license -> !chosenDriverLicenses.contains(license.getKey()))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+            List<String> keys = new ArrayList<>(unchosenDriverLicenseTypes.keySet().stream().sorted().toList());
+            List<String> values = new ArrayList<>(unchosenDriverLicenseTypes.values().stream().sorted().toList());
+            keys.add("no_enter_car");
+            values.add("Продолжить");
+            executeEditMessageWithKeyBoard(EmojiParser.parseToUnicode("Выберите категорию прав.:car:"),
+                    messageId, chatId, values, keys);
         }
 
         if (employmentTypes.containsKey(callbackData)) {
@@ -188,12 +211,9 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
     private void fillClientData(Long chatId) {
         Resume resume = BotUtil.clientsMap.getOrDefault(chatId, new Resume());
         Education education = new Education();
-        List<PrimaryEducation> primaryEducationsList = new ArrayList<>();
-        List<ElementaryEducation> elementaryEducationsList = new ArrayList<>();
-        PrimaryEducation primaryEducation = new PrimaryEducation();
-        ElementaryEducation elementaryEducation = new ElementaryEducation();
-        List<Experience> workExperienceList = new ArrayList<>();
-        Experience workExperience = new Experience();
+        List<PrimaryEducation> primaryEducations = new ArrayList<>();
+        List<ElementaryEducation> elementaryEducations = new ArrayList<>();
+        List<Experience> workExperiences = new ArrayList<>();
 
         for (Map.Entry<String, String> entry : BotUtil.userResumeData.get(chatId).entrySet()) {
             String fieldLabel = entry.getKey();
@@ -216,20 +236,38 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                     resume.setArea(areaId);
                 }
                 case "уровень образования" -> {
-                    Type typeEdu = new Type();
-                    typeEdu.setId(getKeyByValue(educationLevels, fieldValue));
-                    typeEdu.setName(fieldValue);
-                    education.setLevel(typeEdu);
-                }
-                case "учебное заведение", "факультет", "специализация", "год окончания" -> {
-                    if (isPrimaryEdu) {
-                        addPrimaryEducation(primaryEducation, fieldLabel, fieldValue);
-                    } else {
-                        addElementaryEducation(elementaryEducation, fieldLabel, fieldValue);
+                    String[] items = fieldValue.split(ITEMS_DELIMITER);
+                    for (String item : items) {
+                        Type typeEdu = new Type();
+                        typeEdu.setId(getKeyByValue(educationLevels, item));
+                        typeEdu.setName(item);
+                        education.setLevel(typeEdu);
                     }
                 }
-                case "опыт работы", "название организации", "город организации", "ссылка", "должность", "обязанности" ->
-                        processOnWorkExperience(workExperience, fieldLabel, fieldValue);
+                case "учебное заведение", "факультет", "специализация", "год окончания" -> {
+                    List<String> items = Arrays.stream(fieldValue.split(ITEMS_DELIMITER)).toList();
+                    initList(primaryEducations, PrimaryEducation.class, items.size());
+                    initList(elementaryEducations, ElementaryEducation.class, items.size());
+
+                    for (int i = 0; i < items.size(); i++) {
+                        String item = items.get(i);
+                        if (isPrimaryEdu) {
+                            addPrimaryEducation(primaryEducations.get(i), fieldLabel, item);
+                        } else {
+                            addElementaryEducation(elementaryEducations.get(i), fieldLabel, item);
+                        }
+                    }
+                }
+                case "опыт работы", "название организации", "город организации", "ссылка", "должность", "обязанности" -> {
+                    List<String> items = Arrays.stream(fieldValue.split(ITEMS_DELIMITER)).toList();
+                    initList(workExperiences, Experience.class, items.size());
+
+                    for (int i = 0; i < items.size(); i++) {
+                        String item = items.get(i);
+                        Experience workExperience = workExperiences.get(i);
+                        processOnWorkExperience(workExperience, fieldLabel, item);
+                    }
+                }
                 case "навыки" ->
                         resume.setSkills(fieldValue); // todo сюда должна приходить строка состоящая из нескольких навыков или одного
                 case "категория прав" -> {
@@ -251,18 +289,25 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             }
         }
 
-        /* todo это по идее циклично должно быть
-        primaryEducationsList.add(primaryEducation);
-        elementaryEducationsList.add(elementaryEducation);
-        education.setPrimary(primaryEducationsList);
-        education.setElementary(elementaryEducationsList);
-        workExperienceList.add(workExperience);
-        */
+        education.setPrimary(primaryEducations);
+        education.setElementary(elementaryEducations);
 
         resume.setEducation(education);
-        resume.setExperience(workExperienceList);
+        resume.setExperience(workExperiences);
 
         JsonProcessor.createJsonFromEntity(resume);
+    }
+
+    private <T> void initList(List<T> listToInit, Class<T> type, int size) {
+        if (listToInit.isEmpty()) {
+            for (int i = 0; i < size; i++) {
+                try {
+                    listToInit.add(type.getDeclaredConstructor().newInstance());
+                } catch (Exception e) {
+                    return;
+                }
+            }
+        }
     }
 
     private void addPrimaryEducation(PrimaryEducation primaryEducation, String fieldLabel, String fieldValue) {
@@ -308,7 +353,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
     }
 
     private void processOnChosenDriverLicense(String license, Long chatId, Map<String, String> userData) {
-        userData.put(ResumeField.DRIVER_LICENCE.getValue(), license);
+        appendToField(userData, ResumeField.DRIVER_LICENCE.getValue(), license);
         BotUtil.userResumeData.put(chatId, userData);
     }
 
@@ -319,7 +364,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
     private void processOnWorkExperience(Experience workExperience, String fieldLabel, String fieldValue) {
         switch (fieldLabel) {
             case "опыт работы" -> {
-                String[] dates = fieldValue.split(" - ");
+                String[] dates = fieldValue.split(EXPERIENCE_DELIMITER);
                 workExperience.setStart(dates[0]);
                 workExperience.setEnd(dates[1]);
             }

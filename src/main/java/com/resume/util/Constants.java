@@ -23,6 +23,9 @@ public class Constants {
     public static Skills SKILLS;
     public static List<Locale> LOCALES;
     public static List<Type> LANGUAGES;
+    public static final String ITEMS_DELIMITER = ";";
+    public static final String EXPERIENCE_DELIMITER = " - ";
+
     public static final String OTHER_COUNTRIES_JSON_ID = "1001";
     public static final List<String> COUNTRIES_WITH_REGIONS_IDS = List.of(
             "113",   // Россия
@@ -41,17 +44,17 @@ public class Constants {
             "ready", "готов к командировкам",
             "sometimes", "готов к редким командировкам",
             "never", "не готов к командировкам");
-    public static List<String> driverLicenseTypes = List.of(
-            "A",
-            "B",
-            "C",
-            "D",
-            "E",
-            "BE",
-            "CE",
-            "DE",
-            "TM",
-            "TB");
+    public static Map<String, String> driverLicenseTypes = Map.of(
+            "A", "A",
+            "B", "B",
+            "C", "C",
+            "D", "D",
+            "E", "E",
+            "BE", "BE",
+            "CE", "CE",
+            "DE", "DE",
+            "TM", "TM",
+            "TB", "TB");
     public static Map<String, String> employmentTypes = Map.of(
             "full", "Полная занятость",
             "part", "Частичная занятость",
