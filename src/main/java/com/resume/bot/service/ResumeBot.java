@@ -13,6 +13,7 @@ import com.resume.util.BotUtil;
 import com.vdurmont.emoji.EmojiParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.map.LinkedMap;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -21,10 +22,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.resume.bot.json.JsonValidator.ValidationType.*;
 import static com.resume.bot.json.JsonValidator.checkExperience;
@@ -415,6 +413,7 @@ public class ResumeBot extends TelegramLongPollingBot {
 
     private void sendResultMessageAboutClientData(Map<String, String> resumeFields, SendMessage sendMessageRequest) {
         StringBuilder resume = new StringBuilder().append("Пожалуйста, проверьте введенные данные:\n\n");
+        Map<String, List<String>> resumeFieldToValues = new LinkedHashMap<>();
         String currentBlock;
 
         for (Map.Entry<String, String> entry : resumeFields.entrySet()) {
@@ -429,7 +428,7 @@ public class ResumeBot extends TelegramLongPollingBot {
                 resume.append("\n").append(currentBlock).append("\n\n");
             } else if (key.equals(ResumeField.EXPERIENCE_PERIOD.getValue())) {
                 currentBlock = "*Опыт*";
-                resume.append("\n").append(currentBlock).append("\n\n");
+                resume.append("\n").append(currentBlock).append("\n");
             } else if (key.equals(ResumeField.SKILLS.getValue())) {
                 currentBlock = "*Навыки*";
                 resume.append("\n").append(currentBlock).append("\n\n");
@@ -438,7 +437,30 @@ public class ResumeBot extends TelegramLongPollingBot {
                 resume.append("\n").append(currentBlock).append("\n\n");
             }
 
-            resume.append("*").append(key).append("*").append(": ").append(value).append("\n");
+            // For fields with multiple values
+            List<String> items = Arrays.stream(value.split(ITEMS_DELIMITER)).toList();
+            resumeFieldToValues.put(key, items);
+
+            if (isEndOfFieldsBlock(key)) {
+                resume.append("\n");
+                for (int i = 0; i < items.size(); i++) {
+                    for (Map.Entry<String, List<String>> resumeFieldEntry : resumeFieldToValues.entrySet()) {
+                        String currentKey = resumeFieldEntry.getKey();
+                        String currentValue = resumeFieldEntry.getValue().get(i);
+                        resume.append("*").append(currentKey).append("*").append(": ").append(currentValue).append("\n");
+                    }
+                    if (i < items.size() - 1) {
+                        resume.append("\n");
+                    }
+                }
+                resumeFieldToValues.clear();
+            } else {
+                // For fields with single value
+                if (items.size() == 1) {
+                    resume.append("*").append(key).append("*").append(": ").append(value).append("\n");
+                    resumeFieldToValues.clear();
+                }
+            }
         }
 
         resume.append(EmojiParser.parseToUnicode("\nЕсли есть не соответствие или вы ошиблись, нажмите на кнопку *Редактировать* "
@@ -449,6 +471,12 @@ public class ResumeBot extends TelegramLongPollingBot {
 
         sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, callbackData));
         sendMessage(resume.toString(), sendMessageRequest);
+    }
+
+    private boolean isEndOfFieldsBlock(String key) {
+        return
+                key.equals(ResumeField.EDUCATION_END_YEAR.getValue()) ||
+                key.equals(ResumeField.EXPERIENCE_DUTIES.getValue());
     }
 
     @Override
