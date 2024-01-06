@@ -114,8 +114,8 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             case "yes_enter_car" -> {
                 BotUtil.dialogueStates.put(chatId, BotState.ENTER_CAR_AVAILABILITY);
 
-                List<String> keys = driverLicenseTypes.keySet().stream().sorted().toList();
-                List<String> values = driverLicenseTypes.values().stream().sorted().toList();
+                List<String> keys = new ArrayList<>(driverLicenseTypes.keySet().stream().sorted().toList());
+                List<String> values = new ArrayList<>(driverLicenseTypes.values().stream().sorted().toList());
                 keys.add("no_enter_car");
                 values.add("Продолжить");
                 executeEditMessageWithKeyBoard(EmojiParser.parseToUnicode("Выберите категорию прав.:car:"),
