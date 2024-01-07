@@ -2,6 +2,7 @@ package com.resume.bot.display.handler;
 
 import com.resume.bot.display.BotState;
 import com.resume.bot.display.CallbackActionHandler;
+import com.resume.bot.display.ResumeField;
 import com.resume.bot.json.JsonProcessor;
 import com.resume.bot.model.entity.Resume;
 import com.resume.bot.service.HeadHunterService;
@@ -20,10 +21,12 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.resume.bot.display.MessageUtil.*;
+import static com.resume.bot.display.MessageUtil.executeEditMessageWithKeyBoard;
+import static com.resume.bot.display.MessageUtil.sendMessage;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -95,10 +98,25 @@ public class MyResumesActionHandler implements CallbackActionHandler {
                 executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode("Выберите, что нужно сделать с вашим резюме.:slightly_smiling:"),
                         messageId, chatId, buttonLabels, buttonIds);
             }
+            case "edit_resume" -> {
+                Map<String, String> buttons = Map.of(
+                        "edit_resume_1", "1",
+                        "edit_resume_2", "2",
+                        "edit_resume_3", "3",
+                        "edit_resume_4", "4",
+                        "edit_resume_5", "5",
+                        "edit_resume_6", "6");
+
+                executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode("Выберите резюме, которое нужно изменить.:slightly_smiling:"),
+                        messageId, chatId, buttons.values().stream().toList(), buttons.keySet().stream().toList());
+            }
             default -> {
-                if (finallyPublish(callbackData, chatId) || publishOnHh(callbackData, messageId, chatId) || downloadResume(callbackData, chatId) ||
-                        editResume(callbackData, messageId, chatId) || deleteResume(callbackData, chatId) ||
-                        updateResumeOnHh(callbackData, chatId)) {
+                if (finallyPublish(callbackData, chatId)
+                        || publishOnHh(callbackData, messageId, chatId)
+                        || downloadResume(callbackData, chatId)
+                        || editResume(callbackData, chatId)
+                        || deleteResume(callbackData, chatId)
+                        || updateResumeOnHh(callbackData, chatId)) {
                     System.out.println("done");
                 }
             }
@@ -211,7 +229,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
         return true;
     }
 
-    private boolean editResume(String data, Integer messageId, Long chatId) {
+    private boolean editResume(String data, Long chatId) {
         Pattern pattern = Pattern.compile("edit_resume_([1-6])");
 
         Matcher matcher = pattern.matcher(data);
@@ -224,7 +242,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
             return true;
         }
 
-        //todo: edit
+        BotUtil.userStates.put(chatId, BotState.EDIT_MY_RESUME);
 
         return true;
     }
@@ -257,5 +275,35 @@ public class MyResumesActionHandler implements CallbackActionHandler {
     private int getResumeNumber(Matcher matcher) {
         String[] s = matcher.group().split("_");
         return Integer.parseInt(s[s.length - 1]);
+    }
+
+
+    //TODO сами вызовите где надо в этом говне
+    private boolean editClientResumeData(com.resume.bot.json.entity.client.Resume resume,
+                                         String receivedText, Long chatId) {
+        String[] lines = receivedText.split("\\r?\\n");
+        for (String line : lines) {
+            String[] parts = line.split("-", 2);
+            if (parts.length == 2) {
+                String fieldLabel = parts[0].trim().toLowerCase();
+                String fieldValue = parts[1].trim();
+
+                ResumeField field = Arrays.stream(ResumeField.values())
+                        .filter(f -> f.getValue().equals(fieldLabel)).findFirst().orElse(null);
+                if (field != null) {
+                    if (field.processCheck(fieldValue)) {
+                        field.editInResume(resume, fieldValue);
+                    } else {
+                        sendMessage(bot, field.message(), chatId);
+                        return false;
+                    }
+                }
+            } else {
+                sendMessage(bot, "Пожалуйста, введите данные в формате\n*Поле - Ваше новое значение*.", chatId);
+                return false;
+            }
+        }
+
+        return true;
     }
 }

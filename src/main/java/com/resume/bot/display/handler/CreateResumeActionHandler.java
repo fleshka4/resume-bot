@@ -130,7 +130,6 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                 BotUtil.userStates.put(chatId, BotState.EDIT_CLIENT_RESULT_DATA);
 
                 sendMessage(bot, EmojiParser.parseToUnicode("Жду исправлений:eyes:"), chatId);
-                sendMessage(bot, "Введите имя:", chatId);
             }
             case "choice_gender_m", "choice_gender_f" -> {
                 String genderName = callbackData.equals("choice_gender_m") ? "Мужской" : "Женский";
@@ -138,7 +137,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                 userData.put("пол", genderName);
                 BotUtil.userResumeData.put(chatId, userData);
                 BotUtil.dialogueStates.put(chatId, BotState.ENTER_LOCATION);
-                sendMessage(bot, "Введите ваше место жительство.\nВ формате *страна, регион, населенный пункт (опционально)*:", chatId);
+                sendMessage(bot, "Введите ваше место жительства.\nВ формате *страна, регион, населенный пункт (опционально)*:", chatId);
             }
             case "result_data_is_correct" -> {
                 BotUtil.userStates.put(chatId, BotState.RESULT_DATA_CORRECT);

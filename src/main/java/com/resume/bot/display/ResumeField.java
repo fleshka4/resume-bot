@@ -1,8 +1,23 @@
 package com.resume.bot.display;
 
 import com.resume.bot.json.JsonValidator;
+import com.resume.bot.json.entity.Industry;
+import com.resume.bot.json.entity.client.Area;
+import com.resume.bot.json.entity.client.Experience;
+import com.resume.bot.json.entity.client.Resume;
+import com.resume.bot.json.entity.client.Salary;
+import com.resume.bot.json.entity.client.education.PrimaryEducation;
+import com.resume.bot.json.entity.common.Id;
+import com.resume.bot.json.entity.common.Type;
+import com.resume.util.Constants;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Getter
@@ -17,6 +32,11 @@ public enum ResumeField {
         public String message() {
             return formatLetters(getValue(), MAX_LEN_128);
         }
+
+        @Override
+        public void editInResume(Resume resume, String param) {
+            resume.setFirstName(param);
+        }
     },
 
     SURNAME("фамилия") {
@@ -28,6 +48,11 @@ public enum ResumeField {
         @Override
         public String message() {
             return formatLetters(getValue(), MAX_LEN_128);
+        }
+
+        @Override
+        public void editInResume(Resume resume, String param) {
+            resume.setLastName(param);
         }
     },
 
@@ -41,6 +66,11 @@ public enum ResumeField {
         public String message() {
             return formatLetters(getValue(), MAX_LEN_128);
         }
+
+        @Override
+        public void editInResume(Resume resume, String param) {
+            resume.setMiddleName(param);
+        }
     },
 
     SEX("пол") {
@@ -52,6 +82,14 @@ public enum ResumeField {
         @Override
         public String message() {
             return "Пропаганда ЛГБТ запрещена УК РФ ст.282!";
+        }
+
+        @Override
+        public void editInResume(Resume resume, String param) {
+            Constants.sexTypes.entrySet().stream()
+                    .filter(entry -> entry.getValue().equals(param))
+                    .findFirst()
+                    .ifPresent(gender -> resume.setGender(new Id(gender.getKey())));
         }
     },
 
@@ -65,6 +103,11 @@ public enum ResumeField {
         public String message() {
             return INCORRECT_DATE_STRING.formatted(getValue());
         }
+
+        @Override
+        public void editInResume(Resume resume, String param) {
+            resume.setBirthDate(param);
+        }
     },
 
     LIVE_LOCATION("место жительства") {
@@ -76,6 +119,12 @@ public enum ResumeField {
         @Override
         public String message() {
             return formatLocation(getValue());
+        }
+
+        @Override
+        public void editInResume(Resume resume, String param) {
+            JsonValidator.getAreaByNameDeep(Constants.AREAS, param)
+                    .ifPresent(area -> resume.setArea(new Id(area.getId())));
         }
     },
 
@@ -89,6 +138,13 @@ public enum ResumeField {
         public String message() {
             return INCORRECT_PARAM_STRING.formatted(getValue());
         }
+
+        @Override
+        public void editInResume(Resume resume, String param) {
+            Constants.educationLevels.entrySet().stream()
+                    .filter(entry -> entry.getValue().equals(param))
+                    .findFirst().ifPresent(level -> resume.getEducation().setLevel(new Type(level.getKey(), level.getValue())));
+        }
     },
 
     EDUCATION_INSTITUTION("учебное заведение") {
@@ -100,6 +156,14 @@ public enum ResumeField {
         @Override
         public String message() {
             return formatLetters(getValue(), MAX_LEN_512);
+        }
+
+        @Override
+        public void editInResume(Resume resume, String param) {
+            List<PrimaryEducation> list = resume.getEducation().getPrimary();
+            if (!list.isEmpty()) {
+                list.get(0).setName(param);
+            }
         }
     },
 
@@ -113,6 +177,14 @@ public enum ResumeField {
         public String message() {
             return formatLetters(getValue(), MAX_LEN_128);
         }
+
+        @Override
+        public void editInResume(Resume resume, String param) {
+            List<PrimaryEducation> list = resume.getEducation().getPrimary();
+            if (!list.isEmpty()) {
+                list.get(0).setOrganization(param);
+            }
+        }
     },
 
     EDUCATION_SPECIALIZATION("специализация") {
@@ -125,6 +197,14 @@ public enum ResumeField {
         public String message() {
             return formatLetters(getValue(), MAX_LEN_128);
         }
+
+        @Override
+        public void editInResume(Resume resume, String param) {
+            List<PrimaryEducation> list = resume.getEducation().getPrimary();
+            if (!list.isEmpty()) {
+                list.get(0).setResult(param);
+            }
+        }
     },
 
     EDUCATION_END_YEAR("год окончания") {
@@ -136,6 +216,14 @@ public enum ResumeField {
         @Override
         public String message() {
             return INCORRECT_NUMBER_STRING.formatted(getValue());
+        }
+
+        @Override
+        public void editInResume(Resume resume, String param) {
+            List<PrimaryEducation> list = resume.getEducation().getPrimary();
+            if (!list.isEmpty()) {
+                list.get(0).setYear(Long.getLong(param, LocalDate.now().getYear()));
+            }
         }
     },
 
@@ -154,6 +242,14 @@ public enum ResumeField {
         public String message() {
             return INCORRECT_PERIOD_STRING.formatted(getValue());
         }
+
+        @Override
+        public void editInResume(Resume resume, String param) {
+            List<Experience> list = resume.getExperience();
+            if (!list.isEmpty()) {
+                list.get(0).setCompany(param);
+            }
+        }
     },
 
     EXPERIENCE_ORG_NAME("название организации") {
@@ -165,6 +261,14 @@ public enum ResumeField {
         @Override
         public String message() {
             return EXCEEDED_SYMBOLS_LIMIT_STRING.formatted(getValue(), MAX_LEN_512);
+        }
+
+        @Override
+        public void editInResume(Resume resume, String param) {
+            List<Experience> list = resume.getExperience();
+            if (!list.isEmpty()) {
+                list.get(0).setCompany(param);
+            }
         }
     },
 
@@ -178,17 +282,37 @@ public enum ResumeField {
         public String message() {
             return formatLocation(getValue());
         }
+
+        @Override
+        public void editInResume(Resume resume, String param) {
+            List<Experience> list = resume.getExperience();
+            if (!list.isEmpty()) {
+                JsonValidator.getAreaByNameDeep(Constants.AREAS, param)
+                        .ifPresent(city -> list.get(0).setArea(new Area(city.getId(), city.getName())));
+            }
+        }
     },
 
     EXPERIENCE_ORG_INDUSTRY("отрасль") {
         @Override
         public boolean processCheck(String checkValue) {
-            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_256) && JsonValidator.checkCity(checkValue);
+            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_256);
         }
 
         @Override
         public String message() {
             return formatLocation(getValue());
+        }
+
+        @Override
+        public void editInResume(Resume resume, String param) {
+            List<Experience> list = resume.getExperience();
+            if (!list.isEmpty()) {
+                Constants.INDUSTRIES.stream()
+                        .map(Industry::getIndustries).flatMap(List::stream)
+                        .filter(ind -> ind.getName().equals(param)).findFirst()
+                        .ifPresent(industry -> list.get(0).setIndustry(industry));
+            }
         }
     },
 
@@ -202,6 +326,14 @@ public enum ResumeField {
         public String message() {
             return INCORRECT_HYPERLINK_STRING.formatted(MAX_LEN_256);
         }
+
+        @Override
+        public void editInResume(Resume resume, String param) {
+            List<Experience> list = resume.getExperience();
+            if (!list.isEmpty()) {
+                list.get(0).setCompanyUrl(param);
+            }
+        }
     },
 
     EXPERIENCE_POST("должность") {
@@ -213,6 +345,14 @@ public enum ResumeField {
         @Override
         public String message() {
             return formatLetters(getValue(), MAX_LEN_128);
+        }
+
+        @Override
+        public void editInResume(Resume resume, String param) {
+            List<Experience> list = resume.getExperience();
+            if (!list.isEmpty()) {
+                list.get(0).setPosition(param);
+            }
         }
     },
 
@@ -226,6 +366,14 @@ public enum ResumeField {
         public String message() {
             return formatLetters(getValue(), MAX_LEN_4096);
         }
+
+        @Override
+        public void editInResume(Resume resume, String param) {
+            List<Experience> list = resume.getExperience();
+            if (!list.isEmpty()) {
+                list.get(0).setDescription(param);
+            }
+        }
     },
 
     SKILLS("навыки") {
@@ -237,6 +385,11 @@ public enum ResumeField {
         @Override
         public String message() {
             return formatLetters(getValue(), MAX_LEN_128);
+        }
+
+        @Override
+        public void editInResume(Resume resume, String param) {
+            resume.setSkillSet(Arrays.stream(param.split(",")).collect(Collectors.toSet()));
         }
     },
 
@@ -250,6 +403,11 @@ public enum ResumeField {
         public String message() {
             return formatLetters(getValue(), MAX_LEN_4096);
         }
+
+        @Override
+        public void editInResume(Resume resume, String param) {
+            resume.setSkills(param);
+        }
     },
 
     WISH_POSITION("желаемая позиция") {
@@ -261,6 +419,11 @@ public enum ResumeField {
         @Override
         public String message() {
             return formatLetters(getValue(), MAX_LEN_128);
+        }
+
+        @Override
+        public void editInResume(Resume resume, String param) {
+            resume.setTitle(param);
         }
     },
 
@@ -274,8 +437,13 @@ public enum ResumeField {
         public String message() {
             return INCORRECT_SALARY_STRING.formatted(getValue());
         }
-    };
 
+        @Override
+        public void editInResume(Resume resume, String param) {
+            Salary salary = resume.getSalary();
+            salary.setAmount(Long.getLong(param, salary.getAmount()));
+        }
+    };
 
     private static final short MAX_LEN_128 = 128;
     private static final short MAX_LEN_256 = 256;
@@ -298,6 +466,8 @@ public enum ResumeField {
     abstract public boolean processCheck(String checkValue);
 
     abstract public String message();
+
+    abstract public void editInResume(Resume resume, String param);
 
     private static String formatLetters(String string, short maxLen) {
         return MUST_CONTAIN_LETTERS_STRING.formatted(string, maxLen);

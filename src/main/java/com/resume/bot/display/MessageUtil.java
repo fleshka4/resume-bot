@@ -28,14 +28,6 @@ public class MessageUtil {
         executeMessage(bot, editMessage);
     }
 
-    public static void sendMessage(TelegramLongPollingBot bot, String text, Long chatId) {
-        SendMessage message = new SendMessage();
-        message.setParseMode(ParseMode.MARKDOWN);
-        message.setChatId(chatId.toString());
-        message.setText(text);
-        executeMessage(bot, message);
-    }
-
     public static void executeEditMessage(TelegramLongPollingBot bot, String editMessageToSend, Integer messageId, Long chatId) {
         EditMessageText editMessage = new EditMessageText();
         editMessage.setParseMode(ParseMode.MARKDOWN);
@@ -44,6 +36,27 @@ public class MessageUtil {
         editMessage.setText(editMessageToSend);
 
         executeMessage(bot, editMessage);
+    }
+
+    public SendMessage createSendMessageRequest(TelegramLongPollingBot bot, Long chatId) {
+        SendMessage sendMessageRequest = new SendMessage();
+
+        sendMessageRequest.enableMarkdown(true);
+        sendMessageRequest.setChatId(chatId.toString());
+        return sendMessageRequest;
+    }
+
+    public static void sendMessage(TelegramLongPollingBot bot, String text, Long chatId) {
+        SendMessage message = new SendMessage();
+        message.setParseMode(ParseMode.MARKDOWN);
+        message.setChatId(chatId.toString());
+        message.setText(text);
+        executeMessage(bot, message);
+    }
+
+    public void sendMessage(TelegramLongPollingBot bot, String messageToSend, SendMessage sendMessageRequest) {
+        sendMessageRequest.setText(messageToSend);
+        executeMessage(bot, sendMessageRequest);
     }
 
     public static <T extends Serializable, Method extends BotApiMethod<T>> void executeMessage(TelegramLongPollingBot bot, Method message) {

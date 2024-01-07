@@ -268,7 +268,7 @@ public class JsonValidator {
         return false;
     }
 
-    private static Optional<Area> getAreaByNameDeep(List<Area> areas, String name) {
+    public static Optional<Area> getAreaByNameDeep(List<Area> areas, String name) {
         for (Area area : areas) {
             if (area.getName().equals(name)) {
                 return Optional.of(area);
