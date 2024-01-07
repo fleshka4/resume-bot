@@ -11,7 +11,9 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageTe
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @UtilityClass
@@ -26,6 +28,15 @@ public class MessageUtil {
 
         editMessage.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, buttonIds));
         executeMessage(bot, editMessage);
+    }
+
+    public void executeContinueKeyboardMessage(TelegramLongPollingBot bot,String messageText, Integer messageId,
+                                                Long chatId, Map<String, String> data, String continueButtonLabel) {
+        List<String> keys = new ArrayList<>(data.keySet().stream().toList());
+        List<String> values = new ArrayList<>(data.values().stream().toList());
+        keys.add(continueButtonLabel);
+        values.add("Продолжить");
+        executeEditMessageWithKeyBoard(bot, messageText, messageId, chatId, values, keys);
     }
 
     public static void executeEditMessage(TelegramLongPollingBot bot, String editMessageToSend, Integer messageId, Long chatId) {

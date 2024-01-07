@@ -8,6 +8,8 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 
 import java.util.*;
 
+import static com.resume.util.Constants.ITEMS_DELIMITER;
+
 @UtilityClass
 public class BotUtil {
     public final List<String> CREATE_RESUME_IDS_LIST = List.of(
@@ -32,8 +34,14 @@ public class BotUtil {
             // availability of a car
             "yes_enter_car",
             "no_enter_car",
+            // person's recommendation
+            "want_enter_rec",
+            "skip_rec",
             "want_enter_salary",
             "skip_salary",
+            "skip_busyness",
+            "skip_schedule",
+
             "back_to_menu",
             "back_to_create_resume",
             "yes_go_to_menu",
@@ -151,5 +159,18 @@ public class BotUtil {
 
     public static long generateRandom12DigitNumber(Random random) {
         return (long) (Math.pow(10, 11) + random.nextInt((int) Math.pow(10, 11)));
+    }
+
+    public static String appendToField(Map<String, String> resumeFields, String key, String value) {
+        if (resumeFields.containsKey(key)) {
+            String oldText = resumeFields.get(key);
+            return resumeFields.put(key, oldText + ITEMS_DELIMITER + value);
+        } else {
+            return resumeFields.put(key, value);
+        }
+    }
+
+    public static SortedMap<String, String> createSortedMap(Map<String, String> originalMap) {
+        return new TreeMap<>(originalMap);
     }
 }

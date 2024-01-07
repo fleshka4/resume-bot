@@ -2,10 +2,7 @@ package com.resume.bot.display;
 
 import com.resume.bot.json.JsonValidator;
 import com.resume.bot.json.entity.Industry;
-import com.resume.bot.json.entity.client.Area;
-import com.resume.bot.json.entity.client.Experience;
-import com.resume.bot.json.entity.client.Resume;
-import com.resume.bot.json.entity.client.Salary;
+import com.resume.bot.json.entity.client.*;
 import com.resume.bot.json.entity.client.education.PrimaryEducation;
 import com.resume.bot.json.entity.common.Id;
 import com.resume.bot.json.entity.common.Type;
@@ -15,8 +12,8 @@ import lombok.Getter;
 
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -410,6 +407,85 @@ public enum ResumeField {
         }
     },
 
+    DRIVER_LICENCE("категория прав") {
+        @Override
+        public boolean processCheck(String checkValue) {
+            return JsonValidator.checkDriverLicenseType(checkValue);
+        }
+
+        @Override
+        public String message() {
+            return INCORRECT_PARAM_STRING.formatted(getValue());
+        }
+
+        @Override
+        public void editInResume(Resume resume, String param) {
+            if (JsonValidator.checkDriverLicenseType(param)) {
+                resume.getDriverLicenseTypes().add(new Id(param));
+            }
+        }
+    },
+
+    REC_NAME("имя выдавшего рекомендацию") {
+        @Override
+        public boolean processCheck(String checkValue) {
+            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_512) && JsonValidator.checkAlphaSpaceFormat(checkValue);
+        }
+
+        @Override
+        public String message() {
+            return formatLetters(getValue(), MAX_LEN_512);
+        }
+
+        @Override
+        public void editInResume(Resume resume, String param) {
+            List<Recommendation> list = resume.getRecommendation();
+            if (!list.isEmpty()) {
+                list.get(0).setName(param);
+            }
+        }
+    },
+
+    REC_POST("должность выдавшего рекомендацию") {
+        @Override
+        public boolean processCheck(String checkValue) {
+            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_128) && JsonValidator.checkAlphaSpaceFormat(checkValue);
+        }
+
+        @Override
+        public String message() {
+            return formatLetters(getValue(), MAX_LEN_128);
+        }
+
+        @Override
+        public void editInResume(Resume resume, String param) {
+            List<Recommendation> list = resume.getRecommendation();
+            if (!list.isEmpty()) {
+                list.get(0).setPosition(param);
+            }
+        }
+    },
+
+    REC_ORGANIZATION("организация выдавшего рекомендацию") {
+        @Override
+        public boolean processCheck(String checkValue) {
+            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_128) && JsonValidator.checkAlphaSpaceFormat(checkValue);
+        }
+
+        @Override
+        public String message() {
+            return formatLetters(getValue(), MAX_LEN_128);
+        }
+
+        @Override
+        public void editInResume(Resume resume, String param) {
+            List<Recommendation> list = resume.getRecommendation();
+            if (!list.isEmpty()) {
+                list.get(0).setOrganization(param);
+            }
+        }
+    },
+
     WISH_POSITION("желаемая позиция") {
         @Override
         public boolean processCheck(String checkValue) {
@@ -442,6 +518,52 @@ public enum ResumeField {
         public void editInResume(Resume resume, String param) {
             Salary salary = resume.getSalary();
             salary.setAmount(Long.getLong(param, salary.getAmount()));
+        }
+    },
+
+    BUSYNESS("желаемая занятость") {
+        @Override
+        public boolean processCheck(String checkValue) {
+            return JsonValidator.checkEmploymentType(checkValue);
+        }
+
+        @Override
+        public String message() {
+            return INCORRECT_PARAM_STRING.formatted(getValue());
+        }
+
+        @Override
+        public void editInResume(Resume resume, String param) {
+            List<Type> employments = resume.getEmployments();
+            Map.Entry<String, String> matchedEntry = Constants.employmentTypes.entrySet().stream()
+                    .filter(entry -> entry.getValue().equals(param)).findFirst().orElse(null);
+            if (employments.stream().noneMatch(emp -> emp.getName().equals(param))
+                    && matchedEntry != null) {
+                resume.getSchedules().add(new Type(matchedEntry.getKey(), matchedEntry.getValue()));
+            }
+        }
+    },
+
+    SCHEDULE("желаемый график") {
+        @Override
+        public boolean processCheck(String checkValue) {
+            return JsonValidator.checkScheduleType(checkValue);
+        }
+
+        @Override
+        public String message() {
+            return INCORRECT_PARAM_STRING.formatted(getValue());
+        }
+
+        @Override
+        public void editInResume(Resume resume, String param) {
+            List<Type> schedules = resume.getSchedules();
+            Map.Entry<String, String> matchedEntry = Constants.scheduleTypes.entrySet().stream()
+                    .filter(entry -> entry.getValue().equals(param)).findFirst().orElse(null);
+            if (schedules.stream().noneMatch(sch -> sch.getName().equals(param))
+                    && matchedEntry != null) {
+                resume.getSchedules().add(new Type(matchedEntry.getKey(), matchedEntry.getValue()));
+            }
         }
     };
 

@@ -44,7 +44,13 @@ public enum BotState {
     // Availability of a car
     ENTER_CAR_AVAILABILITY,
 
+    // Person's recommendation
+    ENTER_REC_NAME,
+    ENTER_REC_POST,
+    ENTER_REC_ORGANIZATION,
+
     ENTER_WISH_POSITION,
     ENTER_WISH_SALARY,
-    ENTER_WISH_BUSYNESS
+    ENTER_WISH_BUSYNESS,
+    ENTER_WISH_SCHEDULE
 }

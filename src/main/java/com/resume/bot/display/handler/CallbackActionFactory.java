@@ -22,8 +22,9 @@ public class CallbackActionFactory {
         if (BotUtil.CREATE_RESUME_IDS_LIST.contains(callbackData) ||
                 sexTypes.containsKey(callbackData) ||
                 educationLevels.containsKey(callbackData) ||
-                driverLicenseTypes.contains(callbackData) ||
-                employmentTypes.containsKey(callbackData)) { //todo сферы деятельности компании
+                driverLicenseTypes.containsKey(callbackData) ||
+                employmentTypes.containsKey(callbackData) ||
+                scheduleTypes.containsKey(callbackData)) { //todo сферы деятельности компании
             return new CreateResumeActionHandler(pollingBot);
         }
         if (BotUtil.EXPORT_RESUME_IDS_LIST.contains(callbackData)) {
