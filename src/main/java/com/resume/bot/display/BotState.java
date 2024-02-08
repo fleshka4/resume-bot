@@ -9,6 +9,7 @@ public enum BotState {
     CREATE_RESUME_SCRATCH,
     START_DIALOGUE,
     EDIT_CLIENT_RESULT_DATA,
+    EDIT_MY_RESUME,
     RESULT_DATA_CORRECT,
     FINISH_DIALOGUE,
 
@@ -38,5 +39,18 @@ public enum BotState {
     ENTER_SKILLS,
 
     // About me
-    ENTER_ABOUT_ME
+    ENTER_ABOUT_ME,
+
+    // Availability of a car
+    ENTER_CAR_AVAILABILITY,
+
+    // Person's recommendation
+    ENTER_REC_NAME,
+    ENTER_REC_POST,
+    ENTER_REC_ORGANIZATION,
+
+    ENTER_WISH_POSITION,
+    ENTER_WISH_SALARY,
+    ENTER_WISH_BUSYNESS,
+    ENTER_WISH_SCHEDULE
 }

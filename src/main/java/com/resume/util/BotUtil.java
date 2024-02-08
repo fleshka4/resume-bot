@@ -8,13 +8,14 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 
 import java.util.*;
 
+import static com.resume.util.Constants.ITEMS_DELIMITER;
+
 @UtilityClass
 public class BotUtil {
     public final List<String> CREATE_RESUME_IDS_LIST = List.of(
             "menu",
             "create_resume",
             "create_resume_from_scratch",
-            "export_data_hh",
             "start_dialogue",
             "edit_result_data",
             "result_data_is_correct",
@@ -30,6 +31,16 @@ public class BotUtil {
             // about me
             "want_enter_about_me",
             "skip_about_me",
+            // availability of a car
+            "yes_enter_car",
+            "no_enter_car",
+            // person's recommendation
+            "want_enter_rec",
+            "skip_rec",
+            "want_enter_salary",
+            "skip_salary",
+            "skip_busyness",
+            "skip_schedule",
 
             "back_to_menu",
             "back_to_create_resume",
@@ -39,6 +50,20 @@ public class BotUtil {
     public final List<String> MY_RESUMES_IDS_LIST = List.of(
             "my_resumes",
             "back_to_menu_3",
+            "back_to_my_resumes",
+            "edit_resume",
+            "edit_resume_1",
+            "edit_resume_2",
+            "edit_resume_3",
+            "edit_resume_4",
+            "edit_resume_5",
+            "edit_resume_6",
+            "resume_1",
+            "resume_2",
+            "resume_3",
+            "resume_4",
+            "resume_5",
+            "resume_6",
             "back_to_my_resumes"
     );
     public final List<String> BIG_TYPES_IDS = List.of(
@@ -52,6 +77,12 @@ public class BotUtil {
             "download",
             "edit",
             "delete"
+    );
+
+    public final List<String> EXPORT_RESUME_IDS_LIST = List.of(
+            "export_data_hh",
+            "auth",
+            "choose_resume"
     );
 
     public boolean checkIfAction(String suspectAction) {
@@ -167,5 +198,18 @@ public class BotUtil {
 
     public static long generateRandom12DigitNumber(Random random) {
         return (long) (Math.pow(10, 11) + random.nextInt((int) Math.pow(10, 11)));
+    }
+
+    public static String appendToField(Map<String, String> resumeFields, String key, String value) {
+        if (resumeFields.containsKey(key)) {
+            String oldText = resumeFields.get(key);
+            return resumeFields.put(key, oldText + ITEMS_DELIMITER + value);
+        } else {
+            return resumeFields.put(key, value);
+        }
+    }
+
+    public static SortedMap<String, String> createSortedMap(Map<String, String> originalMap) {
+        return new TreeMap<>(originalMap);
     }
 }

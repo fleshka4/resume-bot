@@ -16,8 +16,6 @@ import java.util.Set;
 @AllArgsConstructor
 @Data
 public class Resume {
-//    private Type access;
-//
     @JsonProperty("birth_date")
     private String birthDate;
 
@@ -37,9 +35,6 @@ public class Resume {
     @JsonProperty("has_vehicle")
     private Boolean hasVehicle;
 
-//    @JsonProperty("hidden_fields")
-//    private List<Type> hiddenFields;
-//
     @JsonProperty("last_name")
     private String lastName;
 
@@ -59,9 +54,6 @@ public class Resume {
     private List<Recommendation> recommendation;
 
 //    private Relocation relocation;
-//
-//    @JsonProperty("resume_locale")
-//    private Type resume_locale;
 
     private Salary salary;
 
