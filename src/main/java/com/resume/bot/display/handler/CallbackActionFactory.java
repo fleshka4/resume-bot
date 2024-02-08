@@ -30,6 +30,9 @@ public class CallbackActionFactory {
         if (BotUtil.MY_RESUMES_IDS_LIST.contains(callbackData) || BotUtil.checkIfAction(callbackData)) {
             return new MyResumesActionHandler(pollingBot, resumeService, headHunterService);
         }
+        if (BotUtil.checkIfBigType(callbackData)) {
+            return new BigKeyBoardHandler(pollingBot);
+        }
 
         return null;
     }

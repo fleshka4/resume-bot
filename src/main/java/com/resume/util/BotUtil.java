@@ -39,13 +39,10 @@ public class BotUtil {
     public final List<String> MY_RESUMES_IDS_LIST = List.of(
             "my_resumes",
             "back_to_menu_3",
-            "back_to_my_resumes",
-            "resume_1",
-            "resume_2",
-            "resume_3",
-            "resume_4",
-            "resume_5",
-            "resume_6"
+            "back_to_my_resumes"
+    );
+    public final List<String> BIG_TYPES_IDS = List.of(
+            "INDUSTRIES"
     );
     public final List<String> ACTIONS_WITH_RESUME = List.of(
             "publish_on_hh",
@@ -65,13 +62,23 @@ public class BotUtil {
         }
         return false;
     }
+    public boolean checkIfBigType(String suspectAction) {
+        for (String s : BIG_TYPES_IDS) {
+            if (suspectAction.startsWith(s)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public final Map<Long, BotState> userStates = new HashMap<>();
+    public final Map<Long, Integer> pages = new HashMap<>();
     public final Map<Long, BotState> dialogueStates = new HashMap<>();
     public final Map<Long, Map<String, String>> userResumeData = new LinkedHashMap<>();
     public final Map<Long, Resume> clientsMap = new HashMap<>();
     public final String ERROR_TEXT = "Error occurred: ";
     public final Map<Long, Long> states = new HashMap<>(); // state, chatId
+    public final Map <Long, String> personAndIndustryType = new HashMap<>(); // chatId, industryType
     public final Random random = new Random();
 
     public InlineKeyboardMarkup createInlineKeyboard(List<String> buttonLabels, List<String> callbackData) {
@@ -93,12 +100,37 @@ public class BotUtil {
         return inlineKeyboardMarkup;
     }
 
-    public InlineKeyboardMarkup createInlineKeyboard(List<String> buttonLabels, List<String> callbackData, int pageSize, int pageNumber) {
+    public InlineKeyboardMarkup createInlineKeyboard(/*List<String> buttonLabels, List<String> callbackData, int pageSize, int pageNumber, */BigKeyboardType type, String cbData) {
+        if (type == BigKeyboardType.INVALID) {
+            throw new RuntimeException("BigKeyBoardType is " + type.name());
+        }
+
+        String prev = "prev_page_";
+        String next = "next_page_";
+        int pageSize = 5;
+        List<String> buttonLabels = new ArrayList<>();
+        List<String> callbackData = new ArrayList<>();
+        int pageNumber = !cbData.isEmpty() ? Integer.parseInt(cbData.substring(type.name().length() + prev.length())) : 0;
+        int maxSize = 0;
+        switch (type) {
+            case INDUSTRIES -> {
+                maxSize = Constants.INDUSTRIES.size();
+                if ((pageNumber + 1) * pageSize > maxSize) {
+                    throw new RuntimeException("There is no such many industries");
+                }
+
+                for (int i = pageNumber * pageSize; i < (pageNumber + 1) * pageSize; i++) {
+                    buttonLabels.add(String.valueOf(i));
+                    callbackData.add(type.name() + "_" + i);
+                }
+            }
+        }
+
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
 
         int startIndex = pageNumber * pageSize;
-        int endIndex = Math.min((pageNumber + 1) * pageSize, buttonLabels.size());
+        int endIndex = (pageNumber + 1) * pageSize;
 
         for (int i = startIndex; i < endIndex; i++) {
             List<InlineKeyboardButton> keyboardRow = new ArrayList<>();
@@ -114,17 +146,17 @@ public class BotUtil {
         if (pageNumber > 0) {
             List<InlineKeyboardButton> previousButtonRow = new ArrayList<>();
             InlineKeyboardButton previousButton = new InlineKeyboardButton();
-            previousButton.setText("Предыдущая страница");
-            previousButton.setCallbackData("previous_page");
+            previousButton.setText("Пред. страница");
+            previousButton.setCallbackData(type.name() +  prev+ (pageNumber - 1));
             previousButtonRow.add(previousButton);
             rowList.add(previousButtonRow);
         }
 
-        if (endIndex < buttonLabels.size()) {
+        if (endIndex < maxSize) {
             List<InlineKeyboardButton> nextButtonRow = new ArrayList<>();
             InlineKeyboardButton nextButton = new InlineKeyboardButton();
-            nextButton.setText("Следующая страница");
-            nextButton.setCallbackData("next_page");
+            nextButton.setText("След. страница");
+            nextButton.setCallbackData(type.name() + next + (pageNumber + 1));
             nextButtonRow.add(nextButton);
             rowList.add(nextButtonRow);
         }

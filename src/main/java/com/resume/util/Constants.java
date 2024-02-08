@@ -19,6 +19,7 @@ public class Constants {
     public static List<Country> COUNTRIES;
     public static List<Metro> METROS;
     public static List<Industry> INDUSTRIES;
+    public static Map<Integer, Industry> INDUSTRIES_MAP;
     public static ProfessionalRoles PROFESSIONAL_ROLES;
     public static Skills SKILLS;
     public static List<Locale> LOCALES;
