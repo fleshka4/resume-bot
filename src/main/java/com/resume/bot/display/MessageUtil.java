@@ -49,7 +49,7 @@ public class MessageUtil {
         executeMessage(bot, editMessage);
     }
 
-    public SendMessage createSendMessageRequest(TelegramLongPollingBot bot, Long chatId) {
+    public static SendMessage createSendMessageRequest(TelegramLongPollingBot bot, Long chatId) {
         SendMessage sendMessageRequest = new SendMessage();
 
         sendMessageRequest.enableMarkdown(true);

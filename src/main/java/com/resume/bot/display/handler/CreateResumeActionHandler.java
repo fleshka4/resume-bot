@@ -300,7 +300,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                         }
                     }
                 }
-                case "опыт работы", "название организации", "город организации", "ссылка", "должность", "обязанности" -> {
+                case "опыт работы", "название организации", "город организации", "ссылка", /* todo: "сфера деятельности" = industries,*/ "должность", "обязанности" -> {
                     List<String> items = Arrays.stream(fieldValue.split(ITEMS_DELIMITER)).toList();
                     initList(workExperiences, Experience.class, items.size());
 
@@ -332,7 +332,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                     }
                 }
                 case "желаемая позиция" -> resume.setTitle(fieldValue);
-                case "профессиональная роль" -> {
+                case "профессиональная роль" -> { // todo: специализация, professional_roles
 
                 }
                 case "желаемая зарплата" -> {

@@ -279,9 +279,6 @@ public class ResumeBot extends TelegramLongPollingBot {
 
                     sendMessage(this, "Введите свою должность в организации:", sendMessageRequest);
                     BotUtil.dialogueStates.put(chatId, BotState.ENTER_POST_IN_ORGANIZATION);
-                    // todo Должно быть в самом конце диалога
-//                     BotUtil.userStates.put(chatId, BotState.FINISH_DIALOGUE);
-//                     finishDialogueWithClient(chatId, sendMessageRequest);
 
                     // todo сфера деятельности
                     // List<String> industriesNameList = INDUSTRIES.stream().map(Industry::getName).toList();
