@@ -112,7 +112,7 @@ public class BotUtil {
     public final Map <Long, String> personAndIndustryType = new HashMap<>(); // chatId, industryType
     public final Random random = new Random();
 
-    public InlineKeyboardMarkup createInlineKeyboard(List<String> buttonLabels, List<String> callbackData) {
+    public InlineKeyboardMarkup createInlineKeyboard(List<String> buttonLabels, List<String> callbackData, BigKeyboardType type) {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
 
@@ -127,43 +127,32 @@ public class BotUtil {
             rowList.add(keyboardRow);
         }
 
+        if (type != BigKeyboardType.INVALID) {
+            List<InlineKeyboardButton> nextButtonRow = new ArrayList<>();
+            InlineKeyboardButton nextButton = new InlineKeyboardButton();
+            nextButton.setText("След. страница");
+            nextButton.setCallbackData(type + "_next_page_" + 1);
+            nextButtonRow.add(nextButton);
+            rowList.add(nextButtonRow);
+        }
+
         inlineKeyboardMarkup.setKeyboard(rowList);
         return inlineKeyboardMarkup;
     }
 
-    public InlineKeyboardMarkup createInlineKeyboard(/*List<String> buttonLabels, List<String> callbackData, int pageSize, int pageNumber, */BigKeyboardType type, String cbData) {
-        if (type == BigKeyboardType.INVALID) {
-            throw new RuntimeException("BigKeyBoardType is " + type.name());
-        }
+    public InlineKeyboardMarkup createInlineKeyboard(List<String> buttonLabels, List<String> callbackData) {
+        return createInlineKeyboard(buttonLabels, callbackData, BigKeyboardType.INVALID);
+    }
 
-        String prev = "prev_page_";
-        String next = "next_page_";
-        int pageSize = 5;
-        List<String> buttonLabels = new ArrayList<>();
-        List<String> callbackData = new ArrayList<>();
-        int pageNumber = !cbData.isEmpty() ? Integer.parseInt(cbData.substring(type.name().length() + prev.length())) : 0;
-        int maxSize = 0;
-        switch (type) {
-            case INDUSTRIES -> {
-                maxSize = Constants.INDUSTRIES.size();
-                if ((pageNumber + 1) * pageSize > maxSize) {
-                    throw new RuntimeException("There is no such many industries");
-                }
-
-                for (int i = pageNumber * pageSize; i < (pageNumber + 1) * pageSize; i++) {
-                    buttonLabels.add(String.valueOf(i));
-                    callbackData.add(type.name() + "_" + i);
-                }
-            }
-        }
+    public InlineKeyboardMarkup createInlineBigKeyboard(List<String> buttonLabels, List<String> callbackData, int pageNumber, int maxSize, String type) {
+        final String prev = "_prev_page_";
+        final String next = "_next_page_";
+        final int pageSize = 5;
 
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
 
-        int startIndex = pageNumber * pageSize;
-        int endIndex = (pageNumber + 1) * pageSize;
-
-        for (int i = startIndex; i < endIndex; i++) {
+        for (int i = 0; i < pageSize; i++) {
             List<InlineKeyboardButton> keyboardRow = new ArrayList<>();
             InlineKeyboardButton button = new InlineKeyboardButton();
 
@@ -178,22 +167,43 @@ public class BotUtil {
             List<InlineKeyboardButton> previousButtonRow = new ArrayList<>();
             InlineKeyboardButton previousButton = new InlineKeyboardButton();
             previousButton.setText("Пред. страница");
-            previousButton.setCallbackData(type.name() +  prev+ (pageNumber - 1));
+            previousButton.setCallbackData(type +  prev+ (pageNumber - 1));
             previousButtonRow.add(previousButton);
             rowList.add(previousButtonRow);
         }
 
+        final int endIndex = (pageNumber + 1) * pageSize;
         if (endIndex < maxSize) {
             List<InlineKeyboardButton> nextButtonRow = new ArrayList<>();
             InlineKeyboardButton nextButton = new InlineKeyboardButton();
             nextButton.setText("След. страница");
-            nextButton.setCallbackData(type.name() + next + (pageNumber + 1));
+            nextButton.setCallbackData(type + next + (pageNumber + 1));
             nextButtonRow.add(nextButton);
             rowList.add(nextButtonRow);
         }
 
         inlineKeyboardMarkup.setKeyboard(rowList);
         return inlineKeyboardMarkup;
+    }
+
+    public void prepareBigKeyboardCreation(int pageNumber, BigKeyboardType bigKeyboardType, StringBuilder message, List<String> buttonLabels, List<String> callbackDataList) {
+        final int pageSize = 5;
+        switch (bigKeyboardType) {
+            case INDUSTRIES -> {
+                if ((pageNumber + 1) * pageSize > Constants.INDUSTRIES.size()) {
+                    throw new RuntimeException("There is no such many industries");
+                }
+
+                for (int i = pageNumber * pageSize; i < (pageNumber + 1) * pageSize; i++) {
+                    buttonLabels.add(String.valueOf(i + 1));
+                    callbackDataList.add(bigKeyboardType.name() + "_" + i);
+                    message.append((i + 1)).append(". ").append(Constants.INDUSTRIES.get(i).getName());
+                    if (i != (pageNumber + 1) * pageSize - 1) {
+                        message.append('\n');
+                    }
+                }
+            }
+        }
     }
 
     public static long generateRandom12DigitNumber(Random random) {
