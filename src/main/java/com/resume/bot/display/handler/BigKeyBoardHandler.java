@@ -9,7 +9,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.resume.bot.display.MessageUtil.executeEditMessageWithBigKeyBoard;
+import static com.resume.bot.display.MessageUtil.sendMessage;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -21,24 +26,31 @@ public class BigKeyBoardHandler implements CallbackActionHandler {
         sendMessageRequest.setChatId(chatId);
         String type = callbackData.substring(0, callbackData.indexOf('_'));
         BigKeyboardType bigKeyboardType = BigKeyboardType.INVALID;
+        int maxSize;
         switch (type) {
             case "INDUSTRIES" -> {
                 bigKeyboardType = BigKeyboardType.INDUSTRIES;
+                maxSize = Constants.INDUSTRIES.size();
             }
-            default -> {}
+            default -> throw new RuntimeException("BigKeyBoardType is " + bigKeyboardType.name());
         }
-        if (callbackData.contains("page")) {
-            sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(bigKeyboardType, callbackData));
-        } else {
+        if (!callbackData.contains("page")) {
             int index = Integer.parseInt(callbackData.substring(bigKeyboardType.name().length() + 1));
             BotUtil.personAndIndustryType.put(chatId, Constants.INDUSTRIES.get(index).getName());
             BotUtil.dialogueStates.put(chatId, BotState.ENTER_POST_IN_ORGANIZATION);
+            sendMessage(bot, "Введите свою должность в организации:", sendMessageRequest);
+            return;
         }
-        sendMessageRequest.setText("");
-        try {
-            bot.execute(sendMessageRequest);
-        } catch (TelegramApiException e) {
-            log.error(BotUtil.ERROR_TEXT + e.getMessage());
-        }
+
+        StringBuilder message = new StringBuilder();
+        message.append("Выберите сферу деятельности компании:\n\n");
+
+        List<String> buttonLabels = new ArrayList<>();
+        List<String> callbackDataList = new ArrayList<>();
+
+        final int pageNumber = Integer.parseInt(callbackData.substring(bigKeyboardType.name().length() + 11));
+        BotUtil.prepareBigKeyboardCreation(pageNumber, bigKeyboardType, message, buttonLabels, callbackDataList);
+
+        executeEditMessageWithBigKeyBoard(bot, String.valueOf(message), messageId, chatId, buttonLabels, callbackDataList, pageNumber, maxSize, bigKeyboardType.name());
     }
 }

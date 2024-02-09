@@ -9,6 +9,7 @@ import com.resume.bot.json.JsonValidator;
 import com.resume.bot.json.entity.client.Resume;
 import com.resume.bot.model.entity.User;
 import com.resume.hh_wrapper.config.HhConfig;
+import com.resume.util.BigKeyboardType;
 import com.resume.util.BotUtil;
 import com.vdurmont.emoji.EmojiParser;
 import lombok.RequiredArgsConstructor;
@@ -277,24 +278,22 @@ public class ResumeBot extends TelegramLongPollingBot {
                         checkInput(receivedText, 256L, sendMessageRequest, SYMBOLS_LIMIT)) {
                     appendToField(resumeFields, ResumeField.EXPERIENCE_ORG_LINK.getValue(), receivedText);
 
-                    sendMessage(this, "Введите свою должность в организации:", sendMessageRequest);
-                    BotUtil.dialogueStates.put(chatId, BotState.ENTER_POST_IN_ORGANIZATION);
-
-                    // todo сфера деятельности
-                    // List<String> industriesNameList = INDUSTRIES.stream().map(Industry::getName).toList();
-                    // sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(industriesNameList, industriesNameList,
-                    //         5, 0));
-                    // sendMessage("Выберите сферу деятельности компании:", sendMessageRequest);
-                    // todo сфера деятельности!!!!!!!!!!!!!!!! проблема с клавой хз как сделать 30 кнопок
-//                    List<String> industriesNameList = INDUSTRIES.stream().map(Industry::getName).toList();
-//                    sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(industriesNameList, industriesNameList,
-//                            5, 0));
-//                    sendMessage(this, "Выберите сферу деятельности компании:", sendMessageRequest);
+                    List<String> buttonLabels = new ArrayList<>();
+                    List<String> callbackDataList = new ArrayList<>();
+                    StringBuilder message = new StringBuilder();
+                    message.append("Выберите сферу деятельности компании:\n\n");
+                    BotUtil.prepareBigKeyboardCreation(0, BigKeyboardType.INDUSTRIES, message, buttonLabels, callbackDataList);
+                    sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, callbackDataList, BigKeyboardType.INDUSTRIES));
+                    sendMessage(this, String.valueOf(message), sendMessageRequest);
                 }
             }
             case ENTER_POST_IN_ORGANIZATION -> {
                 if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
                         checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
+                    if (BotUtil.personAndIndustryType.containsKey(chatId)) {
+                        appendToField(resumeFields, ResumeField.EXPERIENCE_ORG_INDUSTRY.getValue(), BotUtil.personAndIndustryType.get(chatId));
+                        System.out.println(resumeFields);
+                    }
                     appendToField(resumeFields, ResumeField.EXPERIENCE_POST.getValue(), receivedText);
 
                     sendMessage(this, "Введите свои обязанности в организации:", sendMessageRequest);
@@ -363,8 +362,6 @@ public class ResumeBot extends TelegramLongPollingBot {
                 }
             }
             case ENTER_WISH_POSITION -> {
-                BotUtil.userStates.put(chatId, BotState.FINISH_DIALOGUE);
-                finishDialogueWithClient(chatId, sendMessageRequest);
                 if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
                         checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
                     appendToField(resumeFields, ResumeField.WISH_POSITION.getValue(), receivedText);
@@ -374,6 +371,9 @@ public class ResumeBot extends TelegramLongPollingBot {
                     sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, callbackData));
                     sendMessage(this, "Хотите ли Вы указать желаемую зарплату?", sendMessageRequest);
                 }
+            }
+            case ENTER_WISH_PROFESSIONAL_ROLE -> {
+
             }
             case ENTER_WISH_SALARY -> {
                 if (checkInput(receivedText, sendMessageRequest, NUMERIC_FORMAT)) {

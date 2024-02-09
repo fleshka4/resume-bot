@@ -30,6 +30,19 @@ public class MessageUtil {
         executeMessage(bot, editMessage);
     }
 
+    public static void executeEditMessageWithBigKeyBoard(TelegramLongPollingBot bot, String editMessageToSend, Integer messageId,
+                                                      Long chatId, List<String> buttonLabels, List<String> buttonIds, int pageNumber, int maxSize, String type) {
+        EditMessageText editMessage = new EditMessageText();
+        editMessage.setParseMode(ParseMode.MARKDOWN);
+        editMessage.setChatId(chatId.toString());
+        editMessage.setMessageId(messageId);
+        editMessage.setText(editMessageToSend);
+
+
+        editMessage.setReplyMarkup(BotUtil.createInlineBigKeyboard(buttonLabels, buttonIds, pageNumber, maxSize, type));
+        executeMessage(bot, editMessage);
+    }
+
     public void executeContinueKeyboardMessage(TelegramLongPollingBot bot,String messageText, Integer messageId,
                                                 Long chatId, Map<String, String> data, String continueButtonLabel) {
         List<String> keys = new ArrayList<>(data.keySet().stream().toList());
