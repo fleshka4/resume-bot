@@ -503,6 +503,23 @@ public enum ResumeField {
         }
     },
 
+    WITH_PROFESSIONAL_ROLE("профессиональная роль") {
+        @Override
+        public boolean processCheck(String checkValue) {
+            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_256);
+        }
+
+        @Override
+        public String message() {
+            return formatLocation(getValue());
+        }
+
+        @Override
+        public void editInResume(Resume resume, String param) {
+            // fixme
+        }
+    },
+
     WISH_SALARY("желаемая зарплата") {
         @Override
         public boolean processCheck(String checkValue) {

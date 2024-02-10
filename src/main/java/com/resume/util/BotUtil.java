@@ -67,7 +67,8 @@ public class BotUtil {
             "back_to_my_resumes"
     );
     public final List<String> BIG_TYPES_IDS = List.of(
-            "INDUSTRIES"
+            "INDUSTRIES",
+            "PROFESSIONAL_ROLES"
     );
     public final List<String> ACTIONS_WITH_RESUME = List.of(
             "publish_on_hh",
@@ -109,7 +110,8 @@ public class BotUtil {
     public final Map<Long, Resume> clientsMap = new HashMap<>();
     public final String ERROR_TEXT = "Error occurred: ";
     public final Map<Long, Long> states = new HashMap<>(); // state, chatId
-    public final Map <Long, String> personAndIndustryType = new HashMap<>(); // chatId, industryType
+    public final Map<Long, String> personAndIndustry = new HashMap<>(); // chatId, industry
+    public final Map<Long, String> personAndProfessionalRole = new HashMap<>(); // chatId, professionalRole
     public final Random random = new Random();
 
     public InlineKeyboardMarkup createInlineKeyboard(List<String> buttonLabels, List<String> callbackData, BigKeyboardType type) {
@@ -147,7 +149,8 @@ public class BotUtil {
     public InlineKeyboardMarkup createInlineBigKeyboard(List<String> buttonLabels, List<String> callbackData, int pageNumber, int maxSize, String type) {
         final String prev = "_prev_page_";
         final String next = "_next_page_";
-        final int pageSize = 5;
+        final int defaultPageSize = 5;
+        final int pageSize = Math.min(buttonLabels.size(), defaultPageSize);
 
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
@@ -167,12 +170,12 @@ public class BotUtil {
             List<InlineKeyboardButton> previousButtonRow = new ArrayList<>();
             InlineKeyboardButton previousButton = new InlineKeyboardButton();
             previousButton.setText("Пред. страница");
-            previousButton.setCallbackData(type +  prev+ (pageNumber - 1));
+            previousButton.setCallbackData(type + prev + (pageNumber - 1));
             previousButtonRow.add(previousButton);
             rowList.add(previousButtonRow);
         }
 
-        final int endIndex = (pageNumber + 1) * pageSize;
+        final int endIndex = (pageNumber + 1) * defaultPageSize;
         if (endIndex < maxSize) {
             List<InlineKeyboardButton> nextButtonRow = new ArrayList<>();
             InlineKeyboardButton nextButton = new InlineKeyboardButton();
@@ -189,15 +192,26 @@ public class BotUtil {
     public void prepareBigKeyboardCreation(int pageNumber, BigKeyboardType bigKeyboardType, StringBuilder message, List<String> buttonLabels, List<String> callbackDataList) {
         final int pageSize = 5;
         switch (bigKeyboardType) {
-            case INDUSTRIES -> {
-                if ((pageNumber + 1) * pageSize > Constants.INDUSTRIES.size()) {
-                    throw new RuntimeException("There is no such many industries");
+            case INDUSTRIES, PROFESSIONAL_ROLES -> {
+                final boolean isIndustry = bigKeyboardType == BigKeyboardType.INDUSTRIES;
+                final int maxSize = isIndustry ?
+                        Constants.INDUSTRIES.size() :
+                        Constants.PROFESSIONAL_ROLES.getCategories().size();
+
+                final int startCounter = pageNumber * pageSize;
+                int limit = (pageNumber + 1) * pageSize;
+                if ((pageNumber + 1) * pageSize > maxSize) {
+                    limit = startCounter + pageSize - (limit - maxSize);
                 }
 
-                for (int i = pageNumber * pageSize; i < (pageNumber + 1) * pageSize; i++) {
+                for (int i = startCounter; i < limit; i++) {
                     buttonLabels.add(String.valueOf(i + 1));
                     callbackDataList.add(bigKeyboardType.name() + "_" + i);
-                    message.append((i + 1)).append(". ").append(Constants.INDUSTRIES.get(i).getName());
+                    message.append((i + 1))
+                            .append(". ")
+                            .append(isIndustry ?
+                                    Constants.INDUSTRIES.get(i).getName() :
+                                    Constants.PROFESSIONAL_ROLES.getCategories().get(i).getName());
                     if (i != (pageNumber + 1) * pageSize - 1) {
                         message.append('\n');
                     }

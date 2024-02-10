@@ -290,9 +290,8 @@ public class ResumeBot extends TelegramLongPollingBot {
             case ENTER_POST_IN_ORGANIZATION -> {
                 if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
                         checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
-                    if (BotUtil.personAndIndustryType.containsKey(chatId)) {
-                        appendToField(resumeFields, ResumeField.EXPERIENCE_ORG_INDUSTRY.getValue(), BotUtil.personAndIndustryType.get(chatId));
-                        System.out.println(resumeFields);
+                    if (BotUtil.personAndIndustry.containsKey(chatId)) {
+                        appendToField(resumeFields, ResumeField.EXPERIENCE_ORG_INDUSTRY.getValue(), BotUtil.personAndIndustry.get(chatId));
                     }
                     appendToField(resumeFields, ResumeField.EXPERIENCE_POST.getValue(), receivedText);
 
@@ -366,17 +365,20 @@ public class ResumeBot extends TelegramLongPollingBot {
                         checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
                     appendToField(resumeFields, ResumeField.WISH_POSITION.getValue(), receivedText);
 
-                    List<String> buttonLabels = List.of("Хочу", "Пропустить");
-                    List<String> callbackData = List.of("want_enter_salary", "skip_salary");
-                    sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, callbackData));
-                    sendMessage(this, "Хотите ли Вы указать желаемую зарплату?", sendMessageRequest);
+                    List<String> buttonLabels = new ArrayList<>();
+                    List<String> callbackDataList = new ArrayList<>();
+                    StringBuilder message = new StringBuilder();
+                    message.append("Выберите специализацию:\n\n");
+                    BotUtil.prepareBigKeyboardCreation(0, BigKeyboardType.PROFESSIONAL_ROLES, message, buttonLabels, callbackDataList);
+                    sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, callbackDataList, BigKeyboardType.PROFESSIONAL_ROLES));
+                    sendMessage(this, String.valueOf(message), sendMessageRequest);
                 }
-            }
-            case ENTER_WISH_PROFESSIONAL_ROLE -> {
-
             }
             case ENTER_WISH_SALARY -> {
                 if (checkInput(receivedText, sendMessageRequest, NUMERIC_FORMAT)) {
+                    if (BotUtil.personAndProfessionalRole.containsKey(chatId)) {
+                        appendToField(resumeFields, ResumeField.WITH_PROFESSIONAL_ROLE.getValue(), BotUtil.personAndProfessionalRole.get(chatId));
+                    }
                     appendToField(resumeFields, ResumeField.WISH_SALARY.getValue(), receivedText);
 
                     List<String> keys = new ArrayList<>(employmentTypes.keySet().stream().toList());

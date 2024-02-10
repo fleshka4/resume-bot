@@ -4,6 +4,7 @@ import com.resume.bot.display.BotState;
 import com.resume.bot.display.CallbackActionHandler;
 import com.resume.bot.display.ResumeField;
 import com.resume.bot.json.JsonProcessor;
+import com.resume.bot.json.entity.Industry;
 import com.resume.bot.json.entity.area.Area;
 import com.resume.bot.json.entity.client.Experience;
 import com.resume.bot.json.entity.client.Recommendation;
@@ -14,6 +15,7 @@ import com.resume.bot.json.entity.client.education.ElementaryEducation;
 import com.resume.bot.json.entity.client.education.PrimaryEducation;
 import com.resume.bot.json.entity.common.Id;
 import com.resume.bot.json.entity.common.Type;
+import com.resume.bot.json.entity.roles.Category;
 import com.resume.util.BotUtil;
 import com.resume.util.Constants;
 import com.vdurmont.emoji.EmojiParser;
@@ -220,7 +222,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             processOnChosenDriverLicense(callbackData, chatId, userData);
 
             List<String> chosenDriverLicenses = Arrays.stream(userData.get(ResumeField.DRIVER_LICENCE.getValue()).split(ITEMS_DELIMITER)).toList();
-            Map<String, String> unchosenDriverLicenseTypes = getUnchosenItems(driverLicenseTypes, chosenDriverLicenses);
+            Map<String, String> unchosenDriverLicenseTypes = getUnChosenItems(driverLicenseTypes, chosenDriverLicenses);
 
             executeContinueKeyboardMessage(bot, EmojiParser.parseToUnicode("Выберите категорию прав.:car:"),
                     messageId, chatId, unchosenDriverLicenseTypes, "no_enter_car");
@@ -230,7 +232,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             processOnChosenBusyness(callbackData, chatId, userData);
 
             List<String> chosenBusyness = Arrays.stream(userData.get(ResumeField.BUSYNESS.getValue()).split(ITEMS_DELIMITER)).toList();
-            Map<String, String> unchosenBusyness = getUnchosenItems(employmentTypes, chosenBusyness);
+            Map<String, String> unchosenBusyness = getUnChosenItems(employmentTypes, chosenBusyness);
 
             executeContinueKeyboardMessage(bot, "Выберите желаемую занятость.", messageId, chatId, unchosenBusyness, "skip_busyness");
         }
@@ -239,7 +241,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             processOnChosenSchedule(callbackData, chatId, userData);
 
             List<String> chosenSchedule = Arrays.stream(userData.get(ResumeField.SCHEDULE.getValue()).split(ITEMS_DELIMITER)).toList();
-            Map<String, String> unchosenSchedule = getUnchosenItems(scheduleTypes, chosenSchedule);
+            Map<String, String> unchosenSchedule = getUnChosenItems(scheduleTypes, chosenSchedule);
 
             executeContinueKeyboardMessage(bot, "Выберите желаемый график.", messageId, chatId, unchosenSchedule, "skip_schedule");
         }
@@ -254,7 +256,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
         List<Id> driverLicenseTypes = new ArrayList<>();
         Recommendation recommendation = new Recommendation();
         List<Recommendation> recommendationList = new ArrayList<>();
-        List<Type> bussynes = new ArrayList<>();
+        List<Type> busyness = new ArrayList<>();
         List<Type> schedules = new ArrayList<>();
 
         for (Map.Entry<String, String> entry : BotUtil.userResumeData.get(chatId).entrySet()) {
@@ -300,7 +302,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                         }
                     }
                 }
-                case "опыт работы", "название организации", "город организации", "ссылка", /* todo: "сфера деятельности" = industries,*/ "должность", "обязанности" -> {
+                case "опыт работы", "название организации", "город организации", "ссылка", "отрасль", "должность", "обязанности" -> {
                     List<String> items = Arrays.stream(fieldValue.split(ITEMS_DELIMITER)).toList();
                     initList(workExperiences, Experience.class, items.size());
 
@@ -333,7 +335,17 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                 }
                 case "желаемая позиция" -> resume.setTitle(fieldValue);
                 case "профессиональная роль" -> { // todo: специализация, professional_roles
-
+                    String roleId = null;
+                    for (Category category: Constants.PROFESSIONAL_ROLES.getCategories()) {
+                        if (category.getName().equals(fieldValue)) {
+                            roleId = category.getId();
+                            break;
+                        }
+                    }
+                    if (roleId == null) {
+                        throw new RuntimeException("Industry is null");
+                    }
+                    resume.setProfessionalRoles(List.of(new Id(roleId)));
                 }
                 case "желаемая зарплата" -> {
                     Salary salary = new Salary();
@@ -342,13 +354,13 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                 }
                 case "желаемая занятость" -> {
                     List<String> items = Arrays.stream(fieldValue.split(ITEMS_DELIMITER)).toList();
-                    initList(bussynes, Type.class, items.size());
+                    initList(busyness, Type.class, items.size());
 
                     for (String item : items) {
                         Type typeBusyness = new Type();
                         typeBusyness.setId(getKeyByValue(employmentTypes, item));
                         typeBusyness.setName(item);
-                        bussynes.add(typeBusyness);
+                        busyness.add(typeBusyness);
                     }
                 }
                 case "желаемый график работы" -> {
@@ -372,7 +384,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
         resume.setExperience(workExperiences);
         resume.setDriverLicenseTypes(driverLicenseTypes);
         resume.setRecommendation(recommendationList);
-        resume.setEmployments(bussynes);
+        resume.setEmployments(busyness);
         resume.setSchedules(schedules);
 
         JsonProcessor.createJsonFromEntity(resume);
@@ -474,7 +486,19 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             case "ссылка" -> workExperience.setCompanyUrl(fieldValue);
             case "должность" -> workExperience.setPosition(fieldValue);
             case "обязанности" -> workExperience.setDescription(fieldValue);
-            // todo case "отрасль" -> workExperience.setIndustries();
+            case "отрасль" -> {
+                List<Type> industries = null;
+                for (Industry industry: INDUSTRIES) {
+                    if (industry.getName().equals(fieldValue)) {
+                        industries = industry.getIndustries();
+                        break;
+                    }
+                }
+                if (industries == null) {
+                    throw new RuntimeException("Industry is null");
+                }
+                workExperience.setIndustries(industries);
+            }
             // пользователь должен протыкать на клавиатуре отрасли своей компании
         }
     }
@@ -487,7 +511,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                 .orElse("");
     }
 
-    private Map<String, String> getUnchosenItems(Map<String, String> allItems, List<String> chosenItems) {
+    private Map<String, String> getUnChosenItems(Map<String, String> allItems, List<String> chosenItems) {
         return allItems.entrySet()
                 .stream()
                 .filter(item -> !chosenItems.contains(item.getKey()))
