@@ -597,6 +597,7 @@ public enum ResumeField {
 
         @Override
         public void editInResume(Resume resume, String param) {
+            resume.setContacts(param);
         }
     },
 
@@ -613,6 +614,7 @@ public enum ResumeField {
 
         @Override
         public void editInResume(Resume resume, String param) {
+            resume.setContacts(param);
         }
     },
 
@@ -629,6 +631,7 @@ public enum ResumeField {
 
         @Override
         public void editInResume(Resume resume, String param) {
+            resume.setContacts(param);
         }
     },
 
@@ -645,6 +648,7 @@ public enum ResumeField {
 
         @Override
         public void editInResume(Resume resume, String param) {
+            resume.setContacts(param);
         }
     };
 

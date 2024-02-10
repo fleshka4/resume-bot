@@ -153,9 +153,8 @@ public class ResumeBot extends TelegramLongPollingBot {
                         checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
                     appendToField(resumeFields, ResumeField.NAME.getValue(), receivedText);
 
-                    sendMessage(this, "Введите авваа фамилию:", sendMessageRequest);
-                    BotUtil.dialogueStates.put(chatId, BotState.ENTER_WISH_SALARY);
-//                    BotUtil.dialogueStates.put(chatId, BotState.ENTER_SURNAME);
+                    sendMessage(this, "Введите фамилию:", sendMessageRequest);
+                    BotUtil.dialogueStates.put(chatId, BotState.ENTER_SURNAME);
                 }
             }
             case ENTER_SURNAME -> {
@@ -429,8 +428,7 @@ public class ResumeBot extends TelegramLongPollingBot {
                 BotUtil.userStates.put(chatId, BotState.FINISH_DIALOGUE);
                 finishDialogueWithClient(chatId, sendMessageRequest);
             }
-            default ->
-                    sendMessage(this, EmojiParser.parseToUnicode("Что-то пошло не так.\nПопробуйте ещё раз.:cry:"), sendMessageRequest);
+            default -> sendMessage(this, EmojiParser.parseToUnicode("Что-то пошло не так.\nПопробуйте ещё раз.:cry:"), sendMessageRequest);
         }
     }
 
