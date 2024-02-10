@@ -1,6 +1,7 @@
 package com.resume.bot.service;
 
 import com.resume.bot.model.entity.Resume;
+import com.resume.bot.model.entity.Template;
 import com.resume.bot.model.entity.User;
 import com.resume.bot.repository.ResumeRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -34,6 +35,14 @@ public class ResumeService {
 
     public void updateHhLinkByResumeId(String hhLink, int resumeId) {
         repository.updateHhLinkByResumeId(hhLink, resumeId);
+    }
+
+    public void updateTemplateByResumeId(Template template, int resumeId) {
+        repository.updateTemplateByResumeId(template, resumeId);
+    }
+
+    public void updateResumeDataByResumeId(String resumeData, int resumeId) {
+        repository.updateResumeDataByResumeId(resumeData, resumeId);
     }
 
     public void deleteResume(Resume resume) {

@@ -1,15 +1,24 @@
 package com.resume.util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.resume.bot.display.BotState;
 import com.resume.bot.json.entity.client.Resume;
 import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
+import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import java.util.*;
 
+import static com.resume.bot.display.MessageUtil.createSendMessageRequest;
+import static com.resume.bot.display.MessageUtil.sendMessage;
 import static com.resume.util.Constants.ITEMS_DELIMITER;
 
+@Slf4j
 @UtilityClass
 public class BotUtil {
     public final List<String> CREATE_RESUME_IDS_LIST = List.of(
@@ -110,9 +119,10 @@ public class BotUtil {
     public final Map<Long, Integer> pages = new HashMap<>();
     public final Map<Long, BotState> dialogueStates = new HashMap<>();
     public final Map<Long, Map<String, String>> userResumeData = new LinkedHashMap<>();
+    public final Map<Long, com.resume.bot.model.entity.Resume> userMyResumeMap = new HashMap<>();
     public final Map<Long, Resume> clientsMap = new HashMap<>();
     public final String ERROR_TEXT = "Error occurred: ";
-    public final Map<Long, Long> states = new HashMap<>(); // state, chatId
+    public final Map<Long, Long> states = new HashMap<>(); // authorize: state, chatId
     public final Map<Long, String> personAndIndustryType = new HashMap<>(); // chatId, industryType
     public final Map<Long, String> personAndIndustry = new HashMap<>(); // chatId, industry
     public final Map<Long, String> personAndProfessionalRole = new HashMap<>(); // chatId, professionalRole
@@ -239,5 +249,38 @@ public class BotUtil {
 
     public static SortedMap<String, String> createSortedMap(Map<String, String> originalMap) {
         return new TreeMap<>(originalMap);
+    }
+
+    public static void askToEditMyResume(com.resume.bot.model.entity.Resume resume, Long chatId, TelegramLongPollingBot bot) {
+        StringBuilder builder = new StringBuilder().append("Ваше резюме:\n\n");
+        ObjectMapper objectMapper = new ObjectMapper();
+        String resumeData = resume.getResumeData();
+        try {
+            JsonNode jsonNode = objectMapper.readTree(resumeData);
+
+            jsonNode.fields().forEachRemaining(entry -> {
+                String key = entry.getKey();
+                String value = entry.getValue().asText();
+                builder.append(key)
+                        .append(": ")
+                        .append(value)
+                        .append('\n');
+            });
+
+            BotUtil.userMyResumeMap.put(chatId, resume);
+        } catch (RuntimeException | JsonProcessingException e) {
+            log.error(e.getMessage());
+            // todo
+        }
+
+        builder.append("""
+                
+                Присылайте исправления в формате *Поле - новое значение*
+
+                *Пример:*
+                Имя - Алексей""");
+
+        SendMessage sendMessageRequest = createSendMessageRequest(bot, chatId);
+        sendMessage(bot, builder.toString(), sendMessageRequest);
     }
 }

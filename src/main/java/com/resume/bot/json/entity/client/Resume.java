@@ -95,7 +95,6 @@ public class Resume {
     @NonNull
     private Id gender;
 
-    @NonNull
     private List<Language> language;
 
     private String contacts;

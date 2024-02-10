@@ -6,6 +6,8 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class TemplateService {
@@ -19,5 +21,9 @@ public class TemplateService {
         return repository.findById(templateId).orElseThrow(
                 () -> new EntityNotFoundException("Template not found")
         );
+    }
+
+    public List<Template> getTemplates() {
+        return repository.findAll();
     }
 }
