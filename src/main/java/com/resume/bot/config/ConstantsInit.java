@@ -4,10 +4,11 @@ import com.resume.bot.service.HeadHunterService;
 import com.resume.util.Constants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
 
 @Slf4j
 @Component
@@ -37,6 +38,10 @@ public class ConstantsInit {
     @EventListener({ApplicationReadyEvent.class})
     public void initIndustries() {
         Constants.INDUSTRIES = headHunterService.getIndustries(hhBaseUrl);
+        Constants.INDUSTRIES_MAP = new HashMap<>();
+        for (int i = 0; i < Constants.INDUSTRIES.size(); i++) {
+            Constants.INDUSTRIES_MAP.put(i, Constants.INDUSTRIES.get(i));
+        }
         log.info("Industries initialized");
     }
 

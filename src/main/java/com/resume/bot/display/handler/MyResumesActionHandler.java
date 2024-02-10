@@ -2,6 +2,7 @@ package com.resume.bot.display.handler;
 
 import com.resume.bot.display.BotState;
 import com.resume.bot.display.CallbackActionHandler;
+import com.resume.bot.display.ResumeField;
 import com.resume.bot.json.JsonProcessor;
 import com.resume.bot.model.entity.Resume;
 import com.resume.bot.service.HeadHunterService;
@@ -12,10 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -23,8 +21,12 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.resume.bot.display.MessageUtil.executeEditMessageWithKeyBoard;
+import static com.resume.bot.display.MessageUtil.sendMessage;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -58,7 +60,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
 
                 // todo проецировать список резюме полученных из бд
                 //  с помощью inline клавиатуры (кнопки это номера в списке)
-                executeEditMessageWithKeyBoard(EmojiParser.parseToUnicode("""
+                executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode("""
                         Здесь Вы можете просматривать список всех созданных резюме.:page_with_curl:
                         После выбора конкретного резюме, у вас будет возможность:
 
@@ -69,7 +71,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
                         """), messageId, chatId, buttonLabels, buttonIds);
             }
             case "back_to_menu_3" -> {
-                List<String> buttonLabels = Arrays.asList("Создать резюме", "Экспорт резюме с hh.ru", "Мои резюме");
+                List<String> buttonLabels = Arrays.asList("Создать резюме", "Использовать резюме с hh.ru", "Мои резюме");
                 List<String> buttonIds = Arrays.asList("create_resume", "export_resume_hh", "my_resumes");
 
                 String menuInfo = """
@@ -84,7 +86,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
                         *Мои резюме* :clipboard:
                         Посмотрите список ваших созданных резюме.""";
 
-                executeEditMessageWithKeyBoard(EmojiParser.parseToUnicode(menuInfo), messageId, chatId, buttonLabels, buttonIds);
+                executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode(menuInfo), messageId, chatId, buttonLabels, buttonIds);
             }
             //todo действия после выбора одной из резюмешек
             case "resume_1", "resume_2", "resume_3", "resume_4", "resume_5", "resume_6" -> {
@@ -93,13 +95,28 @@ public class MyResumesActionHandler implements CallbackActionHandler {
                 List<String> buttonIds = Arrays.asList("publish_on_hh_" + callbackData, "download_" + callbackData,
                         "edit_" + callbackData, "delete_" + callbackData, "back_to_my_resumes");
 
-                executeEditMessageWithKeyBoard(EmojiParser.parseToUnicode("Выберите, что нужно сделать с вашим резюме.:slightly_smiling:"),
+                executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode("Выберите, что нужно сделать с вашим резюме.:slightly_smiling:"),
                         messageId, chatId, buttonLabels, buttonIds);
             }
+            case "edit_resume" -> {
+                Map<String, String> buttons = Map.of(
+                        "edit_resume_1", "1",
+                        "edit_resume_2", "2",
+                        "edit_resume_3", "3",
+                        "edit_resume_4", "4",
+                        "edit_resume_5", "5",
+                        "edit_resume_6", "6");
+
+                executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode("Выберите резюме, которое нужно изменить.:slightly_smiling:"),
+                        messageId, chatId, buttons.values().stream().toList(), buttons.keySet().stream().toList());
+            }
             default -> {
-                if (finallyPublish(callbackData, chatId) || publishOnHh(callbackData, messageId, chatId) || downloadResume(callbackData, chatId) ||
-                        editResume(callbackData, messageId, chatId) || deleteResume(callbackData, chatId) ||
-                         updateResumeOnHh(callbackData, chatId)){
+                if (finallyPublish(callbackData, chatId)
+                        || publishOnHh(callbackData, messageId, chatId)
+                        || downloadResume(callbackData, chatId)
+                        || editResume(callbackData, chatId)
+                        || deleteResume(callbackData, chatId)
+                        || updateResumeOnHh(callbackData, chatId)) {
                     System.out.println("done");
                 }
             }
@@ -120,7 +137,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
         List<String> buttonIds = Arrays.asList("finally_publish_on_hh_resume_" + num, "update_resume_" + num,
                 "resume_" + num);
 
-        executeEditMessageWithKeyBoard(EmojiParser.parseToUnicode("Опубликовать как новое или обновить существующее"),
+        executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode("Опубликовать как новое или обновить существующее"),
                 messageId, chatId, buttonLabels, buttonIds);
         return true;
     }
@@ -140,7 +157,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
 
         String hhLink = resume.getHhLink();
         if (hhLink == null || hhLink.isEmpty()) {
-            sendMessage("Резюме не может быть обновлено, так как оно не найдено на hh.ru. Попробуйте сначала опубликовать его", chatId);
+            sendMessage(bot, "Резюме не может быть обновлено, так как оно не найдено на hh.ru. Попробуйте сначала опубликовать его", chatId);
             return true;
         }
         try {
@@ -150,7 +167,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
                     JsonProcessor.createEntityFromJson(resume.getResumeData(), com.resume.bot.json.entity.client.Resume.class));
         } catch (Exception exception) {
             log.error(exception.getMessage());
-            sendMessage("Произошла ошибка при обновлении резюме. " +
+            sendMessage(bot, "Произошла ошибка при обновлении резюме. " +
                     "Попробуйте удалить его и создать заново или выберите другое", chatId);
         }
         return true;
@@ -181,7 +198,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
             resumeService.saveResume(newResume);
         } catch (Exception exception) {
             log.error(exception.getMessage());
-            sendMessage("Произошла ошибка при публикации резюме. " +
+            sendMessage(bot, "Произошла ошибка при публикации резюме. " +
                     "Попробуйте удалить его и создать заново или выберите другое", chatId);
         }
         return true;
@@ -206,13 +223,13 @@ public class MyResumesActionHandler implements CallbackActionHandler {
             bot.execute(new SendDocument(String.valueOf(chatId), new InputFile(file)));
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
-            sendMessage("Не найден файл, содержащий резюме. Попробуйте создать заново", chatId);
+            sendMessage(bot, "Не найден файл, содержащий резюме. Попробуйте создать заново", chatId);
         }
 
         return true;
     }
 
-    private boolean editResume(String data, Integer messageId, Long chatId) {
+    private boolean editResume(String data, Long chatId) {
         Pattern pattern = Pattern.compile("edit_resume_([1-6])");
 
         Matcher matcher = pattern.matcher(data);
@@ -225,7 +242,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
             return true;
         }
 
-        //todo: edit
+        BotUtil.userStates.put(chatId, BotState.EDIT_MY_RESUME);
 
         return true;
     }
@@ -251,7 +268,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
         if (resumes.size() >= numOfResume) {
             return resumes.get(numOfResume - 1);
         }
-        sendMessage("Резюме не найдено. Попробуйте снова", chatId);
+        sendMessage(bot, "Резюме не найдено. Попробуйте снова", chatId);
         return null;
     }
 
@@ -260,44 +277,33 @@ public class MyResumesActionHandler implements CallbackActionHandler {
         return Integer.parseInt(s[s.length - 1]);
     }
 
-    private void sendMessage(String text, Long chatId) {
-        SendMessage message = new SendMessage();
-        message.setParseMode(ParseMode.MARKDOWN);
-        message.setChatId(chatId.toString());
-        message.setText(text);
-        try {
-            bot.execute(message);
-        } catch (TelegramApiException e) {
-            log.error(BotUtil.ERROR_TEXT + e.getMessage());
+
+    //TODO сами вызовите где надо в этом говне
+    private boolean editClientResumeData(com.resume.bot.json.entity.client.Resume resume,
+                                         String receivedText, Long chatId) {
+        String[] lines = receivedText.split("\\r?\\n");
+        for (String line : lines) {
+            String[] parts = line.split("-", 2);
+            if (parts.length == 2) {
+                String fieldLabel = parts[0].trim().toLowerCase();
+                String fieldValue = parts[1].trim();
+
+                ResumeField field = Arrays.stream(ResumeField.values())
+                        .filter(f -> f.getValue().equals(fieldLabel)).findFirst().orElse(null);
+                if (field != null) {
+                    if (field.processCheck(fieldValue)) {
+                        field.editInResume(resume, fieldValue);
+                    } else {
+                        sendMessage(bot, field.message(), chatId);
+                        return false;
+                    }
+                }
+            } else {
+                sendMessage(bot, "Пожалуйста, введите данные в формате\n*Поле - Ваше новое значение*.", chatId);
+                return false;
+            }
         }
-    }
 
-    private void executeEditMessage(String editMessageToSend, Integer messageId, Long chatId) {
-        EditMessageText editMessage = new EditMessageText();
-        editMessage.setParseMode(ParseMode.MARKDOWN);
-        editMessage.setChatId(chatId.toString());
-        editMessage.setMessageId(messageId);
-        editMessage.setText(editMessageToSend);
-
-        executeMessage(editMessage);
-    }
-
-    private void executeEditMessageWithKeyBoard(String editMessageToSend, Integer messageId, Long chatId, List<String> buttonLabels, List<String> buttonIds) {
-        EditMessageText editMessage = new EditMessageText();
-        editMessage.setParseMode(ParseMode.MARKDOWN);
-        editMessage.setChatId(chatId.toString());
-        editMessage.setMessageId(messageId);
-        editMessage.setText(editMessageToSend);
-
-        editMessage.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, buttonIds));
-        executeMessage(editMessage);
-    }
-
-    private void executeMessage(EditMessageText message) {
-        try {
-            bot.execute(message);
-        } catch (TelegramApiException e) {
-            log.error(BotUtil.ERROR_TEXT + e.getMessage());
-        }
+        return true;
     }
 }
