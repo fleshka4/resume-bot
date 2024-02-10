@@ -23,8 +23,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.*;
 
-import static com.resume.bot.display.MessageUtil.createSendMessageRequest;
-import static com.resume.bot.display.MessageUtil.sendMessage;
+import static com.resume.bot.display.MessageUtil.*;
 import static com.resume.bot.json.JsonValidator.ValidationType.*;
 import static com.resume.bot.json.JsonValidator.checkExperience;
 import static com.resume.bot.json.JsonValidator.checks;
@@ -92,6 +91,9 @@ public class ResumeBot extends TelegramLongPollingBot {
                 createMenu(sendMessageRequest);
             } else if (callbackData.equals("no_go_to_menu")) {
                 sendMessage(this, EmojiParser.parseToUnicode("Продолжим работу.:wink:"), sendMessageRequest);
+            } else if (callbackData.equals("skip_contacts")) {
+                BotUtil.userStates.put(chatId, BotState.FINISH_DIALOGUE);
+                finishDialogueWithClient(chatId, sendMessageRequest);
             } else {
                 CallbackActionHandler callbackHandler = callbackActionFactory.createCallbackActionHandler(this, callbackData);
 
@@ -139,7 +141,6 @@ public class ResumeBot extends TelegramLongPollingBot {
         sendMessage(this, EmojiParser.parseToUnicode("Вы уверены, что хотите вернуться в главное меню?"), sendMessageRequest);
     }
 
-    // todo Дописать диалог
     private void startDialogueWithClient(String receivedText, Long chatId, SendMessage sendMessageRequest) {
         BotState currentDialogueState = BotUtil.dialogueStates.get(chatId);
         Map<String, String> resumeFields = checkAvailabilityResumeFields(chatId);
@@ -152,8 +153,9 @@ public class ResumeBot extends TelegramLongPollingBot {
                         checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
                     appendToField(resumeFields, ResumeField.NAME.getValue(), receivedText);
 
-                    sendMessage(this, "Введите фамилию:", sendMessageRequest);
-                    BotUtil.dialogueStates.put(chatId, BotState.ENTER_SURNAME);
+                    sendMessage(this, "Введите авваа фамилию:", sendMessageRequest);
+                    BotUtil.dialogueStates.put(chatId, BotState.ENTER_WISH_SALARY);
+//                    BotUtil.dialogueStates.put(chatId, BotState.ENTER_SURNAME);
                 }
             }
             case ENTER_SURNAME -> {
@@ -391,6 +393,38 @@ public class ResumeBot extends TelegramLongPollingBot {
                     sendMessage(this, "Выберите желаемую занятость", sendMessageRequest);
                 }
             }
+            case ENTER_PHONE -> {
+                if (checkInput(receivedText, sendMessageRequest, PHONE_NUMBER_FORMAT)) {
+                    appendToField(resumeFields, ResumeField.PHONE.getValue(), receivedText);
+
+                    BotUtil.userStates.put(chatId, BotState.FINISH_DIALOGUE);
+                    finishDialogueWithClient(chatId, sendMessageRequest);
+                }
+            }
+            case ENTER_HOME_PHONE -> {
+                if (checkInput(receivedText, sendMessageRequest, PHONE_NUMBER_FORMAT)) {
+                    appendToField(resumeFields, ResumeField.HOME_PHONE.getValue(), receivedText);
+
+                    BotUtil.userStates.put(chatId, BotState.FINISH_DIALOGUE);
+                    finishDialogueWithClient(chatId, sendMessageRequest);
+                }
+            }
+            case ENTER_WORK_PHONE -> {
+                if (checkInput(receivedText, sendMessageRequest, PHONE_NUMBER_FORMAT)) {
+                    appendToField(resumeFields, ResumeField.WORK_PHONE.getValue(), receivedText);
+
+                    BotUtil.userStates.put(chatId, BotState.FINISH_DIALOGUE);
+                    finishDialogueWithClient(chatId, sendMessageRequest);
+                }
+            }
+            case ENTER_MAIL -> {
+                if (checkInput(receivedText, sendMessageRequest, EMAIL_FORMAT)) {
+                    appendToField(resumeFields, ResumeField.EMAIL.getValue(), receivedText);
+
+                    BotUtil.userStates.put(chatId, BotState.FINISH_DIALOGUE);
+                    finishDialogueWithClient(chatId, sendMessageRequest);
+                }
+            }
             case FINISH_DIALOGUE -> {
                 BotUtil.userStates.put(chatId, BotState.FINISH_DIALOGUE);
                 finishDialogueWithClient(chatId, sendMessageRequest);
@@ -517,6 +551,8 @@ public class ResumeBot extends TelegramLongPollingBot {
     private boolean isEndOfFieldsBlock(String key) {
         return key.equals(ResumeField.EDUCATION_END_YEAR.getValue()) ||
                 key.equals(ResumeField.EXPERIENCE_DUTIES.getValue()) ||
+                key.equals(ResumeField.BUSYNESS.getValue()) ||
+                key.equals(ResumeField.SCHEDULE.getValue()) ||
                 key.equals(ResumeField.REC_ORGANIZATION.getValue());
     }
 

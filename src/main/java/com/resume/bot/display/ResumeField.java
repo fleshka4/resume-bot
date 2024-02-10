@@ -582,6 +582,70 @@ public enum ResumeField {
                 resume.getSchedules().add(new Type(matchedEntry.getKey(), matchedEntry.getValue()));
             }
         }
+    },
+
+    PHONE("контакты") {
+        @Override
+        public boolean processCheck(String checkValue) {
+            return JsonValidator.checkPhoneFormat(checkValue);
+        }
+
+        @Override
+        public String message() {
+            return INCORRECT_PARAM_STRING.formatted(getValue());
+        }
+
+        @Override
+        public void editInResume(Resume resume, String param) {
+        }
+    },
+
+    HOME_PHONE("контакты") {
+        @Override
+        public boolean processCheck(String checkValue) {
+            return JsonValidator.checkPhoneFormat(checkValue);
+        }
+
+        @Override
+        public String message() {
+            return INCORRECT_PARAM_STRING.formatted(getValue());
+        }
+
+        @Override
+        public void editInResume(Resume resume, String param) {
+        }
+    },
+
+    WORK_PHONE("контакты") {
+        @Override
+        public boolean processCheck(String checkValue) {
+            return JsonValidator.checkPhoneFormat(checkValue);
+        }
+
+        @Override
+        public String message() {
+            return INCORRECT_PARAM_STRING.formatted(getValue());
+        }
+
+        @Override
+        public void editInResume(Resume resume, String param) {
+        }
+    },
+
+    EMAIL("контакты") {
+        @Override
+        public boolean processCheck(String checkValue) {
+            return JsonValidator.checkEmailFormat(checkValue);
+        }
+
+        @Override
+        public String message() {
+            return INCORRECT_PARAM_STRING.formatted(getValue());
+        }
+
+        @Override
+        public void editInResume(Resume resume, String param) {
+        }
     };
 
     private static final short MAX_LEN_128 = 128;

@@ -41,6 +41,8 @@ public class BotUtil {
             "skip_salary",
             "skip_busyness",
             "skip_schedule",
+            // person's contacts
+            "want_enter_contacts",
 
             "back_to_menu",
             "back_to_create_resume",
@@ -94,6 +96,7 @@ public class BotUtil {
         }
         return false;
     }
+
     public boolean checkIfBigType(String suspectAction) {
         for (String s : BIG_TYPES_IDS) {
             if (suspectAction.startsWith(s)) {
@@ -110,6 +113,7 @@ public class BotUtil {
     public final Map<Long, Resume> clientsMap = new HashMap<>();
     public final String ERROR_TEXT = "Error occurred: ";
     public final Map<Long, Long> states = new HashMap<>(); // state, chatId
+    public final Map<Long, String> personAndIndustryType = new HashMap<>(); // chatId, industryType
     public final Map<Long, String> personAndIndustry = new HashMap<>(); // chatId, industry
     public final Map<Long, String> personAndProfessionalRole = new HashMap<>(); // chatId, professionalRole
     public final Random random = new Random();

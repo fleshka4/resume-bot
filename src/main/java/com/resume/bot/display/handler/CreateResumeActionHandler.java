@@ -135,7 +135,6 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             }
             case "want_enter_rec" -> {
                 BotUtil.dialogueStates.put(chatId, BotState.ENTER_REC_NAME);
-
                 sendMessage(bot, "Введите ФИО:", chatId);
             }
             case "skip_rec" -> {
@@ -154,12 +153,40 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             }
             case "skip_busyness" -> {
                 BotUtil.dialogueStates.put(chatId, BotState.ENTER_WISH_SCHEDULE);
-
                 executeContinueKeyboardMessage(bot, "Выберите желаемый график.",
                         messageId, chatId, scheduleTypes, "skip_schedule");
             }
             case "skip_schedule" -> {
-                BotUtil.dialogueStates.put(chatId, BotState.FINISH_DIALOGUE);
+                BotUtil.dialogueStates.put(chatId, BotState.ENTER_CONTACTS);
+
+                List<String> buttonLabels = List.of("Хочу", "Пропустить");
+                List<String> buttonIds = List.of("want_enter_contacts", "skip_contacts");
+                executeEditMessageWithKeyBoard(bot, "Хотите ли Вы указать контактную информацию?",
+                        messageId, chatId, buttonLabels, buttonIds);
+            }
+            case "want_enter_contacts" -> {
+                executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode("Выберите желаемый тип связи.:telephone_receiver:"),
+                        messageId, chatId, contactTypes.values().stream().toList(), contactTypes.keySet().stream().toList());
+            }
+            case "home" -> {
+                BotUtil.dialogueStates.put(chatId, BotState.ENTER_HOME_PHONE);
+                executeEditMessage(bot, EmojiParser.parseToUnicode("Введите домашний номер телефона в формате 7ХХХХХХХХХХ или 8ХХХХХХХХХХ:"),
+                        messageId, chatId);
+            }
+            case "work" -> {
+                BotUtil.dialogueStates.put(chatId, BotState.ENTER_WORK_PHONE);
+                executeEditMessage(bot, EmojiParser.parseToUnicode("Введите рабочий номер телефона в формате 7ХХХХХХХХХХ или 8ХХХХХХХХХХ:"),
+                        messageId, chatId);
+            }
+            case "cell" -> {
+                BotUtil.dialogueStates.put(chatId, BotState.ENTER_PHONE);
+                executeEditMessage(bot, EmojiParser.parseToUnicode("Введите мобильный номер телефона в формате 7ХХХХХХХХХХ или 8ХХХХХХХХХХ:"),
+                        messageId, chatId);
+            }
+            case "email" -> {
+                BotUtil.dialogueStates.put(chatId, BotState.ENTER_MAIL);
+                executeEditMessage(bot, EmojiParser.parseToUnicode("Введите электронную почту:"),
+                        messageId, chatId);
             }
             case "edit_result_data" -> {
                 BotUtil.userStates.put(chatId, BotState.EDIT_CLIENT_RESULT_DATA);
@@ -212,12 +239,6 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             processOnChosenLevelEducation(chosenEducationLevel, chatId, userData);
         }
 
-//        if (INDUSTRIES.stream().map(Industry::getName).toList().contains(callbackData)) {
-//            // todo логика после выбора сферы деятельности организации
-//            BotUtil.dialogueStates.put(chatId, BotState.ENTER_POST_IN_ORGANIZATION);
-//            sendMessage(EmojiParser.parseToUnicode("Введите свою должность:"), chatId);
-//        }
-
         if (driverLicenseTypes.containsKey(callbackData)) {
             processOnChosenDriverLicense(callbackData, chatId, userData);
 
@@ -229,19 +250,19 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
         }
 
         if (employmentTypes.containsKey(callbackData)) {
-            processOnChosenBusyness(callbackData, chatId, userData);
+            processOnChosenBusyness(employmentTypes.get(callbackData), chatId, userData);
 
             List<String> chosenBusyness = Arrays.stream(userData.get(ResumeField.BUSYNESS.getValue()).split(ITEMS_DELIMITER)).toList();
-            Map<String, String> unchosenBusyness = getUnChosenItems(employmentTypes, chosenBusyness);
+            Map<String, String> unchosenBusyness = getUnChosenItemsByValue(employmentTypes, chosenBusyness);
 
             executeContinueKeyboardMessage(bot, "Выберите желаемую занятость.", messageId, chatId, unchosenBusyness, "skip_busyness");
         }
 
         if (scheduleTypes.containsKey(callbackData)) {
-            processOnChosenSchedule(callbackData, chatId, userData);
+            processOnChosenSchedule(scheduleTypes.get(callbackData), chatId, userData);
 
             List<String> chosenSchedule = Arrays.stream(userData.get(ResumeField.SCHEDULE.getValue()).split(ITEMS_DELIMITER)).toList();
-            Map<String, String> unchosenSchedule = getUnChosenItems(scheduleTypes, chosenSchedule);
+            Map<String, String> unchosenSchedule = getUnChosenItemsByValue(scheduleTypes, chosenSchedule);
 
             executeContinueKeyboardMessage(bot, "Выберите желаемый график.", messageId, chatId, unchosenSchedule, "skip_schedule");
         }
@@ -334,7 +355,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                     }
                 }
                 case "желаемая позиция" -> resume.setTitle(fieldValue);
-                case "профессиональная роль" -> { // todo: специализация, professional_roles
+                case "профессиональная роль" -> {
                     String roleId = null;
                     for (Category category: Constants.PROFESSIONAL_ROLES.getCategories()) {
                         if (category.getName().equals(fieldValue)) {
@@ -374,6 +395,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                         schedules.add(typeSchedules);
                     }
                 }
+                case "контакты" -> resume.setContacts(fieldValue);
             }
         }
 
@@ -499,7 +521,6 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                 }
                 workExperience.setIndustries(industries);
             }
-            // пользователь должен протыкать на клавиатуре отрасли своей компании
         }
     }
 
@@ -515,6 +536,13 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
         return allItems.entrySet()
                 .stream()
                 .filter(item -> !chosenItems.contains(item.getKey()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    private Map<String, String> getUnChosenItemsByValue(Map<String, String> allItems, List<String> chosenItems) {
+        return allItems.entrySet()
+                .stream()
+                .filter(item -> !chosenItems.contains(item.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }

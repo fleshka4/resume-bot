@@ -97,4 +97,6 @@ public class Resume {
 
     @NonNull
     private List<Language> language;
+
+    private String contacts;
 }

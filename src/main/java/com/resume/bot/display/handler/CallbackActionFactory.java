@@ -24,7 +24,8 @@ public class CallbackActionFactory {
                 educationLevels.containsKey(callbackData) ||
                 driverLicenseTypes.containsKey(callbackData) ||
                 employmentTypes.containsKey(callbackData) ||
-                scheduleTypes.containsKey(callbackData)) { //todo сферы деятельности компании
+                scheduleTypes.containsKey(callbackData) ||
+                contactTypes.containsKey(callbackData)) {
             return new CreateResumeActionHandler(pollingBot);
         }
         if (BotUtil.EXPORT_RESUME_IDS_LIST.contains(callbackData)) {
@@ -36,7 +37,6 @@ public class CallbackActionFactory {
         if (BotUtil.checkIfBigType(callbackData)) {
             return new BigKeyBoardHandler(pollingBot);
         }
-
         return null;
     }
 }

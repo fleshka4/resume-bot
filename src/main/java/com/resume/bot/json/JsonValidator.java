@@ -8,7 +8,6 @@ import org.apache.commons.validator.routines.UrlValidator;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Function;
 
@@ -27,6 +26,7 @@ public class JsonValidator {
         NUMERIC_FORMAT,
         DATE_FORMAT,
         PHONE_NUMBER_FORMAT,
+        EMAIL_FORMAT,
         RESUME_VISIBILITY_TYPE,
         BUSINESS_TRIP_READINESS,
         DRIVER_LICENSE_TYPE,
@@ -63,7 +63,8 @@ public class JsonValidator {
         checks.put(ValidationType.ALPHANUMERIC_FORMAT, objects -> checkAlphanumericFormat((String) objects[0]));
         checks.put(ValidationType.NUMERIC_FORMAT, objects -> checkNumericFormat((String) objects[0]));
         checks.put(ValidationType.DATE_FORMAT, objects -> checkDateFormat((String) objects[0]));
-        checks.put(ValidationType.PHONE_NUMBER_FORMAT, objects -> checkPhoneNumberFormat((String) objects[0]));
+        checks.put(ValidationType.PHONE_NUMBER_FORMAT, objects -> checkPhoneFormat((String) objects[0]));
+        checks.put(ValidationType.EMAIL_FORMAT, objects -> checkEmailFormat((String) objects[0]));
         checks.put(ValidationType.RESUME_VISIBILITY_TYPE, objects -> checkVisibilityType((String) objects[0]));
         checks.put(ValidationType.BUSINESS_TRIP_READINESS, objects -> checkTripReadiness((String) objects[0]));
         checks.put(ValidationType.DRIVER_LICENSE_TYPE, objects -> checkDriverLicenseType((String) objects[0]));
@@ -85,14 +86,14 @@ public class JsonValidator {
         checks.put(ValidationType.LOCATION, objects -> checkLocation((String) objects[0]));
         checks.put(ValidationType.SKILLS, objects -> checkSkills((String) objects[0]));
         checks.put(ValidationType.IN_LIST, objects -> isInList((String) objects[0], List.of((String[]) objects[1])));
-        // fixme норм или нет?
         checks.put(ValidationType.IN_MAP, objects -> isInMap((String) objects[0], (Map<String, String>) objects[1]));
     }
 
     private static final int GRADUATION_DATE_MIN_YEAR = 1950;
     private static final int BIRTH_DATE_MIN_YEAR = 1900;
-    private static final String NUMBER_FORMAT = "\\d{11}";
+    private static final String PHONE_FORMAT = "\\d{11}";
     private static final String DATE_FORMAT = "\\d{2}-\\d{2}-\\d{4}";
+    private static final String EMAIL_FORMAT = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$";
 
     public static boolean checkGraduationYear(String year) {
         int graduationYear;
@@ -172,8 +173,12 @@ public class JsonValidator {
         return text.matches(DATE_FORMAT);
     }
 
-    public static boolean checkPhoneNumberFormat(String text) {
-        return text.matches(NUMBER_FORMAT);
+    public static boolean checkPhoneFormat(String phone) {
+        return phone.matches(PHONE_FORMAT);
+    }
+
+    public static boolean checkEmailFormat(String email) {
+        return email.matches(EMAIL_FORMAT);
     }
 
     public static boolean isInList(String value, String[] array) {
