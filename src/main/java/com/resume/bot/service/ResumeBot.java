@@ -595,7 +595,7 @@ public class ResumeBot extends TelegramLongPollingBot {
                 *Пример:*
                 Имя - Алексей
 
-                И я автоматически изменю некорректную информацию.:dizzy:"""));
+                И я изменю некорректную информацию.:dizzy:"""));
 
         List<String> buttonLabels = List.of("Редактировать", "Всё верно!");
         List<String> callbackData = List.of("edit_result_data", "result_data_is_correct");

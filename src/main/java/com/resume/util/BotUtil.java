@@ -1,10 +1,14 @@
 package com.resume.util;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.resume.bot.display.BotState;
-import com.resume.bot.json.entity.client.Resume;
+import com.resume.bot.json.JsonProcessor;
+import com.resume.bot.json.JsonValidator;
+import com.resume.bot.json.entity.area.Area;
+import com.resume.bot.json.entity.client.*;
+import com.resume.bot.json.entity.client.education.Education;
+import com.resume.bot.json.entity.client.education.PrimaryEducation;
+import com.resume.bot.json.entity.common.Id;
+import com.resume.bot.json.entity.common.Type;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -13,6 +17,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.resume.bot.display.MessageUtil.createSendMessageRequest;
 import static com.resume.bot.display.MessageUtil.sendMessage;
@@ -252,35 +257,142 @@ public class BotUtil {
     }
 
     public static void askToEditMyResume(com.resume.bot.model.entity.Resume resume, Long chatId, TelegramLongPollingBot bot) {
-        StringBuilder builder = new StringBuilder().append("Ваше резюме:\n\n");
-        ObjectMapper objectMapper = new ObjectMapper();
-        String resumeData = resume.getResumeData();
-        try {
-            JsonNode jsonNode = objectMapper.readTree(resumeData);
+        Resume res = JsonProcessor.createEntityFromJson(resume.getResumeData(), Resume.class);
 
-            jsonNode.fields().forEachRemaining(entry -> {
-                String key = entry.getKey();
-                String value = entry.getValue().asText();
-                builder.append(key)
-                        .append(": ")
-                        .append(value)
-                        .append('\n');
-            });
-
-            BotUtil.userMyResumeMap.put(chatId, resume);
-        } catch (RuntimeException | JsonProcessingException e) {
-            log.error(e.getMessage());
-            // todo
+        Area area = JsonValidator.getAreaByIdDeep(Constants.AREAS, res.getArea().getId()).orElse(null);
+        StringBuilder areaSB = new StringBuilder();
+        while (area != null) {
+            areaSB.insert(0, area.getName()).insert(0, area.getParentId() != null ? ", " : "");
+            area = JsonValidator.getAreaByIdDeep(Constants.AREAS, area.getParentId()).orElse(null);
         }
+        String areaStr = areaSB.toString();
 
-        builder.append("""
-                
+        Education education = res.getEducation();
+        String educStr = education != null && !education.getPrimary().isEmpty()
+                ? education.getPrimary().stream().map(ed -> """
+                        уровень образования: %s
+                        учебное заведение: %s
+                        факультет: %s
+                        специализация: %s
+                        год окончания: %d
+                        """.formatted(
+                        education.getLevel().getName(),
+                        ed.getName(),
+                        ed.getOrganization(),
+                        ed.getResult(),
+                        ed.getYear()))
+                .collect(Collectors.joining("\n"))
+                : "";
+
+        List<Experience> experience = res.getExperience();
+        String expStr = experience != null && !experience.isEmpty()
+                ? experience.stream().map(exp -> """
+                        опыт работы: %s
+                        название организации: %s
+                        город организации: %s
+                        ссылка: %s
+                        отрасль: %s
+                        должность: %s
+                        обязанности: %s
+                                                
+                        """.formatted(
+                        exp.getStart() + (exp.getEnd() != null ? " - %s".formatted(exp.getEnd()) : ""),
+                        exp.getCompany(),
+                        exp.getArea().getName(),
+                        exp.getCompanyUrl(),
+                        exp.getIndustries().stream().map(Type::getName).collect(Collectors.joining(", ")),
+                        exp.getPosition(),
+                        exp.getDescription()))
+                .collect(Collectors.joining("\n"))
+                : "";
+
+        List<Recommendation> recommendation = res.getRecommendation();
+        String recStr = recommendation != null && !recommendation.isEmpty()
+                ? recommendation.stream().map(rec -> """
+                        имя выдавшего рекомендацию: %s
+                        должность выдавшего рекомендацию: %s
+                        организация выдавшего рекомендацию: %s
+                                                        
+                                """.formatted(
+                        rec.getName(),
+                        rec.getPosition(),
+                        rec.getOrganization()
+                ))
+                .collect(Collectors.joining("\n"))
+                : "";
+
+        Salary salary = res.getSalary();
+        String salStr = "%d %s".formatted(salary.getAmount(), salary.getCurrency());
+
+        List<Type> employment = res.getEmployments();
+        String empStr = employment.stream().map(Type::getName)
+                .collect(Collectors.joining("", "желаемая занятость: ", "\n"));
+
+        List<Type> schedule = res.getSchedules();
+        String schedStr = schedule.stream().map(Type::getName)
+                .collect(Collectors.joining("", "желаемый график: ", "\n"));
+
+        String outInfo = """
+                Ваше резюме:
+                                
+                Основная информация
+                                
+                имя: %s
+                отчество: %s
+                фамилия: %s
+                дата рождения: %s
+                пол: %s
+                место жительства: %s
+                                
+                %s
+                %s
+                Дополнительная информация
+                                
+                навыки: %s
+                о себе: %s
+                наличие авто: %s
+                категория прав: %s
+                  
+                %s
+                желаемая позиция: %s
+                профессиональная роль: %s
+                желаемая зарплата: %s
+                %s
+                %s
+                контакты: %s
+                    
                 Присылайте исправления в формате *Поле - новое значение*
 
                 *Пример:*
-                Имя - Алексей""");
+                Имя - Алексей
+                """
+                .formatted(
+                        res.getFirstName(),
+                        res.getMiddleName(),
+                        res.getLastName(),
+                        res.getBirthDate(),
+                        Constants.sexTypes.get(res.getGender().getId()),
+                        areaStr,
+                        !educStr.isEmpty() ? "Образование\n\n" + educStr : "",
+                        !expStr.isEmpty() ? "Опыт\n\n" + expStr : "",
+                        String.join(", ", res.getSkillSet()),
+                        res.getSkills(),
+                        res.getHasVehicle() ? "да" : "нет",
+                        String.join(", ", res.getDriverLicenseTypes().stream().map(Id::getId).toList()),
+                        !recStr.isEmpty() ? "Список рекомендаций\n\n" + recStr : "",
+                        res.getTitle(),
+                        Constants.PROFESSIONAL_ROLES.getCategories().stream()
+                                .filter(cat -> cat.getId().equals(res.getProfessionalRoles().get(0).getId()))
+                                .findFirst().get().getName(),
+                        salStr,
+                        empStr,
+                        schedStr,
+                        res.getContacts()
+                );
+
+        BotUtil.userMyResumeMap.put(chatId, resume);
 
         SendMessage sendMessageRequest = createSendMessageRequest(bot, chatId);
-        sendMessage(bot, builder.toString(), sendMessageRequest);
+        sendMessage(bot, outInfo, sendMessageRequest);
     }
 }

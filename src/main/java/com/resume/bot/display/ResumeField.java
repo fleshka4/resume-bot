@@ -392,7 +392,7 @@ public enum ResumeField {
     ABOUT_ME("о себе") {
         @Override
         public boolean processCheck(String checkValue) {
-            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_4096) && JsonValidator.checkAlphaSpaceFormat(checkValue);
+            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_4096);
         }
 
         @Override
