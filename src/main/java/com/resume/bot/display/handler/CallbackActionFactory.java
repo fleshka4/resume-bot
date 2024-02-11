@@ -35,10 +35,10 @@ public class CallbackActionFactory {
             return new CorrectDataHandler(headHunterService, resumeService, templateService, pollingBot, tokenHolderService, userService, hhConfig, hhBaseUrl);
         }
         if (BotUtil.EXPORT_RESUME_IDS_LIST.contains(callbackData)) {
-            return new ExportResumeActionHandler(pollingBot, hhConfig, headHunterService, resumeService, hhBaseUrl);
+            return new ExportResumeActionHandler(pollingBot, hhConfig, headHunterService);
         }
         if (BotUtil.MY_RESUMES_IDS_LIST.contains(callbackData) || BotUtil.checkIfAction(callbackData)) {
-            return new MyResumesActionHandler(pollingBot, resumeService, templateService, headHunterService, hhBaseUrl);
+            return new MyResumesActionHandler(pollingBot, resumeService, templateService, headHunterService);
         }
         if (BotUtil.checkIfBigType(callbackData)) {
             return new BigKeyBoardHandler(pollingBot);

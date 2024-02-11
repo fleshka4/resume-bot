@@ -20,7 +20,7 @@ CREATE TABLE resumes (
   template_id integer
 );
 
-comment on column resumes.hh_link is 'link to hh resume';
+comment on column resumes.link is 'link to hh resume';
 
 CREATE TABLE templates (
   template_id serial PRIMARY KEY,

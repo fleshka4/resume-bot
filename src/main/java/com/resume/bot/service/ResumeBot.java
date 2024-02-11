@@ -11,6 +11,7 @@ import com.resume.bot.json.JsonValidator;
 import com.resume.bot.json.entity.client.Resume;
 import com.resume.bot.model.entity.Template;
 import com.resume.bot.model.entity.User;
+import com.resume.hh_wrapper.config.HhConfig;
 import com.resume.latex.LatexProcessor;
 import com.resume.util.BigKeyboardType;
 import com.resume.util.BotUtil;
@@ -49,10 +50,14 @@ public class ResumeBot extends TelegramLongPollingBot {
 
     private final BotConfig botConfig;
 
+    private final HhConfig hhConfig;
+
     private final HeadHunterService headHunterService;
 
     private final UserService userService;
+
     private final ResumeService resumeService;
+
     private final TemplateService templateService;
 
     @Value("${hh.base-url}")

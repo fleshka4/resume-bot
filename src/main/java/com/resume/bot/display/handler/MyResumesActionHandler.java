@@ -14,6 +14,7 @@ import com.resume.util.BotUtil;
 import com.vdurmont.emoji.EmojiParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
@@ -42,7 +43,8 @@ public class MyResumesActionHandler implements CallbackActionHandler {
 
     private final HeadHunterService headHunterService;
 
-    private final String hhBaseUrl;
+    @Value("${hh.base-url}")
+    private String hhBaseUrl;
 
     @Override
     public void performAction(String callbackData, Integer messageId, Long chatId) {
@@ -71,45 +73,8 @@ public class MyResumesActionHandler implements CallbackActionHandler {
                         - *Удалить резюме*
                         """), messageId, chatId, buttonLabels, buttonIds);
             }
-            case "back_to_hh_resumes" -> {
-                List<Resume> hhResumes = resumeService.getHhResumesByUserId(chatId);
-                List<String> buttonLabels = new ArrayList<>(hhResumes.stream()
-                        .map(Resume::getTitle)
-                        .toList());
-                buttonLabels.add("Назад");
-
-                List<String> buttonIds = new ArrayList<>();
-                for (int i = 1; i <= hhResumes.size(); i++) {
-                    buttonIds.add("resume_hh_" + i);
-                }
-                buttonIds.add("back_to_menu_3");
-                executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode("""
-                        После выбора конкретного резюме, у вас будет возможность:
-
-                        - *Скачать ваше резюме*
-                        - *Внести изменения в резюме*
-                        """), messageId, chatId, buttonLabels, buttonIds);
-            }
             case "back_to_menu_3" -> {
                 BotUtil.createMyResumesMenu(bot, messageId, chatId);
-            }
-            case "resume_1", "resume_2", "resume_3", "resume_4", "resume_5", "resume_6" -> {
-                List<String> buttonLabels = Arrays.asList("Опубликовать на HH", "Скачать резюме",
-                        "Редактировать резюме", "Удалить резюме", "Назад");
-                List<String> buttonIds = Arrays.asList("publish_on_hh_" + callbackData, "download_" + callbackData,
-                        "edit_" + callbackData, "delete_" + callbackData, "back_to_my_resumes");
-
-                executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode("Выберите, что нужно сделать с вашим резюме.:slightly_smiling:"),
-                        messageId, chatId, buttonLabels, buttonIds);
-            }
-            case "resume_hh_1", "resume_hh_2", "resume_hh_3", "resume_hh_4", "resume_hh_5", "resume_hh_6" -> {
-                List<String> buttonLabels = Arrays.asList("Скачать резюме",
-                        "Редактировать резюме", "Назад");
-                List<String> buttonIds = Arrays.asList("download_" + callbackData,
-                        "edit_" + callbackData, "back_to_hh_resumes");
-
-                executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode("Выберите, что нужно сделать с вашим резюме.:slightly_smiling:"),
-                        messageId, chatId, buttonLabels, buttonIds);
             }
             default -> {
                 if (finallyPublish(callbackData, chatId)

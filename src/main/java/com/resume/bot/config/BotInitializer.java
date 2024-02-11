@@ -1,6 +1,5 @@
 package com.resume.bot.config;
 
-import com.resume.bot.service.HeadHunterService;
 import com.resume.bot.service.ResumeBot;
 import com.resume.util.BotUtil;
 import lombok.RequiredArgsConstructor;
@@ -16,22 +15,11 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 @Component
 @RequiredArgsConstructor
 public class BotInitializer {
+
     private final ResumeBot resumeBot;
-    private final HeadHunterService headHunterService;
 
     @EventListener({ContextRefreshedEvent.class})
     public void init() throws TelegramApiException {
-        /*try {
-            System.out.println("MONO");
-            System.out.println(headHunterService.getFlux().get(0));
-        } catch (RuntimeException e) {
-            System.out.println("ERROR");
-        }
-
-        System.out.println("FLUX");
-        System.out.println(headHunterService.getFlux().get(0));*/
-
-
         TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
         try {
             telegramBotsApi.registerBot(resumeBot);

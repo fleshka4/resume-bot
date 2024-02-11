@@ -105,6 +105,7 @@ public class BotUtil {
     );
 
     public final List<String> EXPORT_RESUME_IDS_LIST = List.of(
+            "export_resume_hh",
             "export_data_hh",
             "auth",
             "choose_resume"
@@ -129,7 +130,6 @@ public class BotUtil {
     }
 
     public final Map<Long, BotState> userStates = new HashMap<>();
-    public final Map<Long, Integer> pages = new HashMap<>();
     public final Map<Long, BotState> dialogueStates = new HashMap<>();
     public final Map<Long, Map<String, String>> userResumeData = new LinkedHashMap<>();
     public final Map<Long, com.resume.bot.model.entity.Resume> userMyResumeMap = new HashMap<>();
