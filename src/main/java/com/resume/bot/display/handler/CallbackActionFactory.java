@@ -3,6 +3,8 @@ package com.resume.bot.display.handler;
 import com.resume.bot.display.CallbackActionHandler;
 import com.resume.bot.service.HeadHunterService;
 import com.resume.bot.service.ResumeService;
+import com.resume.bot.service.TemplateService;
+import com.resume.bot.service.UserService;
 import com.resume.hh_wrapper.config.HhConfig;
 import com.resume.hh_wrapper.impl.ApiClientTokenImpl;
 import com.resume.util.BotUtil;
@@ -15,10 +17,12 @@ import static com.resume.util.Constants.*;
 @AllArgsConstructor
 @Component
 public class CallbackActionFactory {
-    private final ResumeService resumeService;
     private final HeadHunterService headHunterService;
     private final ApiClientTokenImpl apiClientTokenImpl;
     private final String hhBaseUrl;
+    private final ResumeService resumeService;
+    private final TemplateService templateService;
+    private final UserService userService;
     private final HhConfig hhConfig;
 
     public CallbackActionHandler createCallbackActionHandler(TelegramLongPollingBot pollingBot, String callbackData) {
@@ -29,7 +33,7 @@ public class CallbackActionFactory {
                 employmentTypes.containsKey(callbackData) ||
                 scheduleTypes.containsKey(callbackData) ||
                 contactTypes.containsKey(callbackData)) {
-            return new CreateResumeActionHandler(pollingBot);
+            return new CreateResumeActionHandler(pollingBot, resumeService, userService);
         }
         if (BotUtil.EXPORT_RESUME_IDS_LIST.contains(callbackData)) {
             return new ExportResumeActionHandler(pollingBot, hhConfig, headHunterService, resumeService, hhBaseUrl);

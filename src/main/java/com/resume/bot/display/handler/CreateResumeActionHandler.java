@@ -16,6 +16,8 @@ import com.resume.bot.json.entity.client.education.PrimaryEducation;
 import com.resume.bot.json.entity.common.Id;
 import com.resume.bot.json.entity.common.Type;
 import com.resume.bot.json.entity.roles.Category;
+import com.resume.bot.service.ResumeService;
+import com.resume.bot.service.UserService;
 import com.resume.util.BotUtil;
 import com.resume.util.Constants;
 import com.vdurmont.emoji.EmojiParser;
@@ -37,6 +39,10 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
 
     private final TelegramLongPollingBot bot;
     private boolean isPrimaryEdu = true;
+
+    private final ResumeService resumeService;
+
+    private final UserService userService;
 
     @Override
     public void performAction(String callbackData, Integer messageId, Long chatId) {
@@ -196,6 +202,9 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             case "result_data_is_correct" -> {
                 BotUtil.userStates.put(chatId, BotState.RESULT_DATA_CORRECT);
                 fillClientData(chatId);
+
+                List<String> buttonLabels = Arrays.asList("Загрузить новое резюме на hh", "Выбор Latex-шаблона");
+                List<String> buttonIds = Arrays.asList("create_resume", "export_resume_hh", "my_resumes");
                 sendMessage(bot, EmojiParser.parseToUnicode("Замечательно! Ваши данные успешно получены.:sparkles:\nВот что Вы можете сделать:"), chatId);
                 // todo кнопки "Загрузить новое резюме на hh", "Обновить резюме на hh", "Выбор Latex-шаблона"
             }
@@ -243,28 +252,28 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             processOnChosenDriverLicense(callbackData, chatId, userData);
 
             List<String> chosenDriverLicenses = Arrays.stream(userData.get(ResumeField.DRIVER_LICENCE.getValue()).split(ITEMS_DELIMITER)).toList();
-            Map<String, String> unchosenDriverLicenseTypes = getUnChosenItems(driverLicenseTypes, chosenDriverLicenses);
+            Map<String, String> unChosenDriverLicenseTypes = getUnChosenItems(driverLicenseTypes, chosenDriverLicenses);
 
             executeContinueKeyboardMessage(bot, EmojiParser.parseToUnicode("Выберите категорию прав.:car:"),
-                    messageId, chatId, unchosenDriverLicenseTypes, "no_enter_car");
+                    messageId, chatId, unChosenDriverLicenseTypes, "no_enter_car");
         }
 
         if (employmentTypes.containsKey(callbackData)) {
             processOnChosenBusyness(employmentTypes.get(callbackData), chatId, userData);
 
             List<String> chosenBusyness = Arrays.stream(userData.get(ResumeField.BUSYNESS.getValue()).split(ITEMS_DELIMITER)).toList();
-            Map<String, String> unchosenBusyness = getUnChosenItemsByValue(employmentTypes, chosenBusyness);
+            Map<String, String> unChosenBusyness = getUnChosenItemsByValue(employmentTypes, chosenBusyness);
 
-            executeContinueKeyboardMessage(bot, "Выберите желаемую занятость.", messageId, chatId, unchosenBusyness, "skip_busyness");
+            executeContinueKeyboardMessage(bot, "Выберите желаемую занятость.", messageId, chatId, unChosenBusyness, "skip_busyness");
         }
 
         if (scheduleTypes.containsKey(callbackData)) {
             processOnChosenSchedule(scheduleTypes.get(callbackData), chatId, userData);
 
             List<String> chosenSchedule = Arrays.stream(userData.get(ResumeField.SCHEDULE.getValue()).split(ITEMS_DELIMITER)).toList();
-            Map<String, String> unchosenSchedule = getUnChosenItemsByValue(scheduleTypes, chosenSchedule);
+            Map<String, String> unChosenSchedule = getUnChosenItemsByValue(scheduleTypes, chosenSchedule);
 
-            executeContinueKeyboardMessage(bot, "Выберите желаемый график.", messageId, chatId, unchosenSchedule, "skip_schedule");
+            executeContinueKeyboardMessage(bot, "Выберите желаемый график.", messageId, chatId, unChosenSchedule, "skip_schedule");
         }
     }
 
@@ -409,7 +418,11 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
         resume.setEmployments(busyness);
         resume.setSchedules(schedules);
 
-        JsonProcessor.createJsonFromEntity(resume);
+        com.resume.bot.model.entity.Resume dbResume = new com.resume.bot.model.entity.Resume();
+        dbResume.setUser(userService.getUser(chatId));
+        dbResume.setTitle(resume.getTitle());
+        dbResume.setResumeData(JsonProcessor.createJsonFromEntity(resume));
+        resumeService.saveResume(dbResume);
     }
 
     private <T> void initList(List<T> listToInit, Class<T> type, int size) {
