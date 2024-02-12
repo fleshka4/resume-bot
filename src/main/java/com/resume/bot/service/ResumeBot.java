@@ -78,7 +78,9 @@ public class ResumeBot extends TelegramLongPollingBot {
                         editResultClientData(message.getText(), chatId, sendMessageRequest);
                     }
                 } else if (currentState == BotState.EDIT_MY_RESUME && BotUtil.userMyResumeMap.containsKey(chatId)) {
-                    editClientResumeData(JsonProcessor.createEntityFromJson(BotUtil.userMyResumeMap.get(chatId).getResumeData(), Resume.class), message.getText(), chatId);
+                    editClientResumeData(
+                            JsonProcessor.createEntityFromJson(BotUtil.userMyResumeMap.get(chatId).getResumeData(), Resume.class),
+                            message.getText(), chatId, sendMessageRequest);
                 } else if ("/login".equals(message.getText())) {
                     loginHandler(chatId, sendMessageRequest);
                 } else {
@@ -459,7 +461,8 @@ public class ResumeBot extends TelegramLongPollingBot {
                 BotUtil.userStates.put(chatId, BotState.FINISH_DIALOGUE);
                 finishDialogueWithClient(chatId, sendMessageRequest);
             }
-            default -> sendMessage(this, EmojiParser.parseToUnicode("Что-то пошло не так.\nПопробуйте ещё раз.:cry:"), sendMessageRequest);
+            default ->
+                    sendMessage(this, EmojiParser.parseToUnicode("Что-то пошло не так.\nПопробуйте ещё раз.:cry:"), sendMessageRequest);
         }
     }
 
@@ -497,7 +500,10 @@ public class ResumeBot extends TelegramLongPollingBot {
                         return;
                     }
                 } else {
-                    sendMessage(this, "Пожалуйста, введите данные в формате\n*Поле - Ваше новое значение*.", sendMessageRequest);
+                    sendMessage(this, """
+                                    Пожалуйста, введите данные в формате
+                                    *Поле - Ваше новое значение*.""",
+                            sendMessageRequest);
                     return;
                 }
             }
@@ -506,8 +512,8 @@ public class ResumeBot extends TelegramLongPollingBot {
         }
     }
 
-    private void editClientResumeData(com.resume.bot.json.entity.client.Resume resume,
-                                      String receivedText, Long chatId) {
+    private void editClientResumeData(com.resume.bot.json.entity.client.Resume resume, String receivedText,
+                                      Long chatId, SendMessage sendMessageRequest) {
         String[] lines = receivedText.split("\\r?\\n");
         for (String line : lines) {
             String[] parts = line.split("-", 2);
@@ -520,17 +526,25 @@ public class ResumeBot extends TelegramLongPollingBot {
                 if (field != null) {
                     if (field.processCheck(fieldValue)) {
                         field.editInResume(resume, fieldValue);
-                        resumeService.updateResumeDataByResumeId(JsonProcessor.createJsonFromEntity(resume), BotUtil.userMyResumeMap.get(chatId).getResumeId());
+
+                        int resumeId = BotUtil.userMyResumeMap.get(chatId).getResumeId();
+                        resumeService.updateResumeDataByResumeId(JsonProcessor.createJsonFromEntity(resume), resumeId);
+                        BotUtil.userMyResumeMap.put(chatId, resumeService.getResume(resumeId));
+
+                        sendMessage(this,
+                                "Новое значение поля \"%s\" - %s".formatted(field.getValue(), fieldValue),
+                                sendMessageRequest);
                     } else {
-                        sendMessage(this, field.message(), chatId);
+                        sendMessage(this, field.message(), sendMessageRequest);
                     }
                 }
             } else {
-                sendMessage(this, "Пожалуйста, введите данные в формате\n*Поле - Ваше новое значение*.", chatId);
+                sendMessage(this, """
+                                Пожалуйста, введите данные в формате
+                                *Поле - Ваше новое значение*.""",
+                        sendMessageRequest);
             }
         }
-
-        BotUtil.askToEditMyResume(BotUtil.userMyResumeMap.get(chatId), chatId, this);
     }
 
     private void sendResultMessageAboutClientData(Map<String, String> resumeFields, SendMessage sendMessageRequest) {
@@ -590,7 +604,8 @@ public class ResumeBot extends TelegramLongPollingBot {
         resume.append(EmojiParser.parseToUnicode("""
 
 
-                Если есть не соответствие или вы ошиблись, нажмите на кнопку *Редактировать* и введите это поле повторно в формате *Поле - новое значение*
+                Если есть не соответствие или вы ошиблись, нажмите на кнопку *Редактировать* и введите это поле повторно в формате
+                *Поле - новое значение*
 
                 *Пример:*
                 Имя - Алексей

@@ -4,9 +4,11 @@ import com.resume.bot.display.BotState;
 import com.resume.bot.json.JsonProcessor;
 import com.resume.bot.json.JsonValidator;
 import com.resume.bot.json.entity.area.Area;
-import com.resume.bot.json.entity.client.*;
+import com.resume.bot.json.entity.client.Experience;
+import com.resume.bot.json.entity.client.Recommendation;
+import com.resume.bot.json.entity.client.Resume;
+import com.resume.bot.json.entity.client.Salary;
 import com.resume.bot.json.entity.client.education.Education;
-import com.resume.bot.json.entity.client.education.PrimaryEducation;
 import com.resume.bot.json.entity.common.Id;
 import com.resume.bot.json.entity.common.Type;
 import lombok.experimental.UtilityClass;
@@ -19,7 +21,6 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.resume.bot.display.MessageUtil.createSendMessageRequest;
 import static com.resume.bot.display.MessageUtil.sendMessage;
 import static com.resume.util.Constants.ITEMS_DELIMITER;
 
@@ -256,7 +257,7 @@ public class BotUtil {
         return new TreeMap<>(originalMap);
     }
 
-    public static void askToEditMyResume(com.resume.bot.model.entity.Resume resume, Long chatId, TelegramLongPollingBot bot) {
+    public static String askToEditMyResume(com.resume.bot.model.entity.Resume resume, Long chatId) {
         Resume res = JsonProcessor.createEntityFromJson(resume.getResumeData(), Resume.class);
 
         Area area = JsonValidator.getAreaByIdDeep(Constants.AREAS, res.getArea().getId()).orElse(null);
@@ -391,8 +392,6 @@ public class BotUtil {
                 );
 
         BotUtil.userMyResumeMap.put(chatId, resume);
-
-        SendMessage sendMessageRequest = createSendMessageRequest(bot, chatId);
-        sendMessage(bot, outInfo, sendMessageRequest);
+        return outInfo;
     }
 }

@@ -2,6 +2,7 @@ package com.resume.bot.display.handler;
 
 import com.resume.bot.display.BotState;
 import com.resume.bot.display.CallbackActionHandler;
+import com.resume.bot.display.MessageUtil;
 import com.resume.bot.json.JsonProcessor;
 import com.resume.bot.model.entity.Resume;
 import com.resume.bot.model.entity.Template;
@@ -15,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -99,25 +101,13 @@ public class MyResumesActionHandler implements CallbackActionHandler {
                 executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode("Выберите, что нужно сделать с вашим резюме.:slightly_smiling:"),
                         messageId, chatId, buttonLabels, buttonIds);
             }
-            /*case "edit_resume" -> {
-                Map<String, String> buttons = Map.of(
-                        "edit_resume_1", "1",
-                        "edit_resume_2", "2",
-                        "edit_resume_3", "3",
-                        "edit_resume_4", "4",
-                        "edit_resume_5", "5",
-                        "edit_resume_6", "6");
-
-                executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode("Выберите резюме, которое нужно изменить.:slightly_smiling:"),
-                        messageId, chatId, buttons.values().stream().toList(), buttons.keySet().stream().toList());
-            }*/
             default -> {
                 if (finallyPublish(callbackData, chatId)
                         || publishOnHh(callbackData, messageId, chatId)
                         || downloadResume(callbackData, chatId)
                         || editResume(callbackData, messageId, chatId)
                         || editTemplateResume(callbackData, messageId, chatId)
-                        || editTextResume(callbackData, chatId)
+                        || editTextResume(callbackData, messageId, chatId)
                         || deleteResume(callbackData, chatId)
                         || updateResumeOnHh(callbackData, chatId)) {
                 }
@@ -279,7 +269,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
         return true;
     }
 
-    private boolean editTextResume(String data, Long chatId) {
+    private boolean editTextResume(String data, Integer messageId, Long chatId) {
         Pattern pattern = Pattern.compile("edit_text_resume_([1-6])");
 
         Matcher matcher = pattern.matcher(data);
@@ -292,9 +282,11 @@ public class MyResumesActionHandler implements CallbackActionHandler {
             return true;
         }
 
+        List<String> buttonLabels = List.of("Всё верно!");
+        List<String> callbackData = List.of("resume_" + getResumeNumber(matcher));
         BotUtil.userStates.put(chatId, BotState.EDIT_MY_RESUME);
-
-        BotUtil.askToEditMyResume(resume, chatId, bot);
+        executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode(BotUtil.askToEditMyResume(resume, chatId)),
+                messageId, chatId, buttonLabels, callbackData);
 
         return true;
     }

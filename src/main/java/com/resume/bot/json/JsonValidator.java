@@ -301,7 +301,7 @@ public class JsonValidator {
             if (area.getId().equals(id)) {
                 return Optional.of(area);
             } else if (!area.getAreas().isEmpty()) {
-                Optional<Area> childArea = getAreaByNameDeep(area.getAreas(), id);
+                Optional<Area> childArea = getAreaByIdDeep(area.getAreas(), id);
                 if (childArea.isPresent()) {
                     return childArea;
                 }
