@@ -50,8 +50,6 @@ public class ResumeBot extends TelegramLongPollingBot {
 
     private final BotConfig botConfig;
 
-    private final HhConfig hhConfig;
-
     private final HeadHunterService headHunterService;
 
     private final UserService userService;

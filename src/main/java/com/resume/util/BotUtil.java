@@ -74,20 +74,6 @@ public class BotUtil {
     public final List<String> MY_RESUMES_IDS_LIST = List.of(
             "my_resumes",
             "back_to_menu_3",
-            "back_to_my_resumes",
-            "edit_resume",
-            "edit_resume_1",
-            "edit_resume_2",
-            "edit_resume_3",
-            "edit_resume_4",
-            "edit_resume_5",
-            "edit_resume_6",
-            "resume_1",
-            "resume_2",
-            "resume_3",
-            "resume_4",
-            "resume_5",
-            "resume_6",
             "back_to_my_resumes"
     );
     public final List<String> BIG_TYPES_IDS = List.of(
