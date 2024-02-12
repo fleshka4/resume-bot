@@ -2,12 +2,16 @@ package com.resume.util;
 
 import com.resume.bot.display.BotState;
 import com.resume.bot.json.entity.client.Resume;
+import com.resume.hh_wrapper.config.HhConfig;
+import com.vdurmont.emoji.EmojiParser;
 import lombok.experimental.UtilityClass;
+import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import java.util.*;
 
+import static com.resume.bot.display.MessageUtil.sendMessage;
 import static com.resume.util.Constants.ITEMS_DELIMITER;
 
 @UtilityClass
@@ -239,5 +243,22 @@ public class BotUtil {
 
     public static SortedMap<String, String> createSortedMap(Map<String, String> originalMap) {
         return new TreeMap<>(originalMap);
+    }
+
+    public static void authorization(TelegramLongPollingBot bot, HhConfig hhConfig, String message, Long chatId) {
+        long randomValue = BotUtil.generateRandom12DigitNumber(BotUtil.random);
+        while (BotUtil.states.containsKey(randomValue)) {
+            randomValue = BotUtil.generateRandom12DigitNumber(BotUtil.random);
+        }
+
+        BotUtil.states.put(randomValue, chatId);
+
+        String link = "https://hh.ru/oauth/authorize?" +
+                "response_type=code&" +
+                "client_id=" + hhConfig.getClientId() +
+                "&state=" + randomValue +
+                "&redirect_uri=http://localhost:5000/hh/auth";
+
+        sendMessage(bot, EmojiParser.parseToUnicode(message.formatted(link)), chatId);
     }
 }

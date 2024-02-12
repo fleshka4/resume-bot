@@ -3,8 +3,10 @@ package com.resume.bot.service;
 import com.resume.bot.config.BotConfig;
 import com.resume.bot.display.BotState;
 import com.resume.bot.display.CallbackActionHandler;
+import com.resume.bot.display.MessageUtil;
 import com.resume.bot.display.ResumeField;
 import com.resume.bot.display.handler.CallbackActionFactory;
+import com.resume.bot.json.JsonProcessor;
 import com.resume.bot.json.JsonValidator;
 import com.resume.bot.json.entity.client.Resume;
 import com.resume.bot.model.entity.User;
@@ -14,6 +16,7 @@ import com.resume.util.BotUtil;
 import com.vdurmont.emoji.EmojiParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -34,21 +37,28 @@ import static com.resume.util.Constants.*;
 @Component
 @RequiredArgsConstructor
 public class ResumeBot extends TelegramLongPollingBot {
+
     private final CallbackActionFactory callbackActionFactory;
 
     private final BotConfig botConfig;
-    private final HhConfig hhConfig;
 
     private final HeadHunterService headHunterService;
+
     private final UserService userService;
 
-    private final String hhBaseUrl;
+    private final ResumeService resumeService;
+
+    @Value("${hh.base-url}")
+    private String hhBaseUrl;
 
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage()) {
             Message message = update.getMessage();
+            String[] messageWithCode = message.getText().split(" ");
             Long chatId = message.getChatId();
+
+            System.out.println(message.getText());
 
             if (!BotUtil.userStates.containsKey(chatId)) {
                 BotUtil.userStates.put(chatId, BotState.START);
@@ -63,6 +73,13 @@ public class ResumeBot extends TelegramLongPollingBot {
                     BotUtil.userStates.put(chatId, BotState.START);
                     BotUtil.clientsMap.put(chatId, new Resume());
                     startCommandReceived(message, sendMessageRequest);
+                } else if (messageWithCode.length == 2) {
+                    String receivedCode = messageWithCode[1].trim();
+                    if ("/start ".concat(receivedCode).equals(message.getText())) {
+                        if (BotUtil.states.containsKey(Long.valueOf(receivedCode))) {
+                            startWithCodeCommandReceived(chatId, sendMessageRequest);
+                        }
+                    }
                 } else if ("/menu".equals(message.getText())) {
                     if (checkClientExists(chatId, sendMessageRequest)) {
                         menuCommandReceived(sendMessageRequest);
@@ -74,8 +91,6 @@ public class ResumeBot extends TelegramLongPollingBot {
                     if (checkClientExists(chatId, sendMessageRequest)) {
                         editResultClientData(message.getText(), chatId, sendMessageRequest);
                     }
-                } else if ("/login".equals(message.getText())) {
-                    loginHandler(chatId, sendMessageRequest);
                 } else {
                     sendMessage(this, EmojiParser.parseToUnicode("Извините, я не понимаю эту команду.:cry:"), sendMessageRequest);
                 }
@@ -104,24 +119,6 @@ public class ResumeBot extends TelegramLongPollingBot {
         }
     }
 
-    private void loginHandler(Long chatId, SendMessage sendMessageRequest) {
-        long randomValue = BotUtil.generateRandom12DigitNumber(BotUtil.random);
-        while (BotUtil.states.containsKey(randomValue)) {
-            randomValue = BotUtil.generateRandom12DigitNumber(BotUtil.random);
-        }
-
-        BotUtil.states.put(randomValue, chatId);
-
-        String link = "https://hh.ru/oauth/authorize?" +
-                "response_type=code&" +
-                "client_id=" + hhConfig.getClientId() +
-                "&state=" + randomValue
-                + "&redirect_uri=http://localhost:5000/hh/auth";
-        String msg = "Чтобы авторизоваться, перейдите по [ссылке](" + link + ") и следуйте инструкциям";
-
-        sendMessage(this, msg, sendMessageRequest);
-    }
-
     private void startCommandReceived(Message message, SendMessage sendMessageRequest) {
         String startMessage = "Привет " + message.getChat().getFirstName() + " !:wave:\nЯ бот для создания резюме." +
                 "Давай вместе составим профессиональное резюме для твоего будущего успеха!:star2:\n" +
@@ -139,6 +136,41 @@ public class ResumeBot extends TelegramLongPollingBot {
 
         sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, callbackData));
         sendMessage(this, EmojiParser.parseToUnicode("Вы уверены, что хотите вернуться в главное меню?"), sendMessageRequest);
+    }
+
+    private void startWithCodeCommandReceived(Long chatId, SendMessage sendMessageRequest) {
+        sendMessage(this, EmojiParser.parseToUnicode("Супер!:fire: Вы успешно авторизовались, теперь мы можем продолжить работу!"), sendMessageRequest);
+        BotUtil.userStates.put(chatId, BotState.MY_RESUMES);
+
+        List<Resume> resumeList = headHunterService.getClientResumes(hhBaseUrl, chatId);
+
+        List<String> buttonLabels = new ArrayList<>(resumeList.stream()
+                .map(Resume::getTitle)
+                .toList());
+        buttonLabels.add("Назад");
+
+        List<String> buttonIds = new ArrayList<>();
+        com.resume.bot.model.entity.Resume resume;
+        Resume resumeJson;
+
+        for (int i = 1; i <= resumeList.size(); i++) {
+            resume = new com.resume.bot.model.entity.Resume();
+            resumeJson = resumeList.get(i - 1);
+            buttonIds.add("resume_hh_" + i);
+            resume.setResumeData(JsonProcessor.createJsonFromEntity(resumeJson));
+            resume.setTitle(resumeJson.getTitle());
+            resume.setUser(userService.getUser(chatId));
+            resume.setLink(resumeJson.getAlternateUrl());
+            resumeService.saveResume(resume);
+        }
+        buttonIds.add("back_to_menu_3");
+        sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, buttonIds));
+        sendMessage(this, EmojiParser.parseToUnicode("""
+                После выбора конкретного резюме, у вас будет возможность:
+
+                - *Скачать ваше резюме*
+                - *Внести изменения в резюме*
+                """), sendMessageRequest);
     }
 
     private void startDialogueWithClient(String receivedText, Long chatId, SendMessage sendMessageRequest) {
@@ -428,7 +460,8 @@ public class ResumeBot extends TelegramLongPollingBot {
                 BotUtil.userStates.put(chatId, BotState.FINISH_DIALOGUE);
                 finishDialogueWithClient(chatId, sendMessageRequest);
             }
-            default -> sendMessage(this, EmojiParser.parseToUnicode("Что-то пошло не так.\nПопробуйте ещё раз.:cry:"), sendMessageRequest);
+            default ->
+                    sendMessage(this, EmojiParser.parseToUnicode("Что-то пошло не так.\nПопробуйте ещё раз.:cry:"), sendMessageRequest);
         }
     }
 

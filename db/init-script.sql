@@ -12,7 +12,7 @@ CREATE TABLE users (
 
 CREATE TABLE resumes (
   resume_id serial PRIMARY KEY,
-  resume_data jsonb,
+  resume_data text,
   pdf_path text,
   link text,
   title varchar,
