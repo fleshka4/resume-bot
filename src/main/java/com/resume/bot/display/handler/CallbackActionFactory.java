@@ -35,11 +35,14 @@ public class CallbackActionFactory {
                 contactTypes.containsKey(callbackData)) {
             return new CreateResumeActionHandler(pollingBot, resumeService, userService);
         }
+        if (BotUtil.CORRECT_DATA_IDS_LIST.contains(callbackData)) {
+            return new CorrectDataHandler(headHunterService, resumeService, pollingBot, hhBaseUrl);
+        }
         if (BotUtil.EXPORT_RESUME_IDS_LIST.contains(callbackData)) {
             return new ExportResumeActionHandler(pollingBot, hhConfig, headHunterService, resumeService, hhBaseUrl);
         }
         if (BotUtil.MY_RESUMES_IDS_LIST.contains(callbackData) || BotUtil.checkIfAction(callbackData)) {
-            return new MyResumesActionHandler(pollingBot, resumeService, headHunterService, apiClientTokenImpl);
+            return new MyResumesActionHandler(pollingBot, resumeService, headHunterService, apiClientTokenImpl, hhBaseUrl);
         }
         if (BotUtil.checkIfBigType(callbackData)) {
             return new BigKeyBoardHandler(pollingBot);

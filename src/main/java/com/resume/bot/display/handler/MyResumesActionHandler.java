@@ -12,7 +12,6 @@ import com.resume.util.BotUtil;
 import com.vdurmont.emoji.EmojiParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
@@ -40,8 +39,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
 
     private final ApiClientTokenImpl apiClientTokenImpl;
 
-    @Value("${hh.base-url}")
-    private String hhBaseUrl;
+    private final String hhBaseUrl;
 
     @Override
     public void performAction(String callbackData, Integer messageId, Long chatId) {
@@ -148,7 +146,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
             return false;
         }
 
-        int num = getResumeNumber(matcher);
+        int num = BotUtil.getResumeNumber(matcher.group());
 
         List<String> buttonLabels = Arrays.asList("Загрузить новое резюме на hh", "Обновить резюме на hh", "Назад");
         List<String> buttonIds = Arrays.asList("finally_publish_on_hh_resume_" + num, "update_resume_" + num,
@@ -167,7 +165,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
             return false;
         }
 
-        Resume resume = getResume(matcher, chatId);
+        Resume resume = BotUtil.getResume(matcher.group(), resumeService, chatId, bot);
         if (resume == null) {
             return true;
         }
@@ -198,26 +196,8 @@ public class MyResumesActionHandler implements CallbackActionHandler {
             return false;
         }
 
-        Resume resume = getResume(matcher, chatId);
-        if (resume == null) {
-            return true;
-        }
-        try {
-            String hhLink = headHunterService.postCreateClient(hhBaseUrl, chatId,
-                    JsonProcessor.createEntityFromJson(resume.getResumeData(), com.resume.bot.json.entity.client.Resume.class));
-            Resume newResume = new Resume();
-            newResume.setResumeData(resume.getResumeData());
-            newResume.setTitle(resume.getTitle());
-            newResume.setUser(resume.getUser());
-            newResume.setTemplate(resume.getTemplate());
-            newResume.setLink(hhLink);
-            newResume.setPdfPath(resume.getPdfPath());
-            resumeService.saveResume(newResume);
-        } catch (Exception exception) {
-            log.error(exception.getMessage());
-            sendMessage(bot, "Произошла ошибка при публикации резюме. " +
-                    "Попробуйте удалить его и создать заново или выберите другое", chatId);
-        }
+        com.resume.bot.model.entity.Resume resume = BotUtil.getResume(matcher.group(), resumeService, chatId, bot);
+        BotUtil.publishResume(resume, chatId, resumeService, headHunterService, bot, hhBaseUrl, true);
         return true;
     }
 
@@ -233,7 +213,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
 
         Resume resume = null;
         if (matcherFirst.matches()) {
-            resume = getResume(matcherFirst, chatId);
+            resume = BotUtil.getResume(matcherFirst.group(), resumeService, chatId, bot);
 
             String filePath = resume.getPdfPath();
             File file = new File(filePath);
@@ -288,28 +268,12 @@ public class MyResumesActionHandler implements CallbackActionHandler {
             return false;
         }
 
-        Resume resume = getResume(matcher, chatId);
+        Resume resume = BotUtil.getResume(matcher.group(), resumeService, chatId, bot);
         if (resume != null) {
             resumeService.deleteResume(resume);
         }
         return true;
     }
-
-    private Resume getResume(Matcher matcher, Long chatId) {
-        int numOfResume = getResumeNumber(matcher);
-        List<Resume> resumes = resumeService.getResumesByUserId(chatId);
-        if (resumes.size() >= numOfResume) {
-            return resumes.get(numOfResume - 1);
-        }
-        sendMessage(bot, "Резюме не найдено. Попробуйте снова", chatId);
-        return null;
-    }
-
-    private int getResumeNumber(Matcher matcher) {
-        String[] s = matcher.group().split("_");
-        return Integer.parseInt(s[s.length - 1]);
-    }
-
 
     //TODO сами вызовите где надо в этом говне
     private boolean editClientResumeData(com.resume.bot.json.entity.client.Resume resume,

@@ -29,6 +29,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.resume.bot.display.MessageUtil.*;
+import static com.resume.bot.display.MessageUtil.executeEditMessageWithKeyBoard;
 import static com.resume.util.BotUtil.appendToField;
 import static com.resume.util.Constants.*;
 import static org.apache.commons.lang3.math.NumberUtils.createLong;
@@ -204,9 +205,10 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                 fillClientData(chatId);
 
                 List<String> buttonLabels = Arrays.asList("Загрузить новое резюме на hh", "Выбор Latex-шаблона");
-                List<String> buttonIds = Arrays.asList("create_resume", "export_resume_hh", "my_resumes");
-                sendMessage(bot, EmojiParser.parseToUnicode("Замечательно! Ваши данные успешно получены.:sparkles:\nВот что Вы можете сделать:"), chatId);
-                // todo кнопки "Загрузить новое резюме на hh", "Обновить резюме на hh", "Выбор Latex-шаблона"
+                List<String> buttonIds = Arrays.asList("post_resume_to_hh", "choose_latex_for_resume");
+                executeEditMessageWithKeyBoard(bot,
+                        EmojiParser.parseToUnicode("Замечательно! Ваши данные успешно получены.:sparkles:\nВот что Вы можете сделать:"),
+                        messageId, chatId, buttonLabels, buttonIds);
             }
             case "back_to_menu" -> {
                 List<String> buttonLabels = Arrays.asList("Создать резюме", "Использовать резюме с hh.ru", "Мои резюме");
@@ -422,7 +424,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
         dbResume.setUser(userService.getUser(chatId));
         dbResume.setTitle(resume.getTitle());
         dbResume.setResumeData(JsonProcessor.createJsonFromEntity(resume));
-        resumeService.saveResume(dbResume);
+        BotUtil.lastSavedResumeMap.put(chatId, resumeService.saveResume(dbResume));
     }
 
     private <T> void initList(List<T> listToInit, Class<T> type, int size) {

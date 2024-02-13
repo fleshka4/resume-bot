@@ -3,14 +3,12 @@ package com.resume.bot.service;
 import com.resume.bot.config.BotConfig;
 import com.resume.bot.display.BotState;
 import com.resume.bot.display.CallbackActionHandler;
-import com.resume.bot.display.MessageUtil;
 import com.resume.bot.display.ResumeField;
 import com.resume.bot.display.handler.CallbackActionFactory;
 import com.resume.bot.json.JsonProcessor;
 import com.resume.bot.json.JsonValidator;
 import com.resume.bot.json.entity.client.Resume;
 import com.resume.bot.model.entity.User;
-import com.resume.hh_wrapper.config.HhConfig;
 import com.resume.util.BigKeyboardType;
 import com.resume.util.BotUtil;
 import com.vdurmont.emoji.EmojiParser;
@@ -26,7 +24,8 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.*;
 
-import static com.resume.bot.display.MessageUtil.*;
+import static com.resume.bot.display.MessageUtil.createSendMessageRequest;
+import static com.resume.bot.display.MessageUtil.sendMessage;
 import static com.resume.bot.json.JsonValidator.ValidationType.*;
 import static com.resume.bot.json.JsonValidator.checkExperience;
 import static com.resume.bot.json.JsonValidator.checks;
@@ -72,6 +71,7 @@ public class ResumeBot extends TelegramLongPollingBot {
                 if ("/start".equals(message.getText())) {
                     BotUtil.userStates.put(chatId, BotState.START);
                     BotUtil.clientsMap.put(chatId, new Resume());
+                    BotUtil.lastSavedResumeMap.remove(chatId);
                     startCommandReceived(message, sendMessageRequest);
                 } else if (messageWithCode.length == 2) {
                     String receivedCode = messageWithCode[1].trim();

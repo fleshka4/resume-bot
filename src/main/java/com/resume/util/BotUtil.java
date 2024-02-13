@@ -1,10 +1,14 @@
 package com.resume.util;
 
 import com.resume.bot.display.BotState;
+import com.resume.bot.json.JsonProcessor;
 import com.resume.bot.json.entity.client.Resume;
+import com.resume.bot.service.HeadHunterService;
+import com.resume.bot.service.ResumeService;
 import com.resume.hh_wrapper.config.HhConfig;
 import com.vdurmont.emoji.EmojiParser;
 import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -14,6 +18,7 @@ import java.util.*;
 import static com.resume.bot.display.MessageUtil.sendMessage;
 import static com.resume.util.Constants.ITEMS_DELIMITER;
 
+@Slf4j
 @UtilityClass
 public class BotUtil {
     public final List<String> CREATE_RESUME_IDS_LIST = List.of(
@@ -52,6 +57,10 @@ public class BotUtil {
             "back_to_create_resume",
             "yes_go_to_menu",
             "no_go_to_menu"
+    );
+    public final List<String> CORRECT_DATA_IDS_LIST = List.of(
+            "post_resume_to_hh",
+            "choose_latex_for_resume"
     );
     public final List<String> MY_RESUMES_IDS_LIST = List.of(
             "my_resumes",
@@ -115,6 +124,7 @@ public class BotUtil {
     public final Map<Long, BotState> dialogueStates = new HashMap<>();
     public final Map<Long, Map<String, String>> userResumeData = new LinkedHashMap<>();
     public final Map<Long, Resume> clientsMap = new HashMap<>();
+    public final Map<Long, com.resume.bot.model.entity.Resume> lastSavedResumeMap = new HashMap<>(); // chatId, last Resume which was created from 0
     public final String ERROR_TEXT = "Error occurred: ";
     public final Map<Long, Long> states = new HashMap<>(); // state, chatId
     public final Map<Long, String> personAndIndustryType = new HashMap<>(); // chatId, industryType
@@ -260,5 +270,35 @@ public class BotUtil {
                 "&redirect_uri=http://localhost:5000/hh/auth";
 
         sendMessage(bot, EmojiParser.parseToUnicode(message.formatted(link)), chatId);
+    }
+
+    public void publishResume(com.resume.bot.model.entity.Resume resume, Long chatId, ResumeService resumeService, HeadHunterService headHunterService, TelegramLongPollingBot bot, String hhBaseUrl, boolean fromMyResumes) {
+        if (resume != null) {
+            try {
+                String hhLink = headHunterService.postCreateClient(hhBaseUrl, chatId,
+                        JsonProcessor.createEntityFromJson(resume.getResumeData(), com.resume.bot.json.entity.client.Resume.class));
+                resumeService.updateHhLinkByResumeId(hhLink, resume.getResumeId());
+            } catch (Exception exception) {
+                log.error(exception.getMessage());
+                String message = "Произошла ошибка при публикации резюме. " +
+                        "Попробуйте удалить его и создать заново" + (!fromMyResumes ? "" :  "или выберите другое");
+                sendMessage(bot, message, chatId);
+            }
+        }
+    }
+
+    public com.resume.bot.model.entity.Resume getResume(String string, ResumeService resumeService, Long chatId, TelegramLongPollingBot bot) {
+        int numOfResume = getResumeNumber(string);
+        List<com.resume.bot.model.entity.Resume> resumes = resumeService.getResumesByUserId(chatId);
+        if (resumes.size() >= numOfResume) {
+            return resumes.get(numOfResume - 1);
+        }
+        sendMessage(bot, "Резюме не найдено. Попробуйте снова", chatId);
+        return null;
+    }
+
+    public int getResumeNumber(String string) {
+        String[] s = string.split("_");
+        return Integer.parseInt(s[s.length - 1]);
     }
 }
