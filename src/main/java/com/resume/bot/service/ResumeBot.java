@@ -64,6 +64,7 @@ public class ResumeBot extends TelegramLongPollingBot {
 
                 if ("/start".equals(message.getText())) {
                     BotUtil.userStates.put(chatId, BotState.START);
+                    BotUtil.userResumeData.put(chatId, new LinkedHashMap<>());
                     BotUtil.clientsMap.put(chatId, new Resume());
                     startCommandReceived(message, sendMessageRequest);
                 } else if ("/menu".equals(message.getText())) {
@@ -469,6 +470,9 @@ public class ResumeBot extends TelegramLongPollingBot {
     private void finishDialogueWithClient(Long chatId, SendMessage sendMessageRequest) {
         if (BotUtil.userStates.get(chatId) == BotState.FINISH_DIALOGUE) {
             Map<String, String> resumeFields = BotUtil.userResumeData.get(chatId);
+            if (BotUtil.personAndProfessionalRole.containsKey(chatId)) {
+                appendToField(resumeFields, ResumeField.WITH_PROFESSIONAL_ROLE.getValue(), BotUtil.personAndProfessionalRole.get(chatId));
+            }
             sendResultMessageAboutClientData(resumeFields, sendMessageRequest);
         }
     }
@@ -481,15 +485,46 @@ public class ResumeBot extends TelegramLongPollingBot {
             for (String line : lines) {
                 String[] parts = line.split("-", 2);
                 if (parts.length == 2) {
+                    int fieldId = 0;
                     String fieldLabel = parts[0].trim().toLowerCase();
                     String fieldValue = parts[1].trim();
 
-                    if (resumeFields.containsKey(fieldLabel)) {
+                    String[] labelItems = fieldLabel.split(" ");
+                    String fieldIdStr = labelItems[labelItems.length - 1];
+                    String fieldLabelWithoutIdNumber = fieldLabel.substring(0, fieldLabel.length() - fieldIdStr.length()).trim();
+
+                    if (resumeFields.containsKey(fieldLabel) || resumeFields.containsKey(fieldLabelWithoutIdNumber)) {
+
+                        String[] actualValues = {};
+                        try {
+                            actualValues = resumeFields.get(fieldLabel).split(ITEMS_DELIMITER);
+                        } catch (Exception e) {}
+                        try {
+                            actualValues = resumeFields.get(fieldLabelWithoutIdNumber).split(ITEMS_DELIMITER);
+                        } catch (Exception e) {}
+
+                        if (actualValues.length > 1) {
+                            fieldLabel = fieldLabelWithoutIdNumber;
+                            try {
+                                fieldId = Integer.parseInt(fieldIdStr) - 1;
+                            } catch (Exception e) {
+                                sendMessage(this, "Пожалуйста, укажите номер редактируемого поля.", sendMessageRequest);
+                                return;
+                            }
+                        }
+
+                        String label = fieldLabel;
                         ResumeField field = Arrays.stream(ResumeField.values())
-                                .filter(f -> f.getValue().equals(fieldLabel)).findFirst().orElse(null);
+                                .filter(f -> f.getValue().equals(label)).findFirst().orElse(null);
                         if (field != null) {
                             if (field.processCheck(fieldValue)) {
-                                resumeFields.put(fieldLabel, fieldValue);
+                                try {
+                                    actualValues[fieldId] = fieldValue;
+                                    resumeFields.put(fieldLabel, String.join(ITEMS_DELIMITER, actualValues));
+                                } catch (Exception e) {
+                                    sendMessage(this, "Пожалуйста, укажите корректный номер поля.", sendMessageRequest);
+                                    return;
+                                }
                             } else {
                                 sendMessage(this, field.message(), sendMessageRequest);
                                 return;
@@ -574,6 +609,8 @@ public class ResumeBot extends TelegramLongPollingBot {
             } else if (key.equals(ResumeField.REC_NAME.getValue())) {
                 currentBlock = "*Список рекомендаций*";
                 resume.append("\n\n").append(currentBlock).append("\n");
+            } else if (key.equals(ResumeField.WISH_POSITION.getValue())) {
+                resume.append("\n\n");
             }
 
             // For fields with multiple values
@@ -591,6 +628,10 @@ public class ResumeBot extends TelegramLongPollingBot {
                         resume.append("\n");
                     }
                 }
+                resumeFieldToValues.clear();
+            } else if (isCommaSeparatedMultipleField(key)) {
+                value = value.replace(ITEMS_DELIMITER, ", ");
+                resume.append("\n").append("*").append(key).append("*").append(": ").append(value);
                 resumeFieldToValues.clear();
             } else {
                 // For fields with single value
@@ -610,7 +651,12 @@ public class ResumeBot extends TelegramLongPollingBot {
                 *Пример:*
                 Имя - Алексей
 
-                И я изменю некорректную информацию.:dizzy:"""));
+                Чтобы отредактировать поле в одном из блоков резюме укажите его порядковый номер через пробел
+                
+                *Пример:*
+                Учебное заведение 2 - СПбПУ
+
+                И я автоматически изменю некорректную информацию.:dizzy:"""));
 
         List<String> buttonLabels = List.of("Редактировать", "Всё верно!");
         List<String> callbackData = List.of("edit_result_data", "result_data_is_correct");
@@ -622,9 +668,13 @@ public class ResumeBot extends TelegramLongPollingBot {
     private boolean isEndOfFieldsBlock(String key) {
         return key.equals(ResumeField.EDUCATION_END_YEAR.getValue()) ||
                 key.equals(ResumeField.EXPERIENCE_DUTIES.getValue()) ||
-                key.equals(ResumeField.BUSYNESS.getValue()) ||
-                key.equals(ResumeField.SCHEDULE.getValue()) ||
                 key.equals(ResumeField.REC_ORGANIZATION.getValue());
+    }
+
+    private boolean isCommaSeparatedMultipleField(String key) {
+        return key.equals(ResumeField.DRIVER_LICENCE.getValue()) ||
+                key.equals(ResumeField.BUSYNESS.getValue()) ||
+                key.equals(ResumeField.SCHEDULE.getValue());
     }
 
     @Override
