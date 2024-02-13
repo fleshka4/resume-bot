@@ -236,6 +236,7 @@ public class ResumeBot extends TelegramLongPollingBot {
             resume.setTitle(resumeJson.getTitle());
             resume.setUser(userService.getUser(chatId));
             resume.setLink(resumeJson.getAlternateUrl());
+            resume.setDownloadLink(resumeJson.getDownload().getPdf().getUrl());
             resumeService.saveResume(resume);
         }
         buttonIds.add("back_to_menu_3");

@@ -45,7 +45,7 @@ public class CallbackActionFactory {
             return new ExportResumeActionHandler(pollingBot, hhConfig, headHunterService, hhBaseUrl, tokenHolderService, userService);
         }
         if (BotUtil.MY_RESUMES_IDS_LIST.contains(callbackData) || BotUtil.checkIfAction(callbackData)) {
-            return new MyResumesActionHandler(pollingBot, resumeService, templateService, headHunterService);
+            return new MyResumesActionHandler(pollingBot, resumeService, templateService, headHunterService, tokenHolderService, userService);
         }
         if (BotUtil.checkIfBigType(callbackData)) {
             return new BigKeyBoardHandler(pollingBot);
