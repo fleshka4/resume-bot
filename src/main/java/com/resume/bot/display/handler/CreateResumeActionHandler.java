@@ -197,7 +197,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                 BotUtil.userStates.put(chatId, BotState.RESULT_DATA_CORRECT);
                 fillClientData(chatId);
                 sendMessage(bot, EmojiParser.parseToUnicode("Замечательно! Ваши данные успешно получены.:sparkles:\nВот что Вы можете сделать:"), chatId);
-                // todo кнопки "Загрузить новое резюме на hh", "Обновить резюме на hh", "Выбор Latex-шаблона"
+                // todo кнопки "Загрузить новое резюме на hh", "Выбор Latex-шаблона"
             }
             case "back_to_menu" -> {
                 List<String> buttonLabels = Arrays.asList("Создать резюме", "Использовать резюме с hh.ru", "Мои резюме");
@@ -409,7 +409,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
         resume.setEmployments(busyness);
         resume.setSchedules(schedules);
 
-        JsonProcessor.createJsonFromEntity(resume);
+        System.err.println(JsonProcessor.createJsonFromEntity(resume));
     }
 
     private <T> void initList(List<T> listToInit, Class<T> type, int size) {

@@ -1,15 +1,30 @@
 package com.resume.util;
 
 import com.resume.bot.display.BotState;
+import com.resume.bot.json.JsonProcessor;
+import com.resume.bot.json.JsonValidator;
+import com.resume.bot.json.entity.area.Area;
+import com.resume.bot.json.entity.client.Experience;
+import com.resume.bot.json.entity.client.Recommendation;
 import com.resume.bot.json.entity.client.Resume;
+import com.resume.bot.json.entity.client.Salary;
+import com.resume.bot.json.entity.client.education.Education;
+import com.resume.bot.json.entity.common.Id;
+import com.resume.bot.json.entity.common.Type;
 import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
+import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
+import static com.resume.bot.display.MessageUtil.sendMessage;
 import static com.resume.util.Constants.ITEMS_DELIMITER;
 
+@Slf4j
 @UtilityClass
 public class BotUtil {
     public final List<String> CREATE_RESUME_IDS_LIST = List.of(
@@ -110,9 +125,10 @@ public class BotUtil {
     public final Map<Long, Integer> pages = new HashMap<>();
     public final Map<Long, BotState> dialogueStates = new HashMap<>();
     public final Map<Long, Map<String, String>> userResumeData = new LinkedHashMap<>();
+    public final Map<Long, com.resume.bot.model.entity.Resume> userMyResumeMap = new HashMap<>();
     public final Map<Long, Resume> clientsMap = new HashMap<>();
     public final String ERROR_TEXT = "Error occurred: ";
-    public final Map<Long, Long> states = new HashMap<>(); // state, chatId
+    public final Map<Long, Long> states = new HashMap<>(); // authorize: state, chatId
     public final Map<Long, String> personAndIndustryType = new HashMap<>(); // chatId, industryType
     public final Map<Long, String> personAndIndustry = new HashMap<>(); // chatId, industry
     public final Map<Long, String> personAndProfessionalRole = new HashMap<>(); // chatId, professionalRole
@@ -239,5 +255,143 @@ public class BotUtil {
 
     public static SortedMap<String, String> createSortedMap(Map<String, String> originalMap) {
         return new TreeMap<>(originalMap);
+    }
+
+    public static String askToEditMyResume(com.resume.bot.model.entity.Resume resume, Long chatId) {
+        Resume res = JsonProcessor.createEntityFromJson(resume.getResumeData(), Resume.class);
+
+        Area area = JsonValidator.getAreaByIdDeep(Constants.AREAS, res.getArea().getId()).orElse(null);
+        StringBuilder areaSB = new StringBuilder();
+        while (area != null) {
+            areaSB.insert(0, area.getName()).insert(0, area.getParentId() != null ? ", " : "");
+            area = JsonValidator.getAreaByIdDeep(Constants.AREAS, area.getParentId()).orElse(null);
+        }
+        String areaStr = areaSB.toString();
+
+        Education education = res.getEducation();
+        String educStr = education != null && !education.getPrimary().isEmpty()
+                ? education.getPrimary().stream().map(ed -> """
+                        уровень образования: %s
+                        учебное заведение: %s
+                        факультет: %s
+                        специализация: %s
+                        год окончания: %d
+                        """.formatted(
+                        education.getLevel().getName(),
+                        ed.getName(),
+                        ed.getOrganization(),
+                        ed.getResult(),
+                        ed.getYear()))
+                .collect(Collectors.joining("\n"))
+                : "";
+
+        List<Experience> experience = res.getExperience();
+        String expStr = experience != null && !experience.isEmpty()
+                ? experience.stream().map(exp -> """
+                        опыт работы: %s
+                        название организации: %s
+                        город организации: %s
+                        ссылка: %s
+                        отрасль: %s
+                        должность: %s
+                        обязанности: %s
+                                                
+                        """.formatted(
+                        exp.getStart() + (exp.getEnd() != null ? " - %s".formatted(exp.getEnd()) : ""),
+                        exp.getCompany(),
+                        exp.getArea().getName(),
+                        exp.getCompanyUrl(),
+                        exp.getIndustries().stream().map(Type::getName).collect(Collectors.joining(", ")),
+                        exp.getPosition(),
+                        exp.getDescription()))
+                .collect(Collectors.joining("\n"))
+                : "";
+
+        List<Recommendation> recommendation = res.getRecommendation();
+        String recStr = recommendation != null && !recommendation.isEmpty()
+                ? recommendation.stream().map(rec -> """
+                        имя выдавшего рекомендацию: %s
+                        должность выдавшего рекомендацию: %s
+                        организация выдавшего рекомендацию: %s
+                                                        
+                                """.formatted(
+                        rec.getName(),
+                        rec.getPosition(),
+                        rec.getOrganization()
+                ))
+                .collect(Collectors.joining("\n"))
+                : "";
+
+        Salary salary = res.getSalary();
+        String salStr = "%d %s".formatted(salary.getAmount(), salary.getCurrency());
+
+        List<Type> employment = res.getEmployments();
+        String empStr = employment.stream().map(Type::getName)
+                .collect(Collectors.joining("", "желаемая занятость: ", "\n"));
+
+        List<Type> schedule = res.getSchedules();
+        String schedStr = schedule.stream().map(Type::getName)
+                .collect(Collectors.joining("", "желаемый график: ", "\n"));
+
+        String outInfo = """
+                Ваше резюме:
+                                
+                Основная информация
+                                
+                имя: %s
+                отчество: %s
+                фамилия: %s
+                дата рождения: %s
+                пол: %s
+                место жительства: %s
+                                
+                %s
+                %s
+                Дополнительная информация
+                                
+                навыки: %s
+                о себе: %s
+                наличие авто: %s
+                категория прав: %s
+                  
+                %s
+                желаемая позиция: %s
+                профессиональная роль: %s
+                желаемая зарплата: %s
+                %s
+                %s
+                контакты: %s
+                    
+                Присылайте исправления в формате *Поле - новое значение*
+
+                *Пример:*
+                Имя - Алексей
+                """
+                .formatted(
+                        res.getFirstName(),
+                        res.getMiddleName(),
+                        res.getLastName(),
+                        res.getBirthDate(),
+                        Constants.sexTypes.get(res.getGender().getId()),
+                        areaStr,
+                        !educStr.isEmpty() ? "Образование\n\n" + educStr : "",
+                        !expStr.isEmpty() ? "Опыт\n\n" + expStr : "",
+                        String.join(", ", res.getSkillSet()),
+                        res.getSkills(),
+                        res.getHasVehicle() ? "да" : "нет",
+                        String.join(", ", res.getDriverLicenseTypes().stream().map(Id::getId).toList()),
+                        !recStr.isEmpty() ? "Список рекомендаций\n\n" + recStr : "",
+                        res.getTitle(),
+                        Constants.PROFESSIONAL_ROLES.getCategories().stream()
+                                .filter(cat -> cat.getId().equals(res.getProfessionalRoles().get(0).getId()))
+                                .findFirst().get().getName(),
+                        salStr,
+                        empStr,
+                        schedStr,
+                        res.getContacts()
+                );
+
+        BotUtil.userMyResumeMap.put(chatId, resume);
+        return outInfo;
     }
 }

@@ -1,6 +1,7 @@
 package com.resume.bot.repository;
 
 import com.resume.bot.model.entity.Resume;
+import com.resume.bot.model.entity.Template;
 import com.resume.bot.model.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -19,5 +20,15 @@ public interface ResumeRepository extends JpaRepository<Resume, Integer> {
     @Transactional
     @Modifying
     @Query("update Resume r set r.hhLink = ?1 where r.resumeId = ?2")
-    int updateHhLinkByResumeId(String hhLink, int resumeId);
+    void updateHhLinkByResumeId(String hhLink, int resumeId);
+
+    @Transactional
+    @Modifying
+    @Query("update Resume r set r.template = ?1 where r.resumeId = ?2")
+    void updateTemplateByResumeId(Template template, int resumeId);
+
+    @Transactional
+    @Modifying
+    @Query("update Resume r set r.resumeData = ?1 where r.resumeId = ?2")
+    void updateResumeDataByResumeId(String resumeData, int resumeId);
 }

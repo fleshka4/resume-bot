@@ -2,6 +2,7 @@ package com.resume.bot.json;
 
 import com.resume.bot.json.entity.area.Area;
 import com.resume.bot.json.entity.area.Country;
+import com.resume.bot.json.entity.common.Id;
 import com.resume.util.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.UrlValidator;
@@ -287,6 +288,20 @@ public class JsonValidator {
                 return Optional.of(area);
             } else if (!area.getAreas().isEmpty()) {
                 Optional<Area> childArea = getAreaByNameDeep(area.getAreas(), name);
+                if (childArea.isPresent()) {
+                    return childArea;
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
+    public static Optional<Area> getAreaByIdDeep(List<Area> areas, String id) {
+        for (Area area : areas) {
+            if (area.getId().equals(id)) {
+                return Optional.of(area);
+            } else if (!area.getAreas().isEmpty()) {
+                Optional<Area> childArea = getAreaByIdDeep(area.getAreas(), id);
                 if (childArea.isPresent()) {
                     return childArea;
                 }
