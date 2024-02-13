@@ -1,6 +1,7 @@
 package com.resume.bot.json.entity.client;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.resume.bot.json.JsonValidator;
 import com.resume.bot.json.entity.client.education.Education;
 import com.resume.bot.json.entity.common.Id;
 import com.resume.bot.json.entity.common.Type;
@@ -11,6 +12,7 @@ import lombok.NonNull;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -53,7 +55,7 @@ public class Resume {
 //
 //    private List<Portfolio> portfolio;
 //
-    @NonNull
+//    @NonNull
     @JsonProperty("professional_roles")
     private List<Id> professionalRoles;
 
@@ -83,7 +85,7 @@ public class Resume {
 //    @JsonProperty("work_ticket")
 //    private List<Id> workTicket;
 
-    @NonNull
+//    @NonNull
     private Id area;
 
 //    @NonNull
@@ -92,16 +94,15 @@ public class Resume {
 //    @NonNull
 //    private List<Contact> contact;
 
-    @NonNull
+//    @NonNull
     private Education education;
 
-    @NonNull
+//    @NonNull
     private List<Experience> experience;
 
-    @NonNull
+//    @NonNull
     private Id gender;
 
-    @NonNull
     private List<Language> language;
 
     private String contacts;

@@ -1,7 +1,6 @@
 package com.resume.bot.display;
 
 import com.resume.bot.json.JsonValidator;
-import com.resume.bot.json.entity.Industry;
 import com.resume.bot.json.entity.client.*;
 import com.resume.bot.json.entity.client.education.PrimaryEducation;
 import com.resume.bot.json.entity.common.Id;
@@ -159,7 +158,7 @@ public enum ResumeField {
         public void editInResume(Resume resume, String param) {
             List<PrimaryEducation> list = resume.getEducation().getPrimary();
             if (!list.isEmpty()) {
-                list.get(0).setName(param);
+                list.getFirst().setName(param);
             }
         }
     },
@@ -179,7 +178,7 @@ public enum ResumeField {
         public void editInResume(Resume resume, String param) {
             List<PrimaryEducation> list = resume.getEducation().getPrimary();
             if (!list.isEmpty()) {
-                list.get(0).setOrganization(param);
+                list.getFirst().setOrganization(param);
             }
         }
     },
@@ -199,7 +198,7 @@ public enum ResumeField {
         public void editInResume(Resume resume, String param) {
             List<PrimaryEducation> list = resume.getEducation().getPrimary();
             if (!list.isEmpty()) {
-                list.get(0).setResult(param);
+                list.getFirst().setResult(param);
             }
         }
     },
@@ -219,7 +218,7 @@ public enum ResumeField {
         public void editInResume(Resume resume, String param) {
             List<PrimaryEducation> list = resume.getEducation().getPrimary();
             if (!list.isEmpty()) {
-                list.get(0).setYear(Long.getLong(param, LocalDate.now().getYear()));
+                list.getFirst().setYear(Long.getLong(param, LocalDate.now().getYear()));
             }
         }
     },
@@ -244,7 +243,7 @@ public enum ResumeField {
         public void editInResume(Resume resume, String param) {
             List<Experience> list = resume.getExperience();
             if (!list.isEmpty()) {
-                list.get(0).setCompany(param);
+                list.getFirst().setCompany(param);
             }
         }
     },
@@ -264,7 +263,7 @@ public enum ResumeField {
         public void editInResume(Resume resume, String param) {
             List<Experience> list = resume.getExperience();
             if (!list.isEmpty()) {
-                list.get(0).setCompany(param);
+                list.getFirst().setCompany(param);
             }
         }
     },
@@ -285,7 +284,7 @@ public enum ResumeField {
             List<Experience> list = resume.getExperience();
             if (!list.isEmpty()) {
                 JsonValidator.getAreaByNameDeep(Constants.AREAS, param)
-                        .ifPresent(city -> list.get(0).setArea(new Area(city.getId(), city.getName())));
+                        .ifPresent(city -> list.getFirst().setArea(new Area(city.getId(), city.getName())));
             }
         }
     },
@@ -303,13 +302,13 @@ public enum ResumeField {
 
         @Override
         public void editInResume(Resume resume, String param) {
-            List<Experience> list = resume.getExperience();
+            /* List<Experience> list = resume.getExperience();
             if (!list.isEmpty()) {
                 Constants.INDUSTRIES.stream()
                         .map(Industry::getIndustries).flatMap(List::stream)
                         .filter(ind -> ind.getName().equals(param)).findFirst()
-                        .ifPresent(industry -> list.get(0).setIndustry(industry));
-            }
+                        .ifPresent(industry -> list.getFirst().setIndustry(industry));
+            }*/
         }
     },
 
@@ -328,7 +327,7 @@ public enum ResumeField {
         public void editInResume(Resume resume, String param) {
             List<Experience> list = resume.getExperience();
             if (!list.isEmpty()) {
-                list.get(0).setCompanyUrl(param);
+                list.getFirst().setCompanyUrl(param);
             }
         }
     },
@@ -348,7 +347,7 @@ public enum ResumeField {
         public void editInResume(Resume resume, String param) {
             List<Experience> list = resume.getExperience();
             if (!list.isEmpty()) {
-                list.get(0).setPosition(param);
+                list.getFirst().setPosition(param);
             }
         }
     },
@@ -368,7 +367,7 @@ public enum ResumeField {
         public void editInResume(Resume resume, String param) {
             List<Experience> list = resume.getExperience();
             if (!list.isEmpty()) {
-                list.get(0).setDescription(param);
+                list.getFirst().setDescription(param);
             }
         }
     },
@@ -393,7 +392,7 @@ public enum ResumeField {
     ABOUT_ME("о себе") {
         @Override
         public boolean processCheck(String checkValue) {
-            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_4096) && JsonValidator.checkAlphaSpaceFormat(checkValue);
+            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_4096);
         }
 
         @Override
@@ -441,7 +440,7 @@ public enum ResumeField {
         public void editInResume(Resume resume, String param) {
             List<Recommendation> list = resume.getRecommendation();
             if (!list.isEmpty()) {
-                list.get(0).setName(param);
+                list.getFirst().setName(param);
             }
         }
     },
@@ -461,7 +460,7 @@ public enum ResumeField {
         public void editInResume(Resume resume, String param) {
             List<Recommendation> list = resume.getRecommendation();
             if (!list.isEmpty()) {
-                list.get(0).setPosition(param);
+                list.getFirst().setPosition(param);
             }
         }
     },
@@ -481,7 +480,7 @@ public enum ResumeField {
         public void editInResume(Resume resume, String param) {
             List<Recommendation> list = resume.getRecommendation();
             if (!list.isEmpty()) {
-                list.get(0).setOrganization(param);
+                list.getFirst().setOrganization(param);
             }
         }
     },
@@ -516,7 +515,7 @@ public enum ResumeField {
 
         @Override
         public void editInResume(Resume resume, String param) {
-            // fixme
+            // NOOP
         }
     },
 

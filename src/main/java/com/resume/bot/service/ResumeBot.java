@@ -8,6 +8,7 @@ import com.resume.bot.display.handler.CallbackActionFactory;
 import com.resume.bot.json.JsonProcessor;
 import com.resume.bot.json.JsonValidator;
 import com.resume.bot.json.entity.client.Resume;
+import com.resume.bot.model.entity.Template;
 import com.resume.bot.model.entity.User;
 import com.resume.util.BigKeyboardType;
 import com.resume.util.BotUtil;
@@ -44,8 +45,8 @@ public class ResumeBot extends TelegramLongPollingBot {
     private final HeadHunterService headHunterService;
 
     private final UserService userService;
-
     private final ResumeService resumeService;
+    private final TemplateService templateService;
 
     @Value("${hh.base-url}")
     private String hhBaseUrl;
@@ -56,8 +57,6 @@ public class ResumeBot extends TelegramLongPollingBot {
             Message message = update.getMessage();
             String[] messageWithCode = message.getText().split(" ");
             Long chatId = message.getChatId();
-
-            System.out.println(message.getText());
 
             if (!BotUtil.userStates.containsKey(chatId)) {
                 BotUtil.userStates.put(chatId, BotState.START);
@@ -70,6 +69,7 @@ public class ResumeBot extends TelegramLongPollingBot {
 
                 if ("/start".equals(message.getText())) {
                     BotUtil.userStates.put(chatId, BotState.START);
+                    BotUtil.userResumeData.put(chatId, new LinkedHashMap<>());
                     BotUtil.clientsMap.put(chatId, new Resume());
                     BotUtil.lastSavedResumeMap.remove(chatId);
                     startCommandReceived(message, sendMessageRequest);
@@ -91,6 +91,10 @@ public class ResumeBot extends TelegramLongPollingBot {
                     if (checkClientExists(chatId, sendMessageRequest)) {
                         editResultClientData(message.getText(), chatId, sendMessageRequest);
                     }
+                } else if (currentState == BotState.EDIT_MY_RESUME && BotUtil.userMyResumeMap.containsKey(chatId)) {
+                    editClientResumeData(
+                            JsonProcessor.createEntityFromJson(BotUtil.userMyResumeMap.get(chatId).getResumeData(), Resume.class),
+                            message.getText(), chatId, sendMessageRequest);
                 } else {
                     sendMessage(this, EmojiParser.parseToUnicode("Извините, я не понимаю эту команду.:cry:"), sendMessageRequest);
                 }
@@ -102,25 +106,51 @@ public class ResumeBot extends TelegramLongPollingBot {
             Long chatId = callbackQuery.getMessage().getChatId();
             SendMessage sendMessageRequest = createSendMessageRequest(this, chatId);
 
-            if (callbackData.equals("yes_go_to_menu")) {
-                createMenu(sendMessageRequest);
-            } else if (callbackData.equals("no_go_to_menu")) {
-                sendMessage(this, EmojiParser.parseToUnicode("Продолжим работу.:wink:"), sendMessageRequest);
-            } else if (callbackData.equals("skip_contacts")) {
-                BotUtil.userStates.put(chatId, BotState.FINISH_DIALOGUE);
-                finishDialogueWithClient(chatId, sendMessageRequest);
-            } else {
-                CallbackActionHandler callbackHandler = callbackActionFactory.createCallbackActionHandler(this, callbackData);
+            if (callbackData.startsWith("template")) {
+                updateTemplate(callbackData, chatId);
+                return;
+            }
 
-                if (callbackHandler != null) {
-                    callbackHandler.performAction(callbackData, messageId, chatId);
+            switch (callbackData) {
+                case "yes_go_to_menu" -> createMenu(sendMessageRequest);
+                case "no_go_to_menu" ->
+                        sendMessage(this, EmojiParser.parseToUnicode("Продолжим работу.:wink:"), sendMessageRequest);
+                case "skip_contacts" -> {
+                    BotUtil.userStates.put(chatId, BotState.FINISH_DIALOGUE);
+                    finishDialogueWithClient(chatId, sendMessageRequest);
+                }
+                default -> {
+                    CallbackActionHandler callbackHandler = callbackActionFactory.createCallbackActionHandler(this, callbackData);
+
+                    if (callbackHandler != null) {
+                        callbackHandler.performAction(callbackData, messageId, chatId);
+                    }
                 }
             }
         }
     }
 
+    private void updateTemplate(String callbackData, Long chatId) {
+        String[] splits = callbackData.split("_");
+        if (splits.length == 4) {
+            List<com.resume.bot.model.entity.Resume> resumes = resumeService.getResumesByUserId(chatId);
+            resumes.sort(Comparator.comparing(com.resume.bot.model.entity.Resume::getResumeId));
+
+            Template template = templateService.getTemplate(Integer.parseInt(splits[3]));
+            if (template == null) {
+                throw new RuntimeException("Template is not found");
+            }
+            com.resume.bot.model.entity.Resume resume = resumes.get(Integer.parseInt(splits[2]));
+            if (resume == null) {
+                throw new RuntimeException("Resume is not found");
+            }
+            resume.setTemplate(template);
+            resumeService.updateTemplateByResumeId(template, resume.getResumeId());
+        }
+    }
+
     private void startCommandReceived(Message message, SendMessage sendMessageRequest) {
-        String startMessage = "Привет " + message.getChat().getFirstName() + " !:wave:\nЯ бот для создания резюме." +
+        String startMessage = "Привет " + message.getChat().getFirstName() + " !:wave:\nЯ бот для создания резюме. " +
                 "Давай вместе составим профессиональное резюме для твоего будущего успеха!:star2:\n" +
                 "Просто следуй моим инструкциям.";
 
@@ -317,7 +347,7 @@ public class ResumeBot extends TelegramLongPollingBot {
                     message.append("Выберите сферу деятельности компании:\n\n");
                     BotUtil.prepareBigKeyboardCreation(0, BigKeyboardType.INDUSTRIES, message, buttonLabels, callbackDataList);
                     sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, callbackDataList, BigKeyboardType.INDUSTRIES));
-                    sendMessage(this, String.valueOf(message), sendMessageRequest);
+                    sendMessage(this, message.toString(), sendMessageRequest);
                 }
             }
             case ENTER_POST_IN_ORGANIZATION -> {
@@ -404,7 +434,7 @@ public class ResumeBot extends TelegramLongPollingBot {
                     message.append("Выберите специализацию:\n\n");
                     BotUtil.prepareBigKeyboardCreation(0, BigKeyboardType.PROFESSIONAL_ROLES, message, buttonLabels, callbackDataList);
                     sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, callbackDataList, BigKeyboardType.PROFESSIONAL_ROLES));
-                    sendMessage(this, String.valueOf(message), sendMessageRequest);
+                    sendMessage(this, message.toString(), sendMessageRequest);
                 }
             }
             case ENTER_WISH_SALARY -> {
@@ -468,6 +498,9 @@ public class ResumeBot extends TelegramLongPollingBot {
     private void finishDialogueWithClient(Long chatId, SendMessage sendMessageRequest) {
         if (BotUtil.userStates.get(chatId) == BotState.FINISH_DIALOGUE) {
             Map<String, String> resumeFields = BotUtil.userResumeData.get(chatId);
+            if (BotUtil.personAndProfessionalRole.containsKey(chatId)) {
+                appendToField(resumeFields, ResumeField.WITH_PROFESSIONAL_ROLE.getValue(), BotUtil.personAndProfessionalRole.get(chatId));
+            }
             sendResultMessageAboutClientData(resumeFields, sendMessageRequest);
         }
     }
@@ -480,15 +513,46 @@ public class ResumeBot extends TelegramLongPollingBot {
             for (String line : lines) {
                 String[] parts = line.split("-", 2);
                 if (parts.length == 2) {
+                    int fieldId = 0;
                     String fieldLabel = parts[0].trim().toLowerCase();
                     String fieldValue = parts[1].trim();
 
-                    if (resumeFields.containsKey(fieldLabel)) {
+                    String[] labelItems = fieldLabel.split(" ");
+                    String fieldIdStr = labelItems[labelItems.length - 1];
+                    String fieldLabelWithoutIdNumber = fieldLabel.substring(0, fieldLabel.length() - fieldIdStr.length()).trim();
+
+                    if (resumeFields.containsKey(fieldLabel) || resumeFields.containsKey(fieldLabelWithoutIdNumber)) {
+
+                        String[] actualValues = {};
+                        try {
+                            actualValues = resumeFields.get(fieldLabel).split(ITEMS_DELIMITER);
+                        } catch (Exception e) {}
+                        try {
+                            actualValues = resumeFields.get(fieldLabelWithoutIdNumber).split(ITEMS_DELIMITER);
+                        } catch (Exception e) {}
+
+                        if (actualValues.length > 1) {
+                            fieldLabel = fieldLabelWithoutIdNumber;
+                            try {
+                                fieldId = Integer.parseInt(fieldIdStr) - 1;
+                            } catch (Exception e) {
+                                sendMessage(this, "Пожалуйста, укажите номер редактируемого поля.", sendMessageRequest);
+                                return;
+                            }
+                        }
+
+                        String label = fieldLabel;
                         ResumeField field = Arrays.stream(ResumeField.values())
-                                .filter(f -> f.getValue().equals(fieldLabel)).findFirst().orElse(null);
+                                .filter(f -> f.getValue().equals(label)).findFirst().orElse(null);
                         if (field != null) {
                             if (field.processCheck(fieldValue)) {
-                                resumeFields.put(fieldLabel, fieldValue);
+                                try {
+                                    actualValues[fieldId] = fieldValue;
+                                    resumeFields.put(fieldLabel, String.join(ITEMS_DELIMITER, actualValues));
+                                } catch (Exception e) {
+                                    sendMessage(this, "Пожалуйста, укажите корректный номер поля.", sendMessageRequest);
+                                    return;
+                                }
                             } else {
                                 sendMessage(this, field.message(), sendMessageRequest);
                                 return;
@@ -499,12 +563,50 @@ public class ResumeBot extends TelegramLongPollingBot {
                         return;
                     }
                 } else {
-                    sendMessage(this, "Пожалуйста, введите данные в формате\n*Поле - Ваше новое значение*.", sendMessageRequest);
+                    sendMessage(this, """
+                                    Пожалуйста, введите данные в формате
+                                    *Поле - Ваше новое значение*.""",
+                            sendMessageRequest);
                     return;
                 }
             }
 
             sendResultMessageAboutClientData(resumeFields, sendMessageRequest);
+        }
+    }
+
+    private void editClientResumeData(com.resume.bot.json.entity.client.Resume resume, String receivedText,
+                                      Long chatId, SendMessage sendMessageRequest) {
+        String[] lines = receivedText.split("\\r?\\n");
+        for (String line : lines) {
+            String[] parts = line.split("-", 2);
+            if (parts.length == 2) {
+                String fieldLabel = parts[0].trim().toLowerCase();
+                String fieldValue = parts[1].trim();
+
+                ResumeField field = Arrays.stream(ResumeField.values())
+                        .filter(f -> f.getValue().equals(fieldLabel)).findFirst().orElse(null);
+                if (field != null) {
+                    if (field.processCheck(fieldValue)) {
+                        field.editInResume(resume, fieldValue);
+
+                        int resumeId = BotUtil.userMyResumeMap.get(chatId).getResumeId();
+                        resumeService.updateResumeDataByResumeId(JsonProcessor.createJsonFromEntity(resume), resumeId);
+                        BotUtil.userMyResumeMap.put(chatId, resumeService.getResume(resumeId));
+
+                        sendMessage(this,
+                                "Новое значение поля \"%s\" - %s".formatted(field.getValue(), fieldValue),
+                                sendMessageRequest);
+                    } else {
+                        sendMessage(this, field.message(), sendMessageRequest);
+                    }
+                }
+            } else {
+                sendMessage(this, """
+                                Пожалуйста, введите данные в формате
+                                *Поле - Ваше новое значение*.""",
+                        sendMessageRequest);
+            }
         }
     }
 
@@ -535,6 +637,8 @@ public class ResumeBot extends TelegramLongPollingBot {
             } else if (key.equals(ResumeField.REC_NAME.getValue())) {
                 currentBlock = "*Список рекомендаций*";
                 resume.append("\n\n").append(currentBlock).append("\n");
+            } else if (key.equals(ResumeField.WISH_POSITION.getValue())) {
+                resume.append("\n\n");
             }
 
             // For fields with multiple values
@@ -553,6 +657,10 @@ public class ResumeBot extends TelegramLongPollingBot {
                     }
                 }
                 resumeFieldToValues.clear();
+            } else if (isCommaSeparatedMultipleField(key)) {
+                value = value.replace(ITEMS_DELIMITER, ", ");
+                resume.append("\n").append("*").append(key).append("*").append(": ").append(value);
+                resumeFieldToValues.clear();
             } else {
                 // For fields with single value
                 if (items.size() == 1) {
@@ -565,10 +673,16 @@ public class ResumeBot extends TelegramLongPollingBot {
         resume.append(EmojiParser.parseToUnicode("""
 
 
-                Если есть не соответствие или вы ошиблись, нажмите на кнопку *Редактировать* и введите это поле повторно в формате *Поле - новое значение*
+                Если есть не соответствие или вы ошиблись, нажмите на кнопку *Редактировать* и введите это поле повторно в формате
+                *Поле - новое значение*
 
                 *Пример:*
                 Имя - Алексей
+
+                Чтобы отредактировать поле в одном из блоков резюме укажите его порядковый номер через пробел
+                
+                *Пример:*
+                Учебное заведение 2 - СПбПУ
 
                 И я автоматически изменю некорректную информацию.:dizzy:"""));
 
@@ -582,9 +696,13 @@ public class ResumeBot extends TelegramLongPollingBot {
     private boolean isEndOfFieldsBlock(String key) {
         return key.equals(ResumeField.EDUCATION_END_YEAR.getValue()) ||
                 key.equals(ResumeField.EXPERIENCE_DUTIES.getValue()) ||
-                key.equals(ResumeField.BUSYNESS.getValue()) ||
-                key.equals(ResumeField.SCHEDULE.getValue()) ||
                 key.equals(ResumeField.REC_ORGANIZATION.getValue());
+    }
+
+    private boolean isCommaSeparatedMultipleField(String key) {
+        return key.equals(ResumeField.DRIVER_LICENCE.getValue()) ||
+                key.equals(ResumeField.BUSYNESS.getValue()) ||
+                key.equals(ResumeField.SCHEDULE.getValue());
     }
 
     @Override

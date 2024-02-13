@@ -4,6 +4,7 @@ import com.resume.bot.display.CallbackActionHandler;
 import com.resume.bot.service.HeadHunterService;
 import com.resume.bot.service.ResumeService;
 import com.resume.bot.service.TemplateService;
+import com.resume.bot.service.TemplateService;
 import com.resume.bot.service.UserService;
 import com.resume.hh_wrapper.config.HhConfig;
 import com.resume.hh_wrapper.impl.ApiClientTokenImpl;
@@ -18,11 +19,10 @@ import static com.resume.util.Constants.*;
 @Component
 public class CallbackActionFactory {
     private final HeadHunterService headHunterService;
-    private final ApiClientTokenImpl apiClientTokenImpl;
-    private final String hhBaseUrl;
     private final ResumeService resumeService;
     private final TemplateService templateService;
     private final UserService userService;
+    private final String hhBaseUrl;
     private final HhConfig hhConfig;
 
     public CallbackActionHandler createCallbackActionHandler(TelegramLongPollingBot pollingBot, String callbackData) {
@@ -42,7 +42,7 @@ public class CallbackActionFactory {
             return new ExportResumeActionHandler(pollingBot, hhConfig, headHunterService, resumeService, hhBaseUrl);
         }
         if (BotUtil.MY_RESUMES_IDS_LIST.contains(callbackData) || BotUtil.checkIfAction(callbackData)) {
-            return new MyResumesActionHandler(pollingBot, resumeService, headHunterService, apiClientTokenImpl, hhBaseUrl);
+            return new MyResumesActionHandler(pollingBot, resumeService, templateService, headHunterService, hhBaseUrl);
         }
         if (BotUtil.checkIfBigType(callbackData)) {
             return new BigKeyBoardHandler(pollingBot);
