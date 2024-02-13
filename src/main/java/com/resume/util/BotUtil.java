@@ -67,19 +67,23 @@ public class BotUtil {
             "yes_go_to_menu",
             "no_go_to_menu"
     );
+
     public final List<String> CORRECT_DATA_IDS_LIST = List.of(
             "post_resume_to_hh",
             "choose_latex_for_resume"
     );
+
     public final List<String> MY_RESUMES_IDS_LIST = List.of(
             "my_resumes",
             "back_to_menu_3",
             "back_to_my_resumes"
     );
+
     public final List<String> BIG_TYPES_IDS = List.of(
             "INDUSTRIES",
             "PROFESSIONAL_ROLES"
     );
+
     public final List<String> ACTIONS_WITH_RESUME = List.of(
             "publish_on_hh",
             "finally_publish_on_hh",

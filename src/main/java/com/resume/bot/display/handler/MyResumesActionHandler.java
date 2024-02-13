@@ -10,7 +10,6 @@ import com.resume.bot.service.HeadHunterService;
 import com.resume.bot.service.ResumeService;
 import com.resume.bot.service.TemplateService;
 import com.resume.latex.LatexProcessor;
-import com.resume.hh_wrapper.impl.ApiClientTokenImpl;
 import com.resume.util.BotUtil;
 import com.vdurmont.emoji.EmojiParser;
 import lombok.RequiredArgsConstructor;
@@ -193,7 +192,6 @@ public class MyResumesActionHandler implements CallbackActionHandler {
                 sendMessage(bot, "Не найден файл, содержащий резюме. Попробуйте создать заново", chatId);
             }
         } else {
-
         }
 
         if (resume == null) {
