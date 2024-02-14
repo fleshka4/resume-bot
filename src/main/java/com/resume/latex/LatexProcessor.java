@@ -53,6 +53,6 @@ public class LatexProcessor {
             throw new RuntimeException("Value for %s is empty".formatted(placeholder.getValue()));
         }
 
-        return content.replace(placeholder.getValue(), value);
+        return content.replaceAll(placeholder.getValue(), value);
     }
 }
