@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class LatexProcessor {
@@ -24,7 +26,9 @@ public class LatexProcessor {
         content = replaceContent(content, resume);
         IOUtil.writeStringToFile(content, outputUserTex);
 
-        ProcessBuilder processBuilder = new ProcessBuilder("pdflatex", "-output-directory=.", outputUserPdf.toString());
+        ProcessBuilder processBuilder = new ProcessBuilder("pdflatex",
+                "-output-directory=%s".formatted(outputUserDir.toString()),
+                outputUserPdf.toString());
         Process process = processBuilder.start();
         if (process.waitFor() != 0) {
             throw new RuntimeException("pdflatex exited with non-zero code.");
