@@ -4,6 +4,7 @@ import com.resume.bot.display.BotState;
 import com.resume.bot.display.CallbackActionHandler;
 import com.resume.bot.json.entity.client.Resume;
 import com.resume.bot.service.HeadHunterService;
+import com.resume.bot.service.ResumeService;
 import com.resume.bot.service.TokenHolderService;
 import com.resume.bot.service.UserService;
 import com.resume.hh_wrapper.config.HhConfig;
@@ -34,6 +35,8 @@ public class ExportResumeActionHandler implements CallbackActionHandler {
 
     private final UserService userService;
 
+    private final ResumeService resumeService;
+
     @Override
     public void performAction(String callbackData, Integer messageId, Long chatId) {
         switch (callbackData) {
@@ -62,6 +65,7 @@ public class ExportResumeActionHandler implements CallbackActionHandler {
         BotUtil.userStates.put(chatId, BotState.MY_RESUMES);
 
         List<Resume> hhResumes = headHunterService.getClientResumes(hhBaseUrl, chatId);
-        exportDisplayLogic(bot, chatId, messageId, hhResumes);
+        List<com.resume.bot.model.entity.Resume> resumesFromDB = resumeService.getResumesByUserId(chatId);
+        exportDisplayLogic(bot, chatId, messageId, resumesFromDB, hhResumes);
     }
 }
