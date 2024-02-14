@@ -18,6 +18,10 @@ public class TokenHolderService {
         );
     }
 
+    public boolean checkTokenHolderExists(User user) {
+        return repository.existsTokenHolderByUser(user);
+    }
+
     public void save(TokenHolder tokenHolder) {
         if (repository.existsTokenHolderByUser(tokenHolder.getUser())) {
             repository.updateAccessTokenAndExpiresInAndRefreshTokenByUser(tokenHolder.getAccessToken(), tokenHolder.getExpiresIn(),

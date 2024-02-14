@@ -265,7 +265,7 @@ public class BotUtil {
         return new TreeMap<>(originalMap);
     }
 
-    public static void authorization(TelegramLongPollingBot bot, HhConfig hhConfig, String message, Long chatId) {
+    public void authorization(TelegramLongPollingBot bot, HhConfig hhConfig, String message, Long chatId) {
         long randomValue = BotUtil.generateRandom12DigitNumber(BotUtil.random);
         while (BotUtil.states.containsKey(randomValue)) {
             randomValue = BotUtil.generateRandom12DigitNumber(BotUtil.random);
@@ -312,7 +312,7 @@ public class BotUtil {
         return Integer.parseInt(s[s.length - 1]);
     }
 
-    public static String askToEditMyResume(com.resume.bot.model.entity.Resume resume, Long chatId) {
+    public String askToEditMyResume(com.resume.bot.model.entity.Resume resume, Long chatId) {
         Resume res = JsonProcessor.createEntityFromJson(resume.getResumeData(), Resume.class);
 
         Area area = JsonValidator.getAreaByIdDeep(Constants.AREAS, res.getArea().getId()).orElse(null);
@@ -438,7 +438,7 @@ public class BotUtil {
                         !recStr.isEmpty() ? "Список рекомендаций\n\n" + recStr : "",
                         res.getTitle(),
                         Constants.PROFESSIONAL_ROLES.getCategories().stream()
-                                .filter(cat -> cat.getId().equals(res.getProfessionalRoles().get(0).getId()))
+                                .filter(cat -> cat.getId().equals(res.getProfessionalRoles().getFirst().getId()))
                                 .findFirst().get().getName(),
                         salStr,
                         empStr,

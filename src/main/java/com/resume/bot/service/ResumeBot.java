@@ -64,37 +64,38 @@ public class ResumeBot extends TelegramLongPollingBot {
             }
 
             if (message.hasText()) {
+                String text = message.getText();
                 SendMessage sendMessageRequest = createSendMessageRequest(this, chatId);
                 BotState currentState = BotUtil.userStates.get(chatId);
 
-                if ("/start".equals(message.getText())) {
+                if ("/start".equals(text)) {
                     BotUtil.userStates.put(chatId, BotState.START);
                     BotUtil.userResumeData.put(chatId, new LinkedHashMap<>());
                     BotUtil.clientsMap.put(chatId, new Resume());
                     BotUtil.lastSavedResumeMap.remove(chatId);
                     startCommandReceived(message, sendMessageRequest);
-                } else if (messageWithCode.length == 2) {
+                } else if (messageWithCode.length == 2 && text.startsWith("/start")) {
                     String receivedCode = messageWithCode[1].trim();
-                    if ("/start ".concat(receivedCode).equals(message.getText())) {
+                    if ("/start ".concat(receivedCode).equals(text)) {
                         if (BotUtil.states.containsKey(Long.valueOf(receivedCode))) {
                             startWithCodeCommandReceived(chatId, sendMessageRequest);
                         }
                     }
-                } else if ("/menu".equals(message.getText())) {
+                } else if ("/menu".equals(text)) {
                     if (checkClientExists(chatId, sendMessageRequest)) {
                         menuCommandReceived(sendMessageRequest);
                     }
                 } else if (currentState == BotState.START_DIALOGUE) {
                     BotUtil.clientsMap.put(chatId, new Resume());
-                    startDialogueWithClient(message.getText(), chatId, sendMessageRequest);
+                    startDialogueWithClient(text, chatId, sendMessageRequest);
                 } else if (currentState == BotState.EDIT_CLIENT_RESULT_DATA) {
                     if (checkClientExists(chatId, sendMessageRequest)) {
-                        editResultClientData(message.getText(), chatId, sendMessageRequest);
+                        editResultClientData(text, chatId, sendMessageRequest);
                     }
                 } else if (currentState == BotState.EDIT_MY_RESUME && BotUtil.userMyResumeMap.containsKey(chatId)) {
                     editClientResumeData(
                             JsonProcessor.createEntityFromJson(BotUtil.userMyResumeMap.get(chatId).getResumeData(), Resume.class),
-                            message.getText(), chatId, sendMessageRequest);
+                            text, chatId, sendMessageRequest);
                 } else {
                     sendMessage(this, EmojiParser.parseToUnicode("Извините, я не понимаю эту команду.:cry:"), sendMessageRequest);
                 }
@@ -106,8 +107,25 @@ public class ResumeBot extends TelegramLongPollingBot {
             Long chatId = callbackQuery.getMessage().getChatId();
             SendMessage sendMessageRequest = createSendMessageRequest(this, chatId);
 
+            BotState currentState = BotUtil.userStates.get(chatId);
             if (callbackData.startsWith("template")) {
-                updateTemplate(callbackData, chatId);
+                if (currentState == BotState.EDIT_MY_RESUME_TEMPLATE) {
+                    updateTemplate(callbackData, chatId);
+                } /*else if (currentState == BotState.CHOOSE_TEMPLATE) {
+                    var resume = BotUtil.lastSavedResumeMap.get(chatId);
+                    setTemplate(BotUtil.lastSavedResumeMap.get(chatId), callbackData.split("_"));
+
+                     String pdfPath = BotUtil.createResumeWithLatexTemplate(resume.getResumeData());
+                     resume.setPdfPath(pdfPath);
+
+                    File file = new File(pdfPath);
+                    try {
+                        bot.execute(new SendDocument(String.valueOf(chatId), new InputFile(file)));
+                    } catch (TelegramApiException e) {
+                        log.error(e.getMessage());
+                        sendMessage(bot, "Не найден файл, содержащий резюме. Попробуйте создать заново", chatId);
+                    }
+                }*/
                 return;
             }
 
@@ -136,17 +154,21 @@ public class ResumeBot extends TelegramLongPollingBot {
             List<com.resume.bot.model.entity.Resume> resumes = resumeService.getResumesByUserId(chatId);
             resumes.sort(Comparator.comparing(com.resume.bot.model.entity.Resume::getResumeId));
 
-            Template template = templateService.getTemplate(Integer.parseInt(splits[3]));
-            if (template == null) {
-                throw new RuntimeException("Template is not found");
-            }
             com.resume.bot.model.entity.Resume resume = resumes.get(Integer.parseInt(splits[2]));
             if (resume == null) {
                 throw new RuntimeException("Resume is not found");
             }
-            resume.setTemplate(template);
-            resumeService.updateTemplateByResumeId(template, resume.getResumeId());
+            setTemplate(resume, splits);
         }
+    }
+
+    private void setTemplate(com.resume.bot.model.entity.Resume resume, String[] splits) {
+        Template template = templateService.getTemplate(Integer.parseInt(splits[splits.length - 1]));
+        if (template == null) {
+            throw new RuntimeException("Template is not found");
+        }
+        resume.setTemplate(template);
+        resumeService.updateTemplateByResumeId(template, resume.getResumeId());
     }
 
     private void startCommandReceived(Message message, SendMessage sendMessageRequest) {
@@ -526,10 +548,10 @@ public class ResumeBot extends TelegramLongPollingBot {
                         String[] actualValues = {};
                         try {
                             actualValues = resumeFields.get(fieldLabel).split(ITEMS_DELIMITER);
-                        } catch (Exception e) {}
+                        } catch (Exception ignored) {}
                         try {
                             actualValues = resumeFields.get(fieldLabelWithoutIdNumber).split(ITEMS_DELIMITER);
-                        } catch (Exception e) {}
+                        } catch (Exception ignored) {}
 
                         if (actualValues.length > 1) {
                             fieldLabel = fieldLabelWithoutIdNumber;

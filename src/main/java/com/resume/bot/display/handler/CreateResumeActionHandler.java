@@ -367,17 +367,19 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                 }
                 case "желаемая позиция" -> resume.setTitle(fieldValue);
                 case "профессиональная роль" -> {
-                    String roleId = null;
-                    for (Category category: Constants.PROFESSIONAL_ROLES.getCategories()) {
-                        if (category.getName().equals(fieldValue)) {
-                            roleId = category.getId();
-                            break;
+                    if (fieldValue != null) {
+                        String roleId = null;
+                        for (Category category : Constants.PROFESSIONAL_ROLES.getCategories()) {
+                            if (category.getName().equals(fieldValue)) {
+                                roleId = category.getId();
+                                break;
+                            }
                         }
+                        if (roleId == null) {
+                            throw new RuntimeException("Industry is null");
+                        }
+                        resume.setProfessionalRoles(List.of(new Id(roleId)));
                     }
-                    if (roleId == null) {
-                        throw new RuntimeException("Industry is null");
-                    }
-                    resume.setProfessionalRoles(List.of(new Id(roleId)));
                 }
                 case "желаемая зарплата" -> {
                     Salary salary = new Salary();
