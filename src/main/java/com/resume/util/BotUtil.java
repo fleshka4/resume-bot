@@ -315,13 +315,8 @@ public class BotUtil {
     public String askToEditMyResume(com.resume.bot.model.entity.Resume resume, Long chatId) {
         Resume res = JsonProcessor.createEntityFromJson(resume.getResumeData(), Resume.class);
 
-        Area area = JsonValidator.getAreaByIdDeep(Constants.AREAS, res.getArea().getId()).orElse(null);
-        StringBuilder areaSB = new StringBuilder();
-        while (area != null) {
-            areaSB.insert(0, area.getName()).insert(0, area.getParentId() != null ? ", " : "");
-            area = JsonValidator.getAreaByIdDeep(Constants.AREAS, area.getParentId()).orElse(null);
-        }
-        String areaStr = areaSB.toString();
+        String areaStr = JsonValidator.getAreaString(
+                JsonValidator.getAreaByIdDeep(Constants.AREAS, res.getArea().getId()).orElse(null));
 
         Education education = res.getEducation();
         String educStr = education != null && !education.getPrimary().isEmpty()

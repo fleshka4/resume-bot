@@ -343,4 +343,13 @@ public class JsonValidator {
         }
         return true;
     }
+
+    public static String getAreaString(Area area) {
+        StringBuilder areaSB = new StringBuilder();
+        while (area != null) {
+            areaSB.insert(0, area.getName()).insert(0, area.getParentId() != null ? ", " : "");
+            area = JsonValidator.getAreaByIdDeep(Constants.AREAS, area.getParentId()).orElse(null);
+        }
+        return areaSB.toString();
+    }
 }
