@@ -41,15 +41,24 @@ public class MessageUtil {
     }
 
     public static void executeEditMessageWithBigKeyBoard(TelegramLongPollingBot bot, String editMessageToSend, Integer messageId,
-                                                         Long chatId, List<String> buttonLabels, List<String> buttonIds, int pageNumber, int maxSize, BigKeyboardType type) {
+                                                         Long chatId, List<String> buttonLabels, List<String> buttonIds,
+                                                         int pageNumber, int maxSize, BigKeyboardType type) {
         EditMessageText editMessage = new EditMessageText();
         editMessage.setParseMode(ParseMode.MARKDOWN);
         editMessage.setChatId(chatId.toString());
         editMessage.setMessageId(messageId);
-        editMessage.setText(editMessageToSend);
+        if (editMessageToSend != null) {
+            editMessage.setText(editMessageToSend);
+        }
 
         editMessage.setReplyMarkup(BotUtil.createInlineBigKeyboard(buttonLabels, buttonIds, pageNumber, maxSize, type));
         executeMessage(bot, editMessage);
+    }
+
+    public static void executeEditMessageWithBigKeyBoard(TelegramLongPollingBot bot, Integer messageId,
+                                                         Long chatId, List<String> buttonLabels, List<String> buttonIds,
+                                                         int pageNumber, int maxSize, BigKeyboardType type) {
+        executeEditMessageWithBigKeyBoard(bot, null, messageId, chatId, buttonLabels, buttonIds, pageNumber, maxSize, type);
     }
 
     public void executeContinueKeyboardMessage(TelegramLongPollingBot bot, String messageText, Integer messageId,

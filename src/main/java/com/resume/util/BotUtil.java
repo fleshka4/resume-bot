@@ -166,11 +166,12 @@ public class BotUtil {
         return createInlineKeyboard(buttonLabels, callbackData, BigKeyboardType.INVALID);
     }
 
-    public InlineKeyboardMarkup createInlineBigKeyboard(List<String> buttonLabels, List<String> callbackData, int pageNumber, int maxSize, BigKeyboardType type) {
+    public InlineKeyboardMarkup createInlineBigKeyboard(List<String> buttonLabels, List<String> callbackData,
+                                                        int pageNumber, int maxSize, BigKeyboardType type) {
         final String prev = "_prev_page_";
         final String next = "_next_page_";
         final int defaultPageSize = 5;
-        final int pageSize = Math.min(buttonLabels.size(), defaultPageSize);
+        final int pageSize = Math.min(callbackData.size(), defaultPageSize);
 
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
@@ -205,52 +206,44 @@ public class BotUtil {
             rowList.add(nextButtonRow);
         }
 
+        String backStr = "Назад";
+        if (buttonLabels.contains(backStr)) {
+            List<InlineKeyboardButton> backButtonRow = new ArrayList<>();
+            InlineKeyboardButton backButton = new InlineKeyboardButton();
+            backButton.setText(backStr);
+            backButton.setCallbackData("back_to_menu_3");
+            backButtonRow.add(backButton);
+            rowList.add(backButtonRow);
+        }
+
         inlineKeyboardMarkup.setKeyboard(rowList);
         return inlineKeyboardMarkup;
     }
 
-    public void prepareBigKeyboardCreation(int pageNumber, BigKeyboardType bigKeyboardType, StringBuilder message, List<String> buttonLabels, List<String> callbackDataList,
-                                           ResumeService resumeService, Long chatId) {
+    public void prepareBigKeyboardCreation(int pageNumber, BigKeyboardType bigKeyboardType, StringBuilder message,
+                                           List<String> buttonLabels, List<String> callbackDataList) {
         final int pageSize = 5;
-        switch (bigKeyboardType) {
-            case INDUSTRIES, PROFESSIONAL_ROLES -> {
-                final boolean isIndustry = bigKeyboardType == BigKeyboardType.INDUSTRIES;
-                final int maxSize = isIndustry ?
-                        Constants.INDUSTRIES.size() :
-                        Constants.PROFESSIONAL_ROLES.getCategories().size();
+        final boolean isIndustry = bigKeyboardType == BigKeyboardType.INDUSTRIES;
+        final int maxSize = isIndustry ?
+                Constants.INDUSTRIES.size() :
+                Constants.PROFESSIONAL_ROLES.getCategories().size();
 
-                final int startCounter = pageNumber * pageSize;
-                int limit = (pageNumber + 1) * pageSize;
-                if ((pageNumber + 1) * pageSize > maxSize) {
-                    limit = startCounter + pageSize - (limit - maxSize);
-                }
+        final int startCounter = pageNumber * pageSize;
+        int limit = (pageNumber + 1) * pageSize;
+        if ((pageNumber + 1) * pageSize > maxSize) {
+            limit = startCounter + pageSize - (limit - maxSize);
+        }
 
-                for (int i = startCounter; i < limit; i++) {
-                    buttonLabels.add(String.valueOf(i + 1));
-                    callbackDataList.add(bigKeyboardType.name() + "_" + i);
-                    message.append((i + 1))
-                            .append(". ")
-                            .append(isIndustry ?
-                                    Constants.INDUSTRIES.get(i).getName() :
-                                    Constants.PROFESSIONAL_ROLES.getCategories().get(i).getName());
-                    if (i != (pageNumber + 1) * pageSize - 1) {
-                        message.append('\n');
-                    }
-                }
-            }
-            case RESUMES -> {
-                List<com.resume.bot.model.entity.Resume> resumes = resumeService.getResumesByUserId(chatId);
-
-                final int startCounter = pageNumber * pageSize;
-                int limit = (pageNumber + 1) * pageSize;
-                if ((pageNumber + 1) * pageSize > resumes.size()) {
-                    limit = startCounter + pageSize - (limit - resumes.size());
-                }
-
-                for (int i = startCounter; i < limit; i++) {
-                    buttonLabels.add(resumes.get(i).getTitle().substring(0, 20));
-                    callbackDataList.add(resumes.get(i).getTitle() + "_" + i);
-                }
+        for (int i = startCounter; i < limit; i++) {
+            buttonLabels.add(String.valueOf(i + 1));
+            callbackDataList.add(bigKeyboardType.name() + "_" + i);
+            message.append((i + 1))
+                    .append(". ")
+                    .append(isIndustry ?
+                            Constants.INDUSTRIES.get(i).getName() :
+                            Constants.PROFESSIONAL_ROLES.getCategories().get(i).getName());
+            if (i != (pageNumber + 1) * pageSize - 1) {
+                message.append('\n');
             }
         }
     }
@@ -437,7 +430,7 @@ public class BotUtil {
                         !expStr.isEmpty() ? "Опыт\n\n" + expStr : "",
                         String.join(", ", res.getSkillSet()),
                         res.getSkills(),
-                        res.getHasVehicle() ? "да" : "нет",
+                        res.getHasVehicle() != null ? res.getHasVehicle() ? "да" : "нет" : "",
                         String.join(", ", res.getDriverLicenseTypes().stream().map(Id::getId).toList()),
                         !recStr.isEmpty() ? "Список рекомендаций\n\n" + recStr : "",
                         res.getTitle(),
@@ -492,5 +485,16 @@ public class BotUtil {
                 Посмотрите список ваших созданных резюме.""";
 
         executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode(menuInfo), messageId, chatId, buttonLabels, buttonIds);
+    }
+
+    public void createActionsWithChosenResume(TelegramLongPollingBot bot, Integer messageId, Long chatId, String current) {
+        List<String> buttonLabels = Arrays.asList("Опубликовать на HH", "Скачать резюме",
+                "Редактировать резюме", "Удалить резюме", "Назад");
+        List<String> buttonIds = Arrays.asList("publish_on_hh_" + current, "download_resume_" + current,
+                "edit_resume_" + current, "delete_resume_" + current, "back_to_resumes");
+
+        String textMsg = "Выберите, что нужно сделать с вашим резюме.:slightly_smiling:";
+        executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode(textMsg),
+                messageId, chatId, buttonLabels, buttonIds);
     }
 }

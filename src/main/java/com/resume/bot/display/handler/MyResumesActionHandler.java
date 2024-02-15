@@ -117,25 +117,17 @@ public class MyResumesActionHandler implements CallbackActionHandler {
                 List<String> buttonIds = Arrays.asList("download_resume_" + postfix,
                         "edit_resume_" + postfix, "back_to_resumes");
 
-                executeEditMessageWithBigKeyBoard(bot, EmojiParser.parseToUnicode(textMsg),
-                        messageId, chatId, buttonLabels, buttonIds, 0,
-                        resumeService.getResumesByUserId(chatId).size(), RESUMES);
+                executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode(textMsg),
+                        messageId, chatId, buttonLabels, buttonIds);
             } else {
-                List<String> buttonLabels = Arrays.asList("Опубликовать на HH", "Скачать резюме",
-                        "Редактировать резюме", "Удалить резюме", "Назад");
-                List<String> buttonIds = Arrays.asList("publish_on_hh_" + postfix, "download_resume_" + postfix,
-                        "edit_resume_" + postfix, "delete_resume_" + postfix, "back_to_resumes");
-
-                executeEditMessageWithBigKeyBoard(bot, EmojiParser.parseToUnicode(textMsg),
-                        messageId, chatId, buttonLabels, buttonIds, 0,
-                        resumeService.getResumesByUserId(chatId).size(), RESUMES);
+                BotUtil.createActionsWithChosenResume(bot, messageId, chatId, postfix);
             }
         }
         return true;
     }
 
     private boolean publishOnHh(String data, Integer messageId, Long chatId) {
-        Pattern pattern = Pattern.compile("publish_on_hh_([0-9]+)");
+        Pattern pattern = Pattern.compile("publish_on_hh_([1-9][0-9]*)");
 
         Matcher matcher = pattern.matcher(data);
         if (!matcher.matches()) {
@@ -154,7 +146,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
     }
 
     private boolean updateResumeOnHh(String data, Long chatId) {
-        Pattern pattern = Pattern.compile("update_resume_([0-9]+)");
+        Pattern pattern = Pattern.compile("update_resume_([1-9][0-9]*)");
 
         Matcher matcher = pattern.matcher(data);
         if (!matcher.matches()) {
@@ -185,7 +177,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
     }
 
     private boolean finallyPublish(String data, Long chatId) {
-        Pattern pattern = Pattern.compile("finally_publish_on_hh_resume_([0-9]+)");
+        Pattern pattern = Pattern.compile("finally_publish_on_hh_resume_([1-9][0-9]*)");
 
         Matcher matcher = pattern.matcher(data);
         if (!matcher.matches()) {
@@ -199,7 +191,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
     }
 
     private boolean downloadResume(String data, Long chatId) {
-        Pattern pattern = Pattern.compile("download_resume_([0-9]+)");
+        Pattern pattern = Pattern.compile("download_resume_([1-9][0-9]*)");
 
         Matcher matcher = pattern.matcher(data);
         if (!matcher.matches()) {
@@ -257,7 +249,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
     private boolean editResume(String data, Integer messageId, Long chatId) {
         BotUtil.userStates.put(chatId, BotState.EDIT_MY_RESUME);
 
-        Pattern pattern = Pattern.compile("edit_resume_([0-9]+)");
+        Pattern pattern = Pattern.compile("edit_resume_([1-9][0-9]*)");
 
         Matcher matcher = pattern.matcher(data);
         if (!matcher.matches()) {
@@ -279,7 +271,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
     }
 
     private boolean editTemplateResume(String data, Integer messageId, Long chatId) {
-        Pattern pattern = Pattern.compile("edit_template_resume_([0-9]+)");
+        Pattern pattern = Pattern.compile("edit_template_resume_([1-9][0-9]*)");
 
         Matcher matcher = pattern.matcher(data);
         if (!matcher.matches()) {
@@ -310,7 +302,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
     }
 
     private boolean editTextResume(String data, Integer messageId, Long chatId) {
-        Pattern pattern = Pattern.compile("edit_text_resume_([0-9]+)");
+        Pattern pattern = Pattern.compile("edit_text_resume_([1-9][0-9]*)");
 
         Matcher matcher = pattern.matcher(data);
         if (!matcher.matches()) {
@@ -323,7 +315,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
         }
 
         List<String> buttonLabels = List.of("Всё верно!");
-        List<String> callbackData = List.of("resume_" + BotUtil.getResumeNumber(matcher.group()));
+        List<String> callbackData = List.of("res_" + resume.getTitle() + "_" + BotUtil.getResumeNumber(matcher.group()));
         BotUtil.userStates.put(chatId, BotState.EDIT_MY_RESUME);
         executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode(BotUtil.askToEditMyResume(resume, chatId)),
                 messageId, chatId, buttonLabels, callbackData);
@@ -332,7 +324,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
     }
 
     private boolean deleteResume(String data, Long chatId) {
-        Pattern pattern = Pattern.compile("delete_resume_([0-9]+)");
+        Pattern pattern = Pattern.compile("delete_resume_([1-9][0-9]*)");
 
         Matcher matcher = pattern.matcher(data);
         if (!matcher.matches()) {
