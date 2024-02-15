@@ -10,6 +10,7 @@ import com.resume.bot.json.JsonValidator;
 import com.resume.bot.json.entity.client.Resume;
 import com.resume.bot.model.entity.Template;
 import com.resume.bot.model.entity.User;
+import com.resume.latex.LatexProcessor;
 import com.resume.util.BigKeyboardType;
 import com.resume.util.BotUtil;
 import com.vdurmont.emoji.EmojiParser;
@@ -18,11 +19,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 import static com.resume.bot.display.MessageUtil.createSendMessageRequest;
@@ -111,21 +117,31 @@ public class ResumeBot extends TelegramLongPollingBot {
             if (callbackData.startsWith("template")) {
                 if (currentState == BotState.EDIT_MY_RESUME_TEMPLATE) {
                     updateTemplate(callbackData, chatId);
-                } /*else if (currentState == BotState.CHOOSE_TEMPLATE) {
-                    var resume = BotUtil.lastSavedResumeMap.get(chatId);
-                    setTemplate(BotUtil.lastSavedResumeMap.get(chatId), callbackData.split("_"));
+                } else if (currentState == BotState.CHOOSE_TEMPLATE) {
+                    var resume = BotUtil.clientsMap.get(chatId);
+                    var dbResume = BotUtil.lastSavedResumeMap.get(chatId);
+                    setTemplate(dbResume, callbackData.split("_"));
 
-                     String pdfPath = BotUtil.createResumeWithLatexTemplate(resume.getResumeData());
-                     resume.setPdfPath(pdfPath);
+                    String pdfPath;
+                    Template template = dbResume.getTemplate();
+                    try {
+                        pdfPath = LatexProcessor.compile(resume, template.getSourcePath(),
+                                                        chatId.toString(), dbResume.getTitle());
+                    } catch (IOException | InterruptedException e) {
+                        log.error(e.getMessage());
+                        throw new RuntimeException(e);
+                    }
+                    resumeService.updateTemplateByResumeId(template, dbResume.getResumeId());
+                    resumeService.updatePdfPathByResumeId(pdfPath, dbResume.getResumeId());
 
                     File file = new File(pdfPath);
                     try {
-                        bot.execute(new SendDocument(String.valueOf(chatId), new InputFile(file)));
+                        execute(new SendDocument(String.valueOf(chatId), new InputFile(file)));
                     } catch (TelegramApiException e) {
                         log.error(e.getMessage());
-                        sendMessage(bot, "Не найден файл, содержащий резюме. Попробуйте создать заново", chatId);
+                        sendMessage(this, "Не найден файл, содержащий резюме. Попробуйте создать заново", chatId);
                     }
-                }*/
+                }
                 return;
             }
 

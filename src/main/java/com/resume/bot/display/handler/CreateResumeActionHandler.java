@@ -4,8 +4,8 @@ import com.resume.bot.display.BotState;
 import com.resume.bot.display.CallbackActionHandler;
 import com.resume.bot.display.ResumeField;
 import com.resume.bot.json.JsonProcessor;
+import com.resume.bot.json.JsonValidator;
 import com.resume.bot.json.entity.Industry;
-import com.resume.bot.json.entity.area.Area;
 import com.resume.bot.json.entity.client.Experience;
 import com.resume.bot.json.entity.client.Recommendation;
 import com.resume.bot.json.entity.client.Resume;
@@ -25,11 +25,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.resume.bot.display.MessageUtil.*;
-import static com.resume.bot.display.MessageUtil.executeEditMessageWithKeyBoard;
 import static com.resume.util.BotUtil.appendToField;
 import static com.resume.util.Constants.*;
 import static org.apache.commons.lang3.math.NumberUtils.createLong;
@@ -308,7 +310,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                     Id areaId = new Id();
                     String[] items = fieldValue.split(",");
                     String cityName = items[items.length - 1].trim();
-                    areaId.setId(getCityId(cityName));
+                    areaId.setId(JsonValidator.getAreaByNameDeep(Constants.AREAS, cityName).get().getId());
                     resume.setArea(areaId);
                 }
                 case "уровень образования" -> {
@@ -376,7 +378,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                             }
                         }
                         if (roleId == null) {
-                            throw new RuntimeException("Industry is null");
+                            throw new RuntimeException("Professional role is null");
                         }
                         resume.setProfessionalRoles(List.of(new Id(roleId)));
                     }
@@ -421,6 +423,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
         resume.setRecommendation(recommendationList);
         resume.setEmployments(busyness);
         resume.setSchedules(schedules);
+        BotUtil.clientsMap.put(chatId, resume);
 
         com.resume.bot.model.entity.Resume dbResume = new com.resume.bot.model.entity.Resume();
         dbResume.setUser(userService.getUser(chatId));
@@ -455,17 +458,6 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             case "учебное заведение" -> elementaryEducation.setName(fieldValue);
             case "год окончания" -> elementaryEducation.setYear(Long.parseLong(fieldValue));
         }
-    }
-
-    private String getCityId(String cityName) {
-        Optional<Area> city1 = Constants.AREAS.stream().filter(a -> !a.getId().equals(OTHER_COUNTRIES_JSON_ID))
-                .map(Area::getAreas).flatMap(List::stream).filter(a -> a.getAreas().isEmpty())
-                .filter(area -> area.getName().equals(cityName)).findFirst();
-        Optional<Area> city2 = Constants.AREAS.stream()
-                .filter(a -> COUNTRIES_WITH_REGIONS_IDS.contains(a.getId()) || a.getId().equals(OTHER_COUNTRIES_JSON_ID))
-                .map(Area::getAreas).flatMap(List::stream).map(Area::getAreas).flatMap(List::stream)
-                .filter(area -> area.getName().equals(cityName)).findFirst();
-        return city1.map(Area::getId).orElseGet(() -> city2.get().getId());
     }
 
     private void processOnChosenSex(String genderName, Long chatId, Map<String, String> userData) {
@@ -519,7 +511,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             case "название организации" -> workExperience.setCompany(fieldValue);
             case "город организации" -> {
                 com.resume.bot.json.entity.client.Area area = new com.resume.bot.json.entity.client.Area(
-                        getCityId(fieldValue), fieldValue);
+                        JsonValidator.getAreaByNameDeep(Constants.AREAS, fieldValue).get().getId(), fieldValue);
                 workExperience.setArea(area);
             }
             case "ссылка" -> workExperience.setCompanyUrl(fieldValue);
