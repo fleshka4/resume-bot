@@ -31,6 +31,7 @@ public class ApiClientImpl {
     }
 
     public <T> T post(String uri, T body, Class<T> type) {
+        System.out.println(body);
         return webClient.post()
                 .uri(uri)
                 .bodyValue(body)

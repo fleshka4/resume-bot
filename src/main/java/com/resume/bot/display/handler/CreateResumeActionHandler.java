@@ -76,13 +76,9 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                 sendMessage(bot, "Введите имя:", chatId);
             }
             case "want_enter_education" -> {
-                String educationLevel = userData.get(ResumeField.EDUCATION_LEVEL.getValue());
-                if (educationLevel != null) {
-                    processOnChosenLevelEducation(educationLevel, chatId, userData);
-                } else {
-                    executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode("Выберите уровень образования.:nerd:"),
-                            messageId, chatId, educationLevels.values().stream().toList(), educationLevels.keySet().stream().toList());
-                }
+                BotUtil.dialogueStates.put(chatId, BotState.ENTER_INSTITUTION);
+                BotUtil.userResumeData.put(chatId, userData);
+                sendMessage(bot, "Введите название учебного заведения:", chatId);
             }
             case "skip_education" -> {
                 List<String> buttonLabels = List.of("Хочу", "Пропустить");
@@ -246,11 +242,16 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
         }
 
         if (educationLevels.containsKey(callbackData)) {
+            appendToField(userData, ResumeField.EDUCATION_LEVEL.getValue(), callbackData);
             String chosenEducationLevel = educationLevels.get(callbackData);
             if (chosenEducationLevel.equals("Среднее")) {
                 isPrimaryEdu = false;
             }
-            processOnChosenLevelEducation(chosenEducationLevel, chatId, userData);
+            List<String> buttonLabels = List.of("Хочу", "Пропустить");
+            List<String> buttonIds = List.of("want_enter_education", "skip_education");
+
+            executeEditMessageWithKeyBoard(bot,  EmojiParser.parseToUnicode("Хотите ли Вы указать место учебы?:nerd_face:"),
+                    messageId, chatId, buttonLabels, buttonIds);
         }
 
         if (driverLicenseTypes.containsKey(callbackData)) {
@@ -327,6 +328,10 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                     List<String> items = Arrays.stream(fieldValue.split(ITEMS_DELIMITER)).toList();
                     initList(primaryEducations, PrimaryEducation.class, items.size());
                     initList(elementaryEducations, ElementaryEducation.class, items.size());
+                    if (items.isEmpty()) {
+                        primaryEducations = null;
+                        elementaryEducations = null;
+                    }
 
                     for (int i = 0; i < items.size(); i++) {
                         String item = items.get(i);
@@ -340,6 +345,9 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                 case "опыт работы", "название организации", "город организации", "ссылка", "отрасль", "должность", "обязанности" -> {
                     List<String> items = Arrays.stream(fieldValue.split(ITEMS_DELIMITER)).toList();
                     initList(workExperiences, Experience.class, items.size());
+                    if (items.isEmpty()) {
+                        workExperiences = null;
+                    }
 
                     for (int i = 0; i < items.size(); i++) {
                         String item = items.get(i);
@@ -352,6 +360,9 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                 case "категория прав" -> {
                     List<String> items = Arrays.stream(fieldValue.split(ITEMS_DELIMITER)).toList();
                     initList(driverLicenseTypes, Id.class, items.size());
+                    if (items.isEmpty()) {
+                        driverLicenseTypes = null;
+                    }
 
                     for (String item : items) {
                         Id idLicense = new Id();
@@ -362,6 +373,9 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                 case "имя выдавшего рекомендацию", "должность выдавшего рекомендацию", "организация выдавшего рекомендацию" -> {
                     List<String> items = Arrays.stream(fieldValue.split(ITEMS_DELIMITER)).toList();
                     initList(recommendationList, Recommendation.class, items.size());
+                    if (items.isEmpty()) {
+                        recommendationList = null;
+                    }
 
                     for (String item : items) {
                         processOnRecommendations(recommendation, fieldLabel, item);
@@ -403,6 +417,9 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                 case "желаемый график работы" -> {
                     List<String> items = Arrays.stream(fieldValue.split(ITEMS_DELIMITER)).toList();
                     initList(schedules, Type.class, items.size());
+                    if (items.isEmpty()) {
+                        schedules = null;
+                    }
 
                     for (String item : items) {
                         Type typeSchedules = new Type();
@@ -468,13 +485,6 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
         sendMessage(bot, """
                 Введите ваше место жительства.
                 В формате *страна, регион (опционально), населенный пункт*:""", chatId);
-    }
-
-    private void processOnChosenLevelEducation(String level, Long chatId, Map<String, String> userData) {
-        appendToField(userData, ResumeField.EDUCATION_LEVEL.getValue(), level);
-        BotUtil.userResumeData.put(chatId, userData);
-        sendMessage(bot, "Введите название учебного заведения:", chatId);
-        BotUtil.dialogueStates.put(chatId, BotState.ENTER_INSTITUTION);
     }
 
     private void processOnChosenDriverLicense(String license, Long chatId, Map<String, String> userData) {

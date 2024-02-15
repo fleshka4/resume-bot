@@ -24,6 +24,7 @@ public enum BotState {
     ENTER_LOCATION,
 
     // Education
+    ENTER_EDU_LEVEL,
     ENTER_INSTITUTION,
     ENTER_FACULTY,
     ENTER_SPECIALIZATION,
