@@ -2,8 +2,6 @@ package com.resume.util;
 
 import com.resume.bot.display.BotState;
 import com.resume.bot.json.JsonProcessor;
-import com.resume.bot.json.JsonValidator;
-import com.resume.bot.json.entity.area.Area;
 import com.resume.bot.json.entity.client.Experience;
 import com.resume.bot.json.entity.client.Recommendation;
 import com.resume.bot.json.entity.client.Resume;
@@ -18,12 +16,14 @@ import com.vdurmont.emoji.EmojiParser;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.resume.bot.display.MessageUtil.executeEditMessageWithKeyBoard;
 import static com.resume.bot.display.MessageUtil.sendMessage;
 import static com.resume.util.Constants.ITEMS_DELIMITER;
 
@@ -291,7 +291,7 @@ public class BotUtil {
             } catch (Exception exception) {
                 log.error(exception.getMessage());
                 String message = "Произошла ошибка при публикации резюме. " +
-                        "Попробуйте удалить его и создать заново" + (!fromMyResumes ? "" :  "или выберите другое");
+                        "Попробуйте удалить его и создать заново" + (!fromMyResumes ? "" :  " или выберите другое");
                 sendMessage(bot, message, chatId);
             }
         }
@@ -315,8 +315,8 @@ public class BotUtil {
     public String askToEditMyResume(com.resume.bot.model.entity.Resume resume, Long chatId) {
         Resume res = JsonProcessor.createEntityFromJson(resume.getResumeData(), Resume.class);
 
-        String areaStr = JsonValidator.getAreaString(
-                JsonValidator.getAreaByIdDeep(Constants.AREAS, res.getArea().getId()).orElse(null));
+        String areaStr = ConstantsUtil.getAreaString(
+                ConstantsUtil.getAreaByIdDeep(Constants.AREAS, res.getArea().getId()).orElse(null));
 
         Education education = res.getEducation();
         String educStr = education != null && !education.getPrimary().isEmpty()
@@ -443,5 +443,45 @@ public class BotUtil {
 
         BotUtil.userMyResumeMap.put(chatId, resume);
         return outInfo;
+    }
+
+    public void createMenu(SendMessage sendMessageRequest, TelegramLongPollingBot bot) {
+        List<String> buttonLabels = Arrays.asList("Создать резюме", "Использовать резюме с hh.ru", "Мои резюме");
+        List<String> callbackData = Arrays.asList("create_resume", "export_resume_hh", "my_resumes");
+
+        sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, callbackData));
+
+        String menuInfo = """
+                Выберите действие:
+
+                *Создать резюме* :memo:
+                Начните процесс создания нового резюме с нуля!
+
+                *Экспорт резюме с hh.ru* :inbox_tray:
+                Экспортируйте свои данные с hh.ru для взаимодействия с ними.
+
+                *Мои резюме* :clipboard:
+                Посмотрите список ваших созданных резюме.""";
+
+        sendMessage(bot, EmojiParser.parseToUnicode(menuInfo), sendMessageRequest);
+    }
+
+    public void createMyResumesMenu(TelegramLongPollingBot bot, Integer messageId, Long chatId) {
+        List<String> buttonLabels = Arrays.asList("Создать резюме", "Использовать резюме с hh.ru", "Мои резюме");
+        List<String> buttonIds = Arrays.asList("create_resume", "export_resume_hh", "my_resumes");
+
+        String menuInfo = """
+                        Выберите действие:
+
+                        *Создать резюме* :memo:
+                        Начните процесс создания нового резюме с нуля!
+
+                        *Экспорт резюме* с hh.ru :inbox_tray:
+                        Экспортируйте свои данные с hh.ru для взаимодействия с ними.
+
+                        *Мои резюме* :clipboard:
+                        Посмотрите список ваших созданных резюме.""";
+
+        executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode(menuInfo), messageId, chatId, buttonLabels, buttonIds);
     }
 }

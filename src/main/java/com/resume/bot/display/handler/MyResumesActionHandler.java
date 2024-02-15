@@ -2,12 +2,14 @@ package com.resume.bot.display.handler;
 
 import com.resume.bot.display.BotState;
 import com.resume.bot.display.CallbackActionHandler;
+import com.resume.bot.display.MessageUtil;
 import com.resume.bot.json.JsonProcessor;
 import com.resume.bot.model.entity.Resume;
 import com.resume.bot.model.entity.Template;
 import com.resume.bot.service.HeadHunterService;
 import com.resume.bot.service.ResumeService;
 import com.resume.bot.service.TemplateService;
+import com.resume.latex.LatexProcessor;
 import com.resume.util.BotUtil;
 import com.vdurmont.emoji.EmojiParser;
 import lombok.RequiredArgsConstructor;
@@ -18,9 +20,9 @@ import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -89,22 +91,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
                         """), messageId, chatId, buttonLabels, buttonIds);
             }
             case "back_to_menu_3" -> {
-                List<String> buttonLabels = Arrays.asList("Создать резюме", "Использовать резюме с hh.ru", "Мои резюме");
-                List<String> buttonIds = Arrays.asList("create_resume", "export_resume_hh", "my_resumes");
-
-                String menuInfo = """
-                        Выберите действие:
-
-                        *Создать резюме* :memo:
-                        Начните процесс создания нового резюме с нуля!
-
-                        *Экспорт резюме* с hh.ru :inbox_tray:
-                        Экспортируйте свои данные с hh.ru для взаимодействия с ними.
-
-                        *Мои резюме* :clipboard:
-                        Посмотрите список ваших созданных резюме.""";
-
-                executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode(menuInfo), messageId, chatId, buttonLabels, buttonIds);
+                BotUtil.createMyResumesMenu(bot, messageId, chatId);
             }
             case "resume_1", "resume_2", "resume_3", "resume_4", "resume_5", "resume_6" -> {
                 List<String> buttonLabels = Arrays.asList("Опубликовать на HH", "Скачать резюме",
@@ -198,6 +185,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
 
         com.resume.bot.model.entity.Resume resume = BotUtil.getResume(matcher.group(), resumeService, chatId, bot);
         BotUtil.publishResume(resume, chatId, resumeService, headHunterService, bot, hhBaseUrl, true);
+        BotUtil.createMenu(MessageUtil.createSendMessageRequest(bot, chatId), bot);
         return true;
     }
 
@@ -216,6 +204,21 @@ public class MyResumesActionHandler implements CallbackActionHandler {
             resume = BotUtil.getResume(matcherFirst.group(), resumeService, chatId, bot);
 
             String filePath = resume.getPdfPath();
+            if (filePath == null) {
+                if (resume.getTemplate() == null) {
+                    sendMessage(bot, "Выберите шаблон перед скачиванием данного резюме", chatId);
+                    return true;
+                }
+                try {
+                    filePath = LatexProcessor.compile(JsonProcessor.createEntityFromJson(resume.getResumeData(), com.resume.bot.json.entity.client.Resume.class),
+                            resume.getTemplate().getSourcePath(), chatId.toString(), resume.getTitle());
+                } catch (IOException | InterruptedException e) {
+                    log.error(e.getMessage());
+                    throw new RuntimeException(e);
+                }
+            }
+
+            resumeService.updatePdfPathByResumeId(resume.getPdfPath(), resume.getResumeId());
             File file = new File(filePath);
             try {
                 bot.execute(new SendDocument(String.valueOf(chatId), new InputFile(file)));
@@ -230,6 +233,8 @@ public class MyResumesActionHandler implements CallbackActionHandler {
         if (resume == null) {
             return true;
         }
+
+        BotUtil.createMenu(MessageUtil.createSendMessageRequest(bot, chatId), bot);
 
         return true;
     }
@@ -246,24 +251,14 @@ public class MyResumesActionHandler implements CallbackActionHandler {
             return false;
         }
 
-        Resume resume = null;
         if (matcherFirst.matches()) {
+            List<String> labels = List.of("Изменить шаблон", "Изменить текст");
+            String[] splits = data.split("_");
+            List<String> ids = List.of(splits[0] + "_template_" + data.substring(5), splits[0] + "_text_" + data.substring(5));
 
-        } else {
-
+            executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode("Выберите, что нужно изменить.:slightly_smiling:"),
+                    messageId, chatId, labels, ids);
         }
-
-        List<String> labels = List.of("Изменить шаблон", "Изменить текст");
-        String[] splits = data.split("_");
-        List<String> ids = List.of(splits[0] + "_template_" + data.substring(5), splits[0] + "_text_" + data.substring(5));
-
-
-        if (resume == null) {
-            return true;
-        }
-
-        executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode("Выберите, что нужно изменить.:slightly_smiling:"),
-                messageId, chatId, labels, ids);
 
         return true;
     }
@@ -293,7 +288,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
             ids.add(data.substring(5) + "_" + templates.get(i).getTemplateId()); // template_resume_([1-6])_templateId
         }
 
-        executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode("Выберите, что нужно изменить.:slightly_smiling:"), // todo: добавить изображения шаблонов
+        executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode("Выберите шаблон:slightly_smiling:"), // todo: добавить изображения шаблонов
                 messageId, chatId, labels, ids);
 
         return true;
@@ -333,6 +328,9 @@ public class MyResumesActionHandler implements CallbackActionHandler {
         if (resume != null) {
             resumeService.deleteResume(resume);
         }
+
+        MessageUtil.sendMessage(bot, "Резюме успешно удалено", chatId);
+        BotUtil.createMenu(MessageUtil.createSendMessageRequest(bot, chatId), bot);
         return true;
     }
 }

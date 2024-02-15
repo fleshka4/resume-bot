@@ -1,10 +1,16 @@
 package com.resume.latex;
 
-import com.resume.bot.json.JsonValidator;
+import com.resume.bot.json.entity.area.Area;
 import com.resume.bot.json.entity.client.Experience;
 import com.resume.bot.json.entity.client.Resume;
+import com.resume.bot.json.entity.client.TotalExperience;
+import com.resume.bot.json.entity.client.education.Course;
 import com.resume.bot.json.entity.client.education.Education;
+import com.resume.bot.json.entity.client.education.ElementaryEducation;
+import com.resume.bot.json.entity.client.education.PrimaryEducation;
+import com.resume.bot.json.entity.common.Id;
 import com.resume.util.Constants;
+import com.resume.util.ConstantsUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -18,6 +24,29 @@ public enum Placeholder {
         @Override
         public String replaceValue(Resume resume) {
             return "%s %s %s".formatted(resume.getLastName(), resume.getFirstName(), resume.getMiddleName());
+        }
+    },
+    PLACE_FOR_BIRTHDAY("PLACE-FOR-BIRTHDAY") {
+        @Override
+        public String replaceValue(Resume resume) {
+            return resume.getBirthDate();
+        }
+    },
+    PLACE_FOR_VEHICLE("PLACE-FOR-VEHICLE") {
+        @Override
+        public String replaceValue(Resume resume) {
+            Boolean has = resume.getHasVehicle();
+            return has != null
+                    ? has
+                    ? "есть"
+                    : "нет"
+                    : "";
+        }
+    },
+    PLACE_FOR_DRIVER_LICENSE("PLACE-FOR-DRIVER-LICENSE") {
+        @Override
+        public String replaceValue(Resume resume) {
+            return resume.getDriverLicenseTypes().stream().map(Id::getId).collect(Collectors.joining(", "));
         }
     },
     PLACE_FOR_POSITION("PLACE-FOR-POSITION") {
@@ -43,9 +72,12 @@ public enum Placeholder {
     PLACE_FOR_CITY("PLACE-FOR-CITY") {
         @Override
         public String replaceValue(Resume resume) {
-            String[] areaParts = JsonValidator.getAreaString(
-                    JsonValidator.getAreaByIdDeep(Constants.AREAS, resume.getArea().getId())
-                            .get()).split(",");
+            Area area = ConstantsUtil.getAreaByIdDeep(Constants.AREAS, resume.getArea().getId()).orElse(null);
+            if (area == null) {
+                return "";
+            }
+
+            String[] areaParts = ConstantsUtil.getAreaString(area).split(",");
             return areaParts.length == 2
                     ? areaParts[1].trim()
                     : areaParts.length == 3
@@ -56,12 +88,15 @@ public enum Placeholder {
     PLACE_FOR_COUNTRY("PLACE-FOR-COUNTRY") {
         @Override
         public String replaceValue(Resume resume) {
-            return JsonValidator.getAreaString(
-                    JsonValidator.getAreaByIdDeep(Constants.AREAS, resume.getArea().getId())
-                            .get()).split(",")[0].trim();
+            Area area = ConstantsUtil.getAreaByIdDeep(Constants.AREAS, resume.getArea().getId()).orElse(null);
+            if (area == null) {
+                return "";
+            }
+
+            return ConstantsUtil.getAreaString(area).split(",")[0].trim();
         }
     },
-    PLACE_FOR_SKILLS("PLACE-FOR-SKILLS") {
+    PLACE_FOR_ABOUT("PLACE-FOR-ABOUT") {
         @Override
         public String replaceValue(Resume resume) {
             String skills = resume.getSkills();
@@ -72,60 +107,121 @@ public enum Placeholder {
         @Override
         public String replaceValue(Resume resume) {
             Education education = resume.getEducation();
-            return education != null && education.getLevel() != null
-                    ?
-                    """
-                    Уровень образования: %s
-                                        
+            String levelStr = education.getLevel() != null
+                    ? "Уровень образования: %s\\\\".formatted(education.getLevel().getName())
+                    : "";
+
+            List<PrimaryEducation> primary = education.getPrimary();
+            String primaryStr = primary != null && !primary.isEmpty()
+                    ? primary.stream()
+                    .map(pe -> """
+                            Учебное заведение: %s\\
+                            Факультет: %s\\
+                            Специализация: %s\\
+                            Год окончания: %d\\
+                            \\
+                            """.formatted(
+                            pe.getName(),
+                            pe.getOrganization(),
+                            pe.getResult(),
+                            pe.getYear()
+                    ))
+                    .collect(Collectors.joining("", "Высшее образование:\\\\", ""))
+                    : "";
+
+            List<ElementaryEducation> elementary = education.getElementary();
+            String elementaryStr = elementary != null && !elementary.isEmpty()
+                    ? elementary.stream()
+                    .map(es -> """
+                            Учебное заведение: %s\\
+                            Год окончания: %d\\
+                            \\
+                            """.formatted(
+                            es.getName(),
+                            es.getYear()
+                    ))
+                    .collect(Collectors.joining("", "Среднее образование:\\\\", ""))
+                    : "";
+
+            List<Course> additional = education.getAdditional();
+            String additionalStr = additional != null && !additional.isEmpty()
+                    ? additional.stream()
+                    .map(as -> """
+                            Название курса:%s\\
+                            Организация: %s\\
+                            Специальность: %s\\
+                            Год окончания: %d\\
+                            \\
+                            """.formatted(
+                            as.getName(),
+                            as.getOrganization(),
+                            as.getResult(),
+                            as.getYear()
+                    ))
+                    .collect(Collectors.joining("", "Курсы повышения квалификации:\\\\", ""))
+                    : "";
+
+            List<Course> attestation = education.getAttestation();
+            String attestationStr = attestation != null && !attestation.isEmpty()
+                    ? attestation.stream()
+                    .map(as -> """
+                            Название курса:%s\\
+                            Организация: %s\\
+                            Специальность: %s\\
+                            Год окончания: %d\\
+                            \\
+                            """.formatted(
+                            as.getName(),
+                            as.getOrganization(),
+                            as.getResult(),
+                            as.getYear()
+                    ))
+                    .collect(Collectors.joining("", "Пройденные тесты:\\\\", ""))
+                    : "";
+
+            return """
                     %s
-                    """.formatted(
-                    education.getLevel().getName(),
-                    education.getPrimary().stream()
-                            .map(pe -> """
-                                    Учебное заведение: %s
-                                    Факультет: %s
-                                    Специализация: %s
-                                    Год окончания: %d
-                                                                        
-                                    """.formatted(
-                                    pe.getName(),
-                                    pe.getOrganization(),
-                                    pe.getResult(),
-                                    pe.getYear()
-                            ))
-                            .collect(Collectors.joining()))
-                    :
-                    "";
+                    %s
+                    %s
+                    %s
+                    %s
+                    """.formatted(levelStr, primaryStr, elementaryStr, additionalStr, attestationStr);
         }
     },
     PLACE_FOR_EXPERIENCE("PLACE-FOR-EXPERIENCE") {
         @Override
         public String replaceValue(Resume resume) {
             List<Experience> experience = resume.getExperience();
-            return experience != null && !experience.isEmpty()
-                    ?
-                    experience.stream()
+            return !experience.isEmpty()
+                    ? experience.stream()
                     .map(exp -> """
-                            Период работы: %s
-                            Компания: %s
-                            Город: %s
-                            Ссылка: %s
-                            Должность: %s
-                            Обязанности: %s
-                                                                
-                            """.formatted(
-                            "%s - %s".formatted(exp.getStart(),
-                                    exp.getEnd() != null && !exp.getEnd().isEmpty() ? exp.getEnd() : "настоящее время"),
+                            Период работы: %s\\
+                            Компания: %s\\
+                            Город: %s\\
+                            Ссылка: %s\\
+                            Должность: %s\\
+                            Обязанности: %s\\
+                            \\
+                            """.formatted("%s - %s".formatted(
+                                    exp.getStart(),
+                                    exp.getEnd() != null && !exp.getEnd().isEmpty()
+                                            ? exp.getEnd()
+                                            : "настоящее время"),
                             exp.getCompany(),
-                            JsonValidator.getAreaString(
-                                    JsonValidator.getAreaByIdDeep(Constants.AREAS, exp.getArea().getId())
-                                            .get()),
+                            ConstantsUtil.getAreaString(
+                                    ConstantsUtil.getAreaByIdDeep(Constants.AREAS, exp.getArea().getId()).orElse(null)),
                             exp.getCompanyUrl(),
                             exp.getPosition(),
                             exp.getDescription()))
                     .collect(Collectors.joining())
-                    :
-                    "";
+                    : "";
+        }
+    },
+    PLACE_FOR_TOTAL_EXPERIENCE("PLACE-FOR-TOTAL-EXPERIENCE") {
+        @Override
+        public String replaceValue(Resume resume) {
+            TotalExperience totalExperience = resume.getTotalExperience();
+            return totalExperience != null ? totalExperience.getMonths().toString() : "0";
         }
     };
 
