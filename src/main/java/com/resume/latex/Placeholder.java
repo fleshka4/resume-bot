@@ -3,6 +3,7 @@ package com.resume.latex;
 import com.resume.bot.json.entity.area.Area;
 import com.resume.bot.json.entity.client.Experience;
 import com.resume.bot.json.entity.client.Resume;
+import com.resume.bot.json.entity.client.TotalExperience;
 import com.resume.bot.json.entity.client.education.Course;
 import com.resume.bot.json.entity.client.education.Education;
 import com.resume.bot.json.entity.client.education.ElementaryEducation;
@@ -19,19 +20,19 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Getter
 public enum Placeholder {
-    PLACE_FOR_NAME("$$PLACE-FOR-NAME$$") {
+    PLACE_FOR_NAME("PLACE-FOR-NAME") {
         @Override
         public String replaceValue(Resume resume) {
             return "%s %s %s".formatted(resume.getLastName(), resume.getFirstName(), resume.getMiddleName());
         }
     },
-    PLACE_FOR_BIRTHDAY("$$PLACE-FOR-BIRTHDAY$$") {
+    PLACE_FOR_BIRTHDAY("PLACE-FOR-BIRTHDAY") {
         @Override
         public String replaceValue(Resume resume) {
             return resume.getBirthDate();
         }
     },
-    PLACE_FOR_VEHICLE("$$PLACE-FOR-VEHICLE$$") {
+    PLACE_FOR_VEHICLE("PLACE-FOR-VEHICLE") {
         @Override
         public String replaceValue(Resume resume) {
             Boolean has = resume.getHasVehicle();
@@ -42,33 +43,33 @@ public enum Placeholder {
                     : "";
         }
     },
-    PLACE_FOR_DRIVER_LICENSE("$$PLACE-FOR-DRIVER-LICENSE$$") {
+    PLACE_FOR_DRIVER_LICENSE("PLACE-FOR-DRIVER-LICENSE") {
         @Override
         public String replaceValue(Resume resume) {
             return resume.getDriverLicenseTypes().stream().map(Id::getId).collect(Collectors.joining(", "));
         }
     },
-    PLACE_FOR_POSITION("$$PLACE-FOR-POSITION$$") {
+    PLACE_FOR_POSITION("PLACE-FOR-POSITION") {
         @Override
         public String replaceValue(Resume resume) {
             return resume.getTitle();
         }
     },
-    PLACE_FOR_NUMBER("$$PLACE-FOR-NUMBER$$") {
+    PLACE_FOR_NUMBER("PLACE-FOR-NUMBER") {
         @Override
         public String replaceValue(Resume resume) {
             String contacts = resume.getContacts();
             return contacts != null && !contacts.contains("@") ? contacts : "";
         }
     },
-    PLACE_FOR_EMAIL("$$PLACE-FOR-EMAIL$$") {
+    PLACE_FOR_EMAIL("PLACE-FOR-EMAIL") {
         @Override
         public String replaceValue(Resume resume) {
             String contacts = resume.getContacts();
             return contacts != null && contacts.contains("@") ? contacts : "";
         }
     },
-    PLACE_FOR_CITY("$$PLACE-FOR-CITY$$") {
+    PLACE_FOR_CITY("PLACE-FOR-CITY") {
         @Override
         public String replaceValue(Resume resume) {
             Area area = ConstantsUtil.getAreaByIdDeep(Constants.AREAS, resume.getArea().getId()).orElse(null);
@@ -84,7 +85,7 @@ public enum Placeholder {
                     : "";
         }
     },
-    PLACE_FOR_COUNTRY("$$PLACE-FOR-COUNTRY$$") {
+    PLACE_FOR_COUNTRY("PLACE-FOR-COUNTRY") {
         @Override
         public String replaceValue(Resume resume) {
             Area area = ConstantsUtil.getAreaByIdDeep(Constants.AREAS, resume.getArea().getId()).orElse(null);
@@ -95,14 +96,14 @@ public enum Placeholder {
             return ConstantsUtil.getAreaString(area).split(",")[0].trim();
         }
     },
-    PLACE_FOR_ABOUT("$$PLACE-FOR-ABOUT$$") {
+    PLACE_FOR_ABOUT("PLACE-FOR-ABOUT") {
         @Override
         public String replaceValue(Resume resume) {
             String skills = resume.getSkills();
             return skills != null ? skills : "";
         }
     },
-    PLACE_FOR_EDUCATION("$$PLACE-FOR-EDUCATION$$") {
+    PLACE_FOR_EDUCATION("PLACE-FOR-EDUCATION") {
         @Override
         public String replaceValue(Resume resume) {
             Education education = resume.getEducation();
@@ -187,7 +188,7 @@ public enum Placeholder {
                     """.formatted(levelStr, primaryStr, elementaryStr, additionalStr, attestationStr);
         }
     },
-    PLACE_FOR_EXPERIENCE("$$PLACE-FOR-EXPERIENCE$$") {
+    PLACE_FOR_EXPERIENCE("PLACE-FOR-EXPERIENCE") {
         @Override
         public String replaceValue(Resume resume) {
             List<Experience> experience = resume.getExperience();
@@ -216,10 +217,11 @@ public enum Placeholder {
                     : "";
         }
     },
-    PLACE_FOR_TOTAL_EXPERIENCE("$$PLACE-FOR-TOTAL-EXPERIENCE$$") {
+    PLACE_FOR_TOTAL_EXPERIENCE("PLACE-FOR-TOTAL-EXPERIENCE") {
         @Override
         public String replaceValue(Resume resume) {
-            return resume.getTotalExperience().getMonths().toString();
+            TotalExperience totalExperience = resume.getTotalExperience();
+            return totalExperience != null ? totalExperience.getMonths().toString() : "0";
         }
     };
 

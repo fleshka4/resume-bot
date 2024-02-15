@@ -118,6 +118,7 @@ public class ResumeBot extends TelegramLongPollingBot {
             if (callbackData.startsWith("template")) {
                 if (currentState == BotState.EDIT_MY_RESUME_TEMPLATE) {
                     updateTemplate(callbackData, chatId);
+                    BotUtil.createMyResumesMenu(this, messageId, chatId);
                 } else if (currentState == BotState.CHOOSE_TEMPLATE) {
                     var resume = BotUtil.clientsMap.get(chatId);
                     var dbResume = BotUtil.lastSavedResumeMap.get(chatId);

@@ -2,7 +2,6 @@ package com.resume.util;
 
 import com.resume.bot.display.BotState;
 import com.resume.bot.json.JsonProcessor;
-import com.resume.bot.json.JsonValidator;
 import com.resume.bot.json.entity.client.Experience;
 import com.resume.bot.json.entity.client.Recommendation;
 import com.resume.bot.json.entity.client.Resume;
@@ -24,6 +23,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.resume.bot.display.MessageUtil.executeEditMessageWithKeyBoard;
 import static com.resume.bot.display.MessageUtil.sendMessage;
 import static com.resume.util.Constants.ITEMS_DELIMITER;
 
@@ -464,5 +464,24 @@ public class BotUtil {
                 Посмотрите список ваших созданных резюме.""";
 
         sendMessage(bot, EmojiParser.parseToUnicode(menuInfo), sendMessageRequest);
+    }
+
+    public void createMyResumesMenu(TelegramLongPollingBot bot, Integer messageId, Long chatId) {
+        List<String> buttonLabels = Arrays.asList("Создать резюме", "Использовать резюме с hh.ru", "Мои резюме");
+        List<String> buttonIds = Arrays.asList("create_resume", "export_resume_hh", "my_resumes");
+
+        String menuInfo = """
+                        Выберите действие:
+
+                        *Создать резюме* :memo:
+                        Начните процесс создания нового резюме с нуля!
+
+                        *Экспорт резюме* с hh.ru :inbox_tray:
+                        Экспортируйте свои данные с hh.ru для взаимодействия с ними.
+
+                        *Мои резюме* :clipboard:
+                        Посмотрите список ваших созданных резюме.""";
+
+        executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode(menuInfo), messageId, chatId, buttonLabels, buttonIds);
     }
 }

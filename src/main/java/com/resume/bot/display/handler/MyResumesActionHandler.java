@@ -91,22 +91,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
                         """), messageId, chatId, buttonLabels, buttonIds);
             }
             case "back_to_menu_3" -> {
-                List<String> buttonLabels = Arrays.asList("Создать резюме", "Использовать резюме с hh.ru", "Мои резюме");
-                List<String> buttonIds = Arrays.asList("create_resume", "export_resume_hh", "my_resumes");
-
-                String menuInfo = """
-                        Выберите действие:
-
-                        *Создать резюме* :memo:
-                        Начните процесс создания нового резюме с нуля!
-
-                        *Экспорт резюме* с hh.ru :inbox_tray:
-                        Экспортируйте свои данные с hh.ru для взаимодействия с ними.
-
-                        *Мои резюме* :clipboard:
-                        Посмотрите список ваших созданных резюме.""";
-
-                executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode(menuInfo), messageId, chatId, buttonLabels, buttonIds);
+                BotUtil.createMyResumesMenu(bot, messageId, chatId);
             }
             case "resume_1", "resume_2", "resume_3", "resume_4", "resume_5", "resume_6" -> {
                 List<String> buttonLabels = Arrays.asList("Опубликовать на HH", "Скачать резюме",
@@ -266,24 +251,14 @@ public class MyResumesActionHandler implements CallbackActionHandler {
             return false;
         }
 
-        Resume resume = null;
         if (matcherFirst.matches()) {
+            List<String> labels = List.of("Изменить шаблон", "Изменить текст");
+            String[] splits = data.split("_");
+            List<String> ids = List.of(splits[0] + "_template_" + data.substring(5), splits[0] + "_text_" + data.substring(5));
 
-        } else {
-
+            executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode("Выберите, что нужно изменить.:slightly_smiling:"),
+                    messageId, chatId, labels, ids);
         }
-
-        List<String> labels = List.of("Изменить шаблон", "Изменить текст");
-        String[] splits = data.split("_");
-        List<String> ids = List.of(splits[0] + "_template_" + data.substring(5), splits[0] + "_text_" + data.substring(5));
-
-
-        if (resume == null) {
-            return true;
-        }
-
-        executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode("Выберите, что нужно изменить.:slightly_smiling:"),
-                messageId, chatId, labels, ids);
 
         return true;
     }
