@@ -316,4 +316,12 @@ public class JsonValidator {
         }
         return true;
     }
+
+    public static boolean checkName(String text) {
+        return Arrays.stream(text.split("-")).allMatch(s -> checkAlphaSpaceFormat(text.trim()));
+    }
+
+    public static boolean checkStringWithPunctuation(String text) {
+        return Arrays.stream(text.split("[-,;\"'!?:.]")).allMatch(s -> checkAlphaSpaceFormat(text.trim()));
+    }
 }

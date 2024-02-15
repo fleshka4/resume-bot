@@ -27,16 +27,16 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 public class AuthController {
     private final AuthApiClient authApiClient;
+    private final TokenHolderService holderService;
+    private final UserService userService;
 
     private final HhConfig hhConfig;
-
-    private final TokenHolderService holderService;
-
-    private final UserService userService;
+    private final String botName;
+    private final String serverUrl;
 
     @GetMapping("/auth")
     public ModelAndView handleAuthorization(@RequestParam String code, @RequestParam String state, ModelMap modelMap) {
-        String redirectLink = URLEncoder.encode("http://localhost:5000/hh/auth", StandardCharsets.UTF_8);
+        String redirectLink = URLEncoder.encode(serverUrl + "/hh/auth", StandardCharsets.UTF_8);
 
         String result = authApiClient.auth("https://hh.ru/oauth/token",
                 "grant_type=authorization_code&client_id=" + hhConfig.getClientId() +
@@ -49,6 +49,6 @@ public class AuthController {
         User user = userService.getUser(BotUtil.states.get(stateNum)); // todo: logger + handle invalid urls
         holderService.save(new TokenHolder(token, user));
         log.info("Auth successful for user " + user.getTgUid());
-        return new ModelAndView("redirect:https://t.me/resume_gen_bot/?start=" + state, modelMap);
+        return new ModelAndView("redirect:https://t.me/%s/?start=%s".formatted(botName, state), modelMap);
     }
 }

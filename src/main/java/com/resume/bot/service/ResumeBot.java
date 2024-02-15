@@ -48,21 +48,15 @@ import static com.resume.util.Constants.*;
 @Component
 @RequiredArgsConstructor
 public class ResumeBot extends TelegramLongPollingBot {
-
     private final CallbackActionFactory callbackActionFactory;
-
     private final BotConfig botConfig;
 
     private final HeadHunterService headHunterService;
-
     private final UserService userService;
-
     private final ResumeService resumeService;
-
     private final TemplateService templateService;
 
-    @Value("${hh.base-url}")
-    private String hhBaseUrl;
+    private final String hhBaseUrl;
 
     @Override
     public void onUpdateReceived(Update update) {
@@ -180,7 +174,12 @@ public class ResumeBot extends TelegramLongPollingBot {
             List<com.resume.bot.model.entity.Resume> resumes = resumeService.getResumesByUserId(chatId);
             resumes.sort(Comparator.comparing(com.resume.bot.model.entity.Resume::getResumeId));
 
-            com.resume.bot.model.entity.Resume resume = resumes.get(Integer.parseInt(splits[2]));
+            int current = Integer.parseInt(splits[2]);
+            if (current >= resumes.size()) {
+                current = resumes.size() - 1;
+            }
+
+            com.resume.bot.model.entity.Resume resume = resumes.get(current);
             if (resume == null) {
                 throw new RuntimeException("Resume is not found");
             }
@@ -500,25 +499,9 @@ public class ResumeBot extends TelegramLongPollingBot {
                     sendMessage(this, "Выберите желаемую занятость", sendMessageRequest);
                 }
             }
-            case ENTER_PHONE -> {
+            case ENTER_PHONE, ENTER_WORK_PHONE, ENTER_HOME_PHONE -> {
                 if (checkInput(receivedText, sendMessageRequest, PHONE_NUMBER_FORMAT)) {
                     appendToField(resumeFields, ResumeField.PHONE.getValue(), receivedText);
-
-                    BotUtil.userStates.put(chatId, BotState.FINISH_DIALOGUE);
-                    finishDialogueWithClient(chatId, sendMessageRequest);
-                }
-            }
-            case ENTER_HOME_PHONE -> {
-                if (checkInput(receivedText, sendMessageRequest, PHONE_NUMBER_FORMAT)) {
-                    appendToField(resumeFields, ResumeField.HOME_PHONE.getValue(), receivedText);
-
-                    BotUtil.userStates.put(chatId, BotState.FINISH_DIALOGUE);
-                    finishDialogueWithClient(chatId, sendMessageRequest);
-                }
-            }
-            case ENTER_WORK_PHONE -> {
-                if (checkInput(receivedText, sendMessageRequest, PHONE_NUMBER_FORMAT)) {
-                    appendToField(resumeFields, ResumeField.WORK_PHONE.getValue(), receivedText);
 
                     BotUtil.userStates.put(chatId, BotState.FINISH_DIALOGUE);
                     finishDialogueWithClient(chatId, sendMessageRequest);
@@ -536,8 +519,10 @@ public class ResumeBot extends TelegramLongPollingBot {
                 BotUtil.userStates.put(chatId, BotState.FINISH_DIALOGUE);
                 finishDialogueWithClient(chatId, sendMessageRequest);
             }
-            default ->
-                    sendMessage(this, EmojiParser.parseToUnicode("Что-то пошло не так.\nПопробуйте ещё раз.:cry:"), sendMessageRequest);
+            default -> {
+                sendMessage(this,
+                        EmojiParser.parseToUnicode("Что-то пошло не так.\nПопробуйте ещё раз.:cry:"), sendMessageRequest);
+            }
         }
     }
 

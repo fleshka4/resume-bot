@@ -26,8 +26,9 @@ public class CorrectDataHandler implements CallbackActionHandler {
     private final UserService userService;
     private final HhConfig hhConfig;
 
-    @Value("${hh.base-url}")
     private final String hhBaseUrl;
+    private final String serverUrl;
+
 
     @Override
     public void performAction(String callbackData, Integer messageId, Long chatId) {
@@ -44,8 +45,10 @@ public class CorrectDataHandler implements CallbackActionHandler {
                     MessageUtil.executeEditMessage(bot, "Ваше резюме успешно опубликовано на hh.ru", messageId, chatId);
                     BotUtil.createMenu(MessageUtil.createSendMessageRequest(bot, chatId), bot);
                 } else {
-                    BotUtil.authorization(bot, hhConfig, "Чтобы опубликовать резюме необходимо авторизоваться на hh.ru" +
-                            " по следующей [ссылке](%s)!:key:. После авторизации нажмите на кнопку публикации резюме еще раз", chatId);
+                    BotUtil.authorization(bot, hhConfig,
+                            "Чтобы опубликовать резюме необходимо авторизоваться на hh.ru по следующей [ссылке](%s)!:key:. " +
+                                    "После авторизации нажмите на кнопку публикации резюме еще раз",
+                            chatId, "%s/hh/auth".formatted(serverUrl));
                 }
             }
             case "choose_latex_for_resume" -> {

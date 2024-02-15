@@ -76,7 +76,8 @@ public class BotUtil {
     public final List<String> MY_RESUMES_IDS_LIST = List.of(
             "my_resumes",
             "back_to_menu_3",
-            "back_to_my_resumes"
+            "back_to_my_resumes",
+            "back_to_resumes"
     );
 
     public final List<String> BIG_TYPES_IDS = List.of(
@@ -248,7 +249,7 @@ public class BotUtil {
 
                 for (int i = startCounter; i < limit; i++) {
                     buttonLabels.add(resumes.get(i).getTitle().substring(0, 20));
-                    callbackDataList.add(resumes.get(i).getTitle()  + "_" + i);
+                    callbackDataList.add(resumes.get(i).getTitle() + "_" + i);
                 }
             }
         }
@@ -271,7 +272,7 @@ public class BotUtil {
         return new TreeMap<>(originalMap);
     }
 
-    public void authorization(TelegramLongPollingBot bot, HhConfig hhConfig, String message, Long chatId) {
+    public void authorization(TelegramLongPollingBot bot, HhConfig hhConfig, String message, Long chatId, String redirectUrl) {
         long randomValue = BotUtil.generateRandom12DigitNumber(BotUtil.random);
         while (BotUtil.states.containsKey(randomValue)) {
             randomValue = BotUtil.generateRandom12DigitNumber(BotUtil.random);
@@ -283,12 +284,14 @@ public class BotUtil {
                 "response_type=code&" +
                 "client_id=" + hhConfig.getClientId() +
                 "&state=" + randomValue +
-                "&redirect_uri=http://localhost:5000/hh/auth";
+                "&redirect_uri=" + redirectUrl;
 
         sendMessage(bot, EmojiParser.parseToUnicode(message.formatted(link)), chatId);
     }
 
-    public void publishResume(com.resume.bot.model.entity.Resume resume, Long chatId, ResumeService resumeService, HeadHunterService headHunterService, TelegramLongPollingBot bot, String hhBaseUrl, boolean fromMyResumes) {
+    public void publishResume(com.resume.bot.model.entity.Resume resume, Long chatId, ResumeService resumeService,
+                              HeadHunterService headHunterService, TelegramLongPollingBot bot, String hhBaseUrl,
+                              boolean fromMyResumes) {
         if (resume != null) {
             try {
                 String hhLink = headHunterService.postCreateClient(hhBaseUrl, chatId,
@@ -297,7 +300,7 @@ public class BotUtil {
             } catch (Exception exception) {
                 log.error(exception.getMessage());
                 String message = "Произошла ошибка при публикации резюме. " +
-                        "Попробуйте удалить его и создать заново" + (!fromMyResumes ? "" :  " или выберите другое");
+                        "Попробуйте удалить его и создать заново" + (!fromMyResumes ? "" : " или выберите другое");
                 sendMessage(bot, message, chatId);
             }
         }
@@ -477,16 +480,16 @@ public class BotUtil {
         List<String> buttonIds = Arrays.asList("create_resume", "export_resume_hh", "my_resumes");
 
         String menuInfo = """
-                        Выберите действие:
+                Выберите действие:
 
-                        *Создать резюме* :memo:
-                        Начните процесс создания нового резюме с нуля!
+                *Создать резюме* :memo:
+                Начните процесс создания нового резюме с нуля!
 
-                        *Экспорт резюме* с hh.ru :inbox_tray:
-                        Экспортируйте свои данные с hh.ru для взаимодействия с ними.
+                *Экспорт резюме* с hh.ru :inbox_tray:
+                Экспортируйте свои данные с hh.ru для взаимодействия с ними.
 
-                        *Мои резюме* :clipboard:
-                        Посмотрите список ваших созданных резюме.""";
+                *Мои резюме* :clipboard:
+                Посмотрите список ваших созданных резюме.""";
 
         executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode(menuInfo), messageId, chatId, buttonLabels, buttonIds);
     }

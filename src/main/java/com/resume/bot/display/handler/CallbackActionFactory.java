@@ -24,6 +24,7 @@ public class CallbackActionFactory {
     private final UserService userService;
 
     private final String hhBaseUrl;
+    private final String serverUrl;
 
     private final HhConfig hhConfig;
 
@@ -42,13 +43,13 @@ public class CallbackActionFactory {
             return new CreateResumeActionHandler(pollingBot, resumeService, userService);
         }
         if (BotUtil.CORRECT_DATA_IDS_LIST.contains(callbackData)) {
-            return new CorrectDataHandler(headHunterService, resumeService, templateService, pollingBot, tokenHolderService, userService, hhConfig, hhBaseUrl);
+            return new CorrectDataHandler(headHunterService, resumeService, templateService, pollingBot, tokenHolderService, userService, hhConfig, hhBaseUrl, serverUrl);
         }
         if (BotUtil.EXPORT_RESUME_IDS_LIST.contains(callbackData)) {
-            return new ExportResumeActionHandler(pollingBot, hhConfig, headHunterService, hhBaseUrl, tokenHolderService, userService, resumeService);
+            return new ExportResumeActionHandler(pollingBot, hhConfig, hhBaseUrl, serverUrl, headHunterService, tokenHolderService, userService, resumeService);
         }
         if (BotUtil.MY_RESUMES_IDS_LIST.contains(callbackData) || BotUtil.checkIfAction(callbackData) || callbackData.startsWith("res_")) {
-            return new MyResumesActionHandler(pollingBot, resumeService, templateService, headHunterService, tokenHolderService, userService, apiClientTokenImpl);
+            return new MyResumesActionHandler(pollingBot, resumeService, templateService, headHunterService, tokenHolderService, userService, apiClientTokenImpl, hhBaseUrl);
         }
         if (BotUtil.checkIfBigType(callbackData)) {
             return new BigKeyBoardHandler(pollingBot);

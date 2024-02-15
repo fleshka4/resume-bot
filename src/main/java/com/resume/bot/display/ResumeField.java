@@ -22,7 +22,7 @@ public enum ResumeField {
     NAME("имя") {
         @Override
         public boolean processCheck(String checkValue) {
-            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_128) && JsonValidator.checkAlphaFormat(checkValue);
+            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_128) && JsonValidator.checkName(checkValue);
         }
 
         @Override
@@ -39,7 +39,7 @@ public enum ResumeField {
     SURNAME("фамилия") {
         @Override
         public boolean processCheck(String checkValue) {
-            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_128) && JsonValidator.checkAlphaFormat(checkValue);
+            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_128) && JsonValidator.checkName(checkValue);
         }
 
         @Override
@@ -56,7 +56,7 @@ public enum ResumeField {
     PATRONYMIC("отчество") {
         @Override
         public boolean processCheck(String checkValue) {
-            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_128) && JsonValidator.checkAlphaFormat(checkValue);
+            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_128) && JsonValidator.checkName(checkValue);
         }
 
         @Override
@@ -147,7 +147,7 @@ public enum ResumeField {
     EDUCATION_INSTITUTION("учебное заведение") {
         @Override
         public boolean processCheck(String checkValue) {
-            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_512) && JsonValidator.checkAlphaSpaceFormat(checkValue);
+            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_512) && JsonValidator.checkStringWithPunctuation(checkValue);
         }
 
         @Override
@@ -356,7 +356,7 @@ public enum ResumeField {
     EXPERIENCE_DUTIES("обязанности") {
         @Override
         public boolean processCheck(String checkValue) {
-            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_4096) && JsonValidator.checkAlphaSpaceFormat(checkValue);
+            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_4096) && JsonValidator.checkStringWithPunctuation(checkValue);
         }
 
         @Override
@@ -376,7 +376,7 @@ public enum ResumeField {
     SKILLS("навыки") {
         @Override
         public boolean processCheck(String checkValue) {
-            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_128) && JsonValidator.checkAlphaSpaceFormat(checkValue);
+            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_128);
         }
 
         @Override
@@ -429,7 +429,7 @@ public enum ResumeField {
     REC_NAME("имя выдавшего рекомендацию") {
         @Override
         public boolean processCheck(String checkValue) {
-            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_512) && JsonValidator.checkAlphaSpaceFormat(checkValue);
+            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_512) && JsonValidator.checkName(checkValue);
         }
 
         @Override
@@ -469,7 +469,7 @@ public enum ResumeField {
     REC_ORGANIZATION("организация выдавшего рекомендацию") {
         @Override
         public boolean processCheck(String checkValue) {
-            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_128) && JsonValidator.checkAlphaSpaceFormat(checkValue);
+            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_128) && JsonValidator.checkStringWithPunctuation(checkValue);
         }
 
         @Override
@@ -600,41 +600,6 @@ public enum ResumeField {
             resume.setContacts(param);
         }
     },
-
-    HOME_PHONE("контакты") {
-        @Override
-        public boolean processCheck(String checkValue) {
-            return JsonValidator.checkPhoneFormat(checkValue);
-        }
-
-        @Override
-        public String message() {
-            return INCORRECT_PARAM_STRING.formatted(getValue());
-        }
-
-        @Override
-        public void editInResume(Resume resume, String param) {
-            resume.setContacts(param);
-        }
-    },
-
-    WORK_PHONE("контакты") {
-        @Override
-        public boolean processCheck(String checkValue) {
-            return JsonValidator.checkPhoneFormat(checkValue);
-        }
-
-        @Override
-        public String message() {
-            return INCORRECT_PARAM_STRING.formatted(getValue());
-        }
-
-        @Override
-        public void editInResume(Resume resume, String param) {
-            resume.setContacts(param);
-        }
-    },
-
     EMAIL("контакты") {
         @Override
         public boolean processCheck(String checkValue) {

@@ -28,29 +28,26 @@ import static com.resume.util.BigKeyboardType.RESUMES;
 @Component
 @RequiredArgsConstructor
 public class ExportResumeActionHandler implements CallbackActionHandler {
-
     private final TelegramLongPollingBot bot;
 
     private final HhConfig hhConfig;
+    private final String hhBaseUrl;
+    private final String serverUrl;
 
     private final HeadHunterService headHunterService;
-
-    private final String hhBaseUrl;
-
     private final TokenHolderService tokenHolderService;
-
     private final UserService userService;
-
     private final ResumeService resumeService;
 
     @Override
     public void performAction(String callbackData, Integer messageId, Long chatId) {
+        String redirectUrl = "%s/hh/auth".formatted(serverUrl);
         switch (callbackData) {
             case "export_data_hh" -> {
                 if (!tokenHolderService.checkTokenHolderExists(userService.getUser(chatId))) {
                     BotUtil.authorization(bot, hhConfig, """
                             Отлично, для экспортирования своих резюме с hh.ru необходимо авторизоваться по следующей [ссылке](%s)!:key:
-                            """, chatId);
+                            """, chatId, redirectUrl);
                 } else {
                     exportLogic(chatId, messageId);
                 }
@@ -59,7 +56,7 @@ public class ExportResumeActionHandler implements CallbackActionHandler {
                 if (!tokenHolderService.checkTokenHolderExists(userService.getUser(chatId))) {
                     BotUtil.authorization(bot, hhConfig, """
                             Прежде чем начать работу со своими резюме с hh.ru необходимо авторизоваться по следующей [ссылке](%s)!:key:
-                            """, chatId);
+                            """, chatId, redirectUrl);
                 } else {
                     exportLogic(chatId, messageId);
                 }

@@ -13,10 +13,18 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class ApplicationConfig {
+    @Value("${server.url}")
+    private String serverUrl;
+
     @Value("${hh.base-url}")
     private String hhBaseUrl;
 
-    @Bean
+    @Bean(name = "serverUrl")
+    public String serverUrl() {
+        return serverUrl;
+    }
+
+    @Bean(name = "hhBaseUrl")
     public String hhBaseUrl() {
         return hhBaseUrl;
     }
