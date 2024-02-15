@@ -9,6 +9,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+
 @Slf4j
 public class LatexProcessor {
     private static final Path tempDir = Paths.get(System.getProperty("user.home")).resolve(".resume_bot");
@@ -20,7 +22,7 @@ public class LatexProcessor {
         Path outputUserPdf = outputUserDir.resolve(resumeName + ".pdf");
 
         Files.createDirectories(outputUserDir);
-        Files.copy(sourceTmpFile, outputUserTex);
+        Files.copy(sourceTmpFile, outputUserTex, REPLACE_EXISTING);
         String content = IOUtil.loadFileContent(outputUserTex);
         content = replaceContent(content, resume);
         IOUtil.writeStringToFile(content, outputUserTex);
@@ -49,7 +51,7 @@ public class LatexProcessor {
 
     private static String insertValue(String content, Placeholder placeholder, String value) {
         if (!content.contains(placeholder.getValue())) {
-            throw new RuntimeException("There is no %s".formatted(placeholder.getValue()));
+            return content;
         }
 
         if (value == null) {

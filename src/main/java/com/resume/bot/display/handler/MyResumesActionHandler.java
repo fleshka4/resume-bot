@@ -222,6 +222,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
             if (filePath == null) {
                 if (resume.getTemplate() == null) {
                     sendMessage(bot, "Выберите шаблон перед скачиванием данного резюме", chatId);
+                    return true;
                 }
                 try {
                     filePath = LatexProcessor.compile(JsonProcessor.createEntityFromJson(resume.getResumeData(), com.resume.bot.json.entity.client.Resume.class),
