@@ -58,7 +58,7 @@ public class BigKeyBoardHandler implements CallbackActionHandler {
         }
 
         StringBuilder message = new StringBuilder();
-        message.append("Выберите сферу деятельности компании:\n\n");
+        message.append("Выберите ").append(bigKeyboardType == BigKeyboardType.INDUSTRIES ? "сферу деятельности компании" : "профессиональную роль").append(":\n\n");
 
         List<String> buttonLabels = new ArrayList<>();
         List<String> callbackDataList = new ArrayList<>();

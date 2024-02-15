@@ -4,8 +4,8 @@ import com.resume.bot.display.BotState;
 import com.resume.bot.display.CallbackActionHandler;
 import com.resume.bot.display.ResumeField;
 import com.resume.bot.json.JsonProcessor;
+import com.resume.bot.json.JsonValidator;
 import com.resume.bot.json.entity.Industry;
-import com.resume.bot.json.entity.area.Area;
 import com.resume.bot.json.entity.client.Experience;
 import com.resume.bot.json.entity.client.Recommendation;
 import com.resume.bot.json.entity.client.Resume;
@@ -16,6 +16,8 @@ import com.resume.bot.json.entity.client.education.PrimaryEducation;
 import com.resume.bot.json.entity.common.Id;
 import com.resume.bot.json.entity.common.Type;
 import com.resume.bot.json.entity.roles.Category;
+import com.resume.bot.service.ResumeService;
+import com.resume.bot.service.UserService;
 import com.resume.util.BotUtil;
 import com.resume.util.Constants;
 import com.vdurmont.emoji.EmojiParser;
@@ -23,7 +25,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.resume.bot.display.MessageUtil.*;
@@ -37,6 +42,10 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
 
     private final TelegramLongPollingBot bot;
     private boolean isPrimaryEdu = true;
+
+    private final ResumeService resumeService;
+
+    private final UserService userService;
 
     @Override
     public void performAction(String callbackData, Integer messageId, Long chatId) {
@@ -196,8 +205,12 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             case "result_data_is_correct" -> {
                 BotUtil.userStates.put(chatId, BotState.RESULT_DATA_CORRECT);
                 fillClientData(chatId);
-                sendMessage(bot, EmojiParser.parseToUnicode("Замечательно! Ваши данные успешно получены.:sparkles:\nВот что Вы можете сделать:"), chatId);
-                // todo кнопки "Загрузить новое резюме на hh", "Выбор Latex-шаблона"
+
+                List<String> buttonLabels = Arrays.asList("Загрузить новое резюме на hh", "Выбор Latex-шаблона");
+                List<String> buttonIds = Arrays.asList("post_resume_to_hh", "choose_latex_for_resume");
+                executeEditMessageWithKeyBoard(bot,
+                        EmojiParser.parseToUnicode("Замечательно! Ваши данные успешно получены.:sparkles:\nВот что Вы можете сделать:"),
+                        messageId, chatId, buttonLabels, buttonIds);
             }
             case "back_to_menu" -> {
                 List<String> buttonLabels = Arrays.asList("Создать резюме", "Использовать резюме с hh.ru", "Мои резюме");
@@ -243,28 +256,28 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             processOnChosenDriverLicense(callbackData, chatId, userData);
 
             List<String> chosenDriverLicenses = Arrays.stream(userData.get(ResumeField.DRIVER_LICENCE.getValue()).split(ITEMS_DELIMITER)).toList();
-            Map<String, String> unchosenDriverLicenseTypes = getUnChosenItems(driverLicenseTypes, chosenDriverLicenses);
+            Map<String, String> unChosenDriverLicenseTypes = getUnChosenItems(driverLicenseTypes, chosenDriverLicenses);
 
             executeContinueKeyboardMessage(bot, EmojiParser.parseToUnicode("Выберите категорию прав.:car:"),
-                    messageId, chatId, unchosenDriverLicenseTypes, "no_enter_car");
+                    messageId, chatId, unChosenDriverLicenseTypes, "no_enter_car");
         }
 
         if (employmentTypes.containsKey(callbackData)) {
             processOnChosenBusyness(employmentTypes.get(callbackData), chatId, userData);
 
             List<String> chosenBusyness = Arrays.stream(userData.get(ResumeField.BUSYNESS.getValue()).split(ITEMS_DELIMITER)).toList();
-            Map<String, String> unchosenBusyness = getUnChosenItemsByValue(employmentTypes, chosenBusyness);
+            Map<String, String> unChosenBusyness = getUnChosenItemsByValue(employmentTypes, chosenBusyness);
 
-            executeContinueKeyboardMessage(bot, "Выберите желаемую занятость.", messageId, chatId, unchosenBusyness, "skip_busyness");
+            executeContinueKeyboardMessage(bot, "Выберите желаемую занятость.", messageId, chatId, unChosenBusyness, "skip_busyness");
         }
 
         if (scheduleTypes.containsKey(callbackData)) {
             processOnChosenSchedule(scheduleTypes.get(callbackData), chatId, userData);
 
             List<String> chosenSchedule = Arrays.stream(userData.get(ResumeField.SCHEDULE.getValue()).split(ITEMS_DELIMITER)).toList();
-            Map<String, String> unchosenSchedule = getUnChosenItemsByValue(scheduleTypes, chosenSchedule);
+            Map<String, String> unChosenSchedule = getUnChosenItemsByValue(scheduleTypes, chosenSchedule);
 
-            executeContinueKeyboardMessage(bot, "Выберите желаемый график.", messageId, chatId, unchosenSchedule, "skip_schedule");
+            executeContinueKeyboardMessage(bot, "Выберите желаемый график.", messageId, chatId, unChosenSchedule, "skip_schedule");
         }
     }
 
@@ -297,7 +310,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                     Id areaId = new Id();
                     String[] items = fieldValue.split(",");
                     String cityName = items[items.length - 1].trim();
-                    areaId.setId(getCityId(cityName));
+                    areaId.setId(JsonValidator.getAreaByNameDeep(Constants.AREAS, cityName).get().getId());
                     resume.setArea(areaId);
                 }
                 case "уровень образования" -> {
@@ -356,17 +369,19 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                 }
                 case "желаемая позиция" -> resume.setTitle(fieldValue);
                 case "профессиональная роль" -> {
-                    String roleId = null;
-                    for (Category category: Constants.PROFESSIONAL_ROLES.getCategories()) {
-                        if (category.getName().equals(fieldValue)) {
-                            roleId = category.getId();
-                            break;
+                    if (fieldValue != null) {
+                        String roleId = null;
+                        for (Category category : Constants.PROFESSIONAL_ROLES.getCategories()) {
+                            if (category.getName().equals(fieldValue)) {
+                                roleId = category.getId();
+                                break;
+                            }
                         }
+                        if (roleId == null) {
+                            throw new RuntimeException("Professional role is null");
+                        }
+                        resume.setProfessionalRoles(List.of(new Id(roleId)));
                     }
-                    if (roleId == null) {
-                        throw new RuntimeException("Industry is null");
-                    }
-                    resume.setProfessionalRoles(List.of(new Id(roleId)));
                 }
                 case "желаемая зарплата" -> {
                     Salary salary = new Salary();
@@ -408,8 +423,13 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
         resume.setRecommendation(recommendationList);
         resume.setEmployments(busyness);
         resume.setSchedules(schedules);
+        BotUtil.clientsMap.put(chatId, resume);
 
-        System.err.println(JsonProcessor.createJsonFromEntity(resume));
+        com.resume.bot.model.entity.Resume dbResume = new com.resume.bot.model.entity.Resume();
+        dbResume.setUser(userService.getUser(chatId));
+        dbResume.setTitle(resume.getTitle());
+        dbResume.setResumeData(JsonProcessor.createJsonFromEntity(resume));
+        BotUtil.lastSavedResumeMap.put(chatId, resumeService.saveResume(dbResume));
     }
 
     private <T> void initList(List<T> listToInit, Class<T> type, int size) {
@@ -438,17 +458,6 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             case "учебное заведение" -> elementaryEducation.setName(fieldValue);
             case "год окончания" -> elementaryEducation.setYear(Long.parseLong(fieldValue));
         }
-    }
-
-    private String getCityId(String cityName) {
-        Optional<Area> city1 = Constants.AREAS.stream().filter(a -> !a.getId().equals(OTHER_COUNTRIES_JSON_ID))
-                .map(Area::getAreas).flatMap(List::stream).filter(a -> a.getAreas().isEmpty())
-                .filter(area -> area.getName().equals(cityName)).findFirst();
-        Optional<Area> city2 = Constants.AREAS.stream()
-                .filter(a -> COUNTRIES_WITH_REGIONS_IDS.contains(a.getId()) || a.getId().equals(OTHER_COUNTRIES_JSON_ID))
-                .map(Area::getAreas).flatMap(List::stream).map(Area::getAreas).flatMap(List::stream)
-                .filter(area -> area.getName().equals(cityName)).findFirst();
-        return city1.map(Area::getId).orElseGet(() -> city2.get().getId());
     }
 
     private void processOnChosenSex(String genderName, Long chatId, Map<String, String> userData) {
@@ -502,7 +511,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             case "название организации" -> workExperience.setCompany(fieldValue);
             case "город организации" -> {
                 com.resume.bot.json.entity.client.Area area = new com.resume.bot.json.entity.client.Area(
-                        getCityId(fieldValue), fieldValue);
+                        JsonValidator.getAreaByNameDeep(Constants.AREAS, fieldValue).get().getId(), fieldValue);
                 workExperience.setArea(area);
             }
             case "ссылка" -> workExperience.setCompanyUrl(fieldValue);

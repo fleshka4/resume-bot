@@ -2,7 +2,6 @@ package com.resume.bot.display.handler;
 
 import com.resume.bot.display.BotState;
 import com.resume.bot.display.CallbackActionHandler;
-import com.resume.bot.display.MessageUtil;
 import com.resume.bot.json.JsonProcessor;
 import com.resume.bot.model.entity.Resume;
 import com.resume.bot.model.entity.Template;
@@ -13,10 +12,8 @@ import com.resume.util.BotUtil;
 import com.vdurmont.emoji.EmojiParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -43,8 +40,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
 
     private final HeadHunterService headHunterService;
 
-    @Value("${hh.base-url}")
-    private String hhBaseUrl;
+    private final String hhBaseUrl;
 
     @Override
     public void performAction(String callbackData, Integer messageId, Long chatId) {
@@ -73,6 +69,25 @@ public class MyResumesActionHandler implements CallbackActionHandler {
                         - *Удалить резюме*
                         """), messageId, chatId, buttonLabels, buttonIds);
             }
+            case "back_to_hh_resumes" -> {
+                List<Resume> hhResumes = resumeService.getHhResumesByUserId(chatId);
+                List<String> buttonLabels = new ArrayList<>(hhResumes.stream()
+                        .map(Resume::getTitle)
+                        .toList());
+                buttonLabels.add("Назад");
+
+                List<String> buttonIds = new ArrayList<>();
+                for (int i = 1; i <= hhResumes.size(); i++) {
+                    buttonIds.add("resume_hh_" + i);
+                }
+                buttonIds.add("back_to_menu_3");
+                executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode("""
+                        После выбора конкретного резюме, у вас будет возможность:
+
+                        - *Скачать ваше резюме*
+                        - *Внести изменения в резюме*
+                        """), messageId, chatId, buttonLabels, buttonIds);
+            }
             case "back_to_menu_3" -> {
                 List<String> buttonLabels = Arrays.asList("Создать резюме", "Использовать резюме с hh.ru", "Мои резюме");
                 List<String> buttonIds = Arrays.asList("create_resume", "export_resume_hh", "my_resumes");
@@ -91,12 +106,20 @@ public class MyResumesActionHandler implements CallbackActionHandler {
 
                 executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode(menuInfo), messageId, chatId, buttonLabels, buttonIds);
             }
-            //todo действия после выбора одной из резюмешек
             case "resume_1", "resume_2", "resume_3", "resume_4", "resume_5", "resume_6" -> {
                 List<String> buttonLabels = Arrays.asList("Опубликовать на HH", "Скачать резюме",
                         "Редактировать резюме", "Удалить резюме", "Назад");
                 List<String> buttonIds = Arrays.asList("publish_on_hh_" + callbackData, "download_" + callbackData,
                         "edit_" + callbackData, "delete_" + callbackData, "back_to_my_resumes");
+
+                executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode("Выберите, что нужно сделать с вашим резюме.:slightly_smiling:"),
+                        messageId, chatId, buttonLabels, buttonIds);
+            }
+            case "resume_hh_1", "resume_hh_2", "resume_hh_3", "resume_hh_4", "resume_hh_5", "resume_hh_6" -> {
+                List<String> buttonLabels = Arrays.asList("Скачать резюме",
+                        "Редактировать резюме", "Назад");
+                List<String> buttonIds = Arrays.asList("download_" + callbackData,
+                        "edit_" + callbackData, "back_to_hh_resumes");
 
                 executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode("Выберите, что нужно сделать с вашим резюме.:slightly_smiling:"),
                         messageId, chatId, buttonLabels, buttonIds);
@@ -123,7 +146,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
             return false;
         }
 
-        int num = getResumeNumber(matcher);
+        int num = BotUtil.getResumeNumber(matcher.group());
 
         List<String> buttonLabels = Arrays.asList("Загрузить новое резюме на hh", "Обновить резюме на hh", "Назад");
         List<String> buttonIds = Arrays.asList("finally_publish_on_hh_resume_" + num, "update_resume_" + num,
@@ -142,12 +165,12 @@ public class MyResumesActionHandler implements CallbackActionHandler {
             return false;
         }
 
-        Resume resume = getResume(matcher, chatId);
+        Resume resume = BotUtil.getResume(matcher.group(), resumeService, chatId, bot);
         if (resume == null) {
             return true;
         }
 
-        String hhLink = resume.getHhLink();
+        String hhLink = resume.getLink();
         if (hhLink == null || hhLink.isEmpty()) {
             sendMessage(bot, "Резюме не может быть обновлено, так как оно не найдено на hh.ru. Попробуйте сначала опубликовать его", chatId);
             return true;
@@ -173,68 +196,75 @@ public class MyResumesActionHandler implements CallbackActionHandler {
             return false;
         }
 
-        Resume resume = getResume(matcher, chatId);
-        if (resume == null) {
-            return true;
-        }
-        try {
-            String hhLink = headHunterService.postCreateClient(hhBaseUrl, chatId,
-                    JsonProcessor.createEntityFromJson(resume.getResumeData(), com.resume.bot.json.entity.client.Resume.class));
-            Resume newResume = new Resume();
-            newResume.setResumeData(resume.getResumeData());
-            newResume.setTitle(resume.getTitle());
-            newResume.setUser(resume.getUser());
-            newResume.setTemplate(resume.getTemplate());
-            newResume.setHhLink(hhLink);
-            newResume.setPdfPath(resume.getPdfPath());
-            resumeService.saveResume(newResume);
-        } catch (Exception exception) {
-            log.error(exception.getMessage());
-            sendMessage(bot, "Произошла ошибка при публикации резюме. " +
-                    "Попробуйте удалить его и создать заново или выберите другое", chatId);
-        }
+        com.resume.bot.model.entity.Resume resume = BotUtil.getResume(matcher.group(), resumeService, chatId, bot);
+        BotUtil.publishResume(resume, chatId, resumeService, headHunterService, bot, hhBaseUrl, true);
         return true;
     }
 
     private boolean downloadResume(String data, Long chatId) {
-        Pattern pattern = Pattern.compile("download_resume_([1-6])");
+        Pattern patternForLatexResumes = Pattern.compile("download_resume_([1-6])");
+        Pattern patternForHhResumes = Pattern.compile("download_resume_hh_([1-6])");
 
-        Matcher matcher = pattern.matcher(data);
-        if (!matcher.matches()) {
+        Matcher matcherFirst = patternForLatexResumes.matcher(data);
+        Matcher matcherSecond = patternForHhResumes.matcher(data);
+        if (!matcherFirst.matches() && !matcherSecond.matches()) {
             return false;
         }
 
-        Resume resume = getResume(matcher, chatId);
-        if (resume == null) {
-            return true;
+        Resume resume = null;
+        if (matcherFirst.matches()) {
+            resume = BotUtil.getResume(matcherFirst.group(), resumeService, chatId, bot);
+
+            String filePath = resume.getPdfPath();
+            File file = new File(filePath);
+            try {
+                bot.execute(new SendDocument(String.valueOf(chatId), new InputFile(file)));
+            } catch (TelegramApiException e) {
+                log.error(e.getMessage());
+                sendMessage(bot, "Не найден файл, содержащий резюме. Попробуйте создать заново", chatId);
+            }
+        } else {
+
         }
 
-        String filePath = resume.getPdfPath();
-        File file = new File(filePath);
-        try {
-            bot.execute(new SendDocument(String.valueOf(chatId), new InputFile(file)));
-        } catch (TelegramApiException e) {
-            log.error(e.getMessage());
-            sendMessage(bot, "Не найден файл, содержащий резюме. Попробуйте создать заново", chatId);
+        if (resume == null) {
+            return true;
         }
 
         return true;
     }
 
-    private boolean editResume(String data, Integer messageId, Long chatId) {
-        Pattern pattern = Pattern.compile("edit_resume_([1-6])");
+    private boolean editResume(String data,  Integer messageId, Long chatId) {
+        BotUtil.userStates.put(chatId, BotState.EDIT_MY_RESUME);
 
-        Matcher matcher = pattern.matcher(data);
-        if (!matcher.matches()) {
+        Pattern patternForLatexResumes = Pattern.compile("edit_resume_([1-6])");
+        Pattern patternForHhResumes = Pattern.compile("download_resume_hh_([1-6])");
+
+        Matcher matcherFirst = patternForLatexResumes.matcher(data);
+        Matcher matcherSecond = patternForHhResumes.matcher(data);
+        if (!matcherFirst.matches() && !matcherSecond.matches()) {
             return false;
+        }
+
+        Resume resume = null;
+        if (matcherFirst.matches()) {
+
+        } else {
+
         }
 
         List<String> labels = List.of("Изменить шаблон", "Изменить текст");
         String[] splits = data.split("_");
         List<String> ids = List.of(splits[0] + "_template_" + data.substring(5), splits[0] + "_text_" + data.substring(5));
 
+
+        if (resume == null) {
+            return true;
+        }
+
         executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode("Выберите, что нужно изменить.:slightly_smiling:"),
                 messageId, chatId, labels, ids);
+
         return true;
     }
 
@@ -246,7 +276,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
             return false;
         }
 
-        Resume resume = getResume(matcher, chatId);
+        Resume resume = BotUtil.getResume(matcher.group(), resumeService, chatId, bot);
         if (resume == null) {
             return true;
         }
@@ -277,13 +307,13 @@ public class MyResumesActionHandler implements CallbackActionHandler {
             return false;
         }
 
-        Resume resume = getResume(matcher, chatId);
+        Resume resume = BotUtil.getResume(matcher.group(), resumeService, chatId, bot);
         if (resume == null) {
             return true;
         }
 
         List<String> buttonLabels = List.of("Всё верно!");
-        List<String> callbackData = List.of("resume_" + getResumeNumber(matcher));
+        List<String> callbackData = List.of("resume_" + BotUtil.getResumeNumber(matcher.group()));
         BotUtil.userStates.put(chatId, BotState.EDIT_MY_RESUME);
         executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode(BotUtil.askToEditMyResume(resume, chatId)),
                 messageId, chatId, buttonLabels, callbackData);
@@ -299,26 +329,10 @@ public class MyResumesActionHandler implements CallbackActionHandler {
             return false;
         }
 
-        Resume resume = getResume(matcher, chatId);
+        Resume resume = BotUtil.getResume(matcher.group(), resumeService, chatId, bot);
         if (resume != null) {
             resumeService.deleteResume(resume);
         }
         return true;
-    }
-
-    private Resume getResume(Matcher matcher, Long chatId) {
-        int numOfResume = getResumeNumber(matcher);
-        List<Resume> resumes = resumeService.getResumesByUserId(chatId);
-        resumes.sort(Comparator.comparingInt(Resume::getResumeId));
-        if (resumes.size() >= numOfResume) {
-            return resumes.get(numOfResume - 1);
-        }
-        sendMessage(bot, "Резюме не найдено. Попробуйте снова", chatId);
-        return null;
-    }
-
-    private int getResumeNumber(Matcher matcher) {
-        String[] s = matcher.group().split("_");
-        return Integer.parseInt(s[s.length - 1]);
     }
 }

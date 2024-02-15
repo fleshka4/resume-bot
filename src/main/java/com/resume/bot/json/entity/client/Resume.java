@@ -18,6 +18,12 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Data
 public class Resume {
+    @JsonProperty("alternate_url")
+    private String alternateUrl;
+
+    @JsonProperty("download")
+    private Download download;
+
     @JsonProperty("birth_date")
     private String birthDate;
 
@@ -40,16 +46,16 @@ public class Resume {
     @JsonProperty("last_name")
     private String lastName;
 
-//    private Id metro;
+    //    private Id metro;
 //
     @JsonProperty("middle_name")
     private String middleName;
 
-//    private Photo photo;
+    //    private Photo photo;
 //
 //    private List<Portfolio> portfolio;
 //
-//    @NonNull
+    @NonNull
     @JsonProperty("professional_roles")
     private List<Id> professionalRoles;
 
@@ -61,7 +67,7 @@ public class Resume {
 
     private List<Type> schedules;
 
-//    private List<Site> site;
+    //    private List<Site> site;
 //
     @JsonProperty("skill_set")
     private Set<String> skillSet;
@@ -79,7 +85,7 @@ public class Resume {
 //    @JsonProperty("work_ticket")
 //    private List<Id> workTicket;
 
-//    @NonNull
+    @NonNull
     private Id area;
 
 //    @NonNull
@@ -88,13 +94,13 @@ public class Resume {
 //    @NonNull
 //    private List<Contact> contact;
 
-//    @NonNull
+    @NonNull
     private Education education;
 
-//    @NonNull
+    @NonNull
     private List<Experience> experience;
 
-//    @NonNull
+    @NonNull
     private Id gender;
 
     private List<Language> language;

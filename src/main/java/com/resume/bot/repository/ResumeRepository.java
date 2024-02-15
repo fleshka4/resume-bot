@@ -19,7 +19,7 @@ public interface ResumeRepository extends JpaRepository<Resume, Integer> {
 
     @Transactional
     @Modifying
-    @Query("update Resume r set r.hhLink = ?1 where r.resumeId = ?2")
+    @Query("update Resume r set r.link = ?1 where r.resumeId = ?2")
     void updateHhLinkByResumeId(String hhLink, int resumeId);
 
     @Transactional
@@ -31,4 +31,9 @@ public interface ResumeRepository extends JpaRepository<Resume, Integer> {
     @Modifying
     @Query("update Resume r set r.resumeData = ?1 where r.resumeId = ?2")
     void updateResumeDataByResumeId(String resumeData, int resumeId);
+
+    @Transactional
+    @Modifying
+    @Query("update Resume r set r.pdfPath = ?1 where r.resumeId = ?2")
+    int updatePdfPathByResumeId(String pdfPath, int resumeId);
 }

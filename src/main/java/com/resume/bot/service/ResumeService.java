@@ -33,6 +33,12 @@ public class ResumeService {
         return repository.findByUser_TgUid(id);
     }
 
+    public List<Resume> getHhResumesByUserId(Long id) {
+        return repository.findByUser_TgUid(id).stream()
+                .filter(resume -> resume.getLink() != null)
+                .toList();
+    }
+
     public void updateHhLinkByResumeId(String hhLink, int resumeId) {
         repository.updateHhLinkByResumeId(hhLink, resumeId);
     }
@@ -43,6 +49,10 @@ public class ResumeService {
 
     public void updateResumeDataByResumeId(String resumeData, int resumeId) {
         repository.updateResumeDataByResumeId(resumeData, resumeId);
+    }
+
+    public void updatePdfPathByResumeId(String pdfPath, int resumeId) {
+        repository.updatePdfPathByResumeId(pdfPath, resumeId);
     }
 
     public void deleteResume(Resume resume) {

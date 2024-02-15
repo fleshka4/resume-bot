@@ -20,7 +20,7 @@ public class Resume {
 
     private String pdfPath;
 
-    private String hhLink;
+    private String link;
 
     private String title;
 
