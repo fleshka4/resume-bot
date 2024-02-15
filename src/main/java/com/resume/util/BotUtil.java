@@ -81,7 +81,8 @@ public class BotUtil {
 
     public final List<String> BIG_TYPES_IDS = List.of(
             "INDUSTRIES",
-            "PROFESSIONAL_ROLES"
+            "PROFESSIONAL_ROLES",
+            "RESUMES"
     );
 
     public final List<String> ACTIONS_WITH_RESUME = List.of(
@@ -164,7 +165,7 @@ public class BotUtil {
         return createInlineKeyboard(buttonLabels, callbackData, BigKeyboardType.INVALID);
     }
 
-    public InlineKeyboardMarkup createInlineBigKeyboard(List<String> buttonLabels, List<String> callbackData, int pageNumber, int maxSize, String type) {
+    public InlineKeyboardMarkup createInlineBigKeyboard(List<String> buttonLabels, List<String> callbackData, int pageNumber, int maxSize, BigKeyboardType type) {
         final String prev = "_prev_page_";
         final String next = "_next_page_";
         final int defaultPageSize = 5;
@@ -188,7 +189,7 @@ public class BotUtil {
             List<InlineKeyboardButton> previousButtonRow = new ArrayList<>();
             InlineKeyboardButton previousButton = new InlineKeyboardButton();
             previousButton.setText("Пред. страница");
-            previousButton.setCallbackData(type + prev + (pageNumber - 1));
+            previousButton.setCallbackData(type.name() + prev + (pageNumber - 1));
             previousButtonRow.add(previousButton);
             rowList.add(previousButtonRow);
         }
@@ -198,7 +199,7 @@ public class BotUtil {
             List<InlineKeyboardButton> nextButtonRow = new ArrayList<>();
             InlineKeyboardButton nextButton = new InlineKeyboardButton();
             nextButton.setText("След. страница");
-            nextButton.setCallbackData(type + next + (pageNumber + 1));
+            nextButton.setCallbackData(type.name() + next + (pageNumber + 1));
             nextButtonRow.add(nextButton);
             rowList.add(nextButtonRow);
         }
@@ -207,7 +208,8 @@ public class BotUtil {
         return inlineKeyboardMarkup;
     }
 
-    public void prepareBigKeyboardCreation(int pageNumber, BigKeyboardType bigKeyboardType, StringBuilder message, List<String> buttonLabels, List<String> callbackDataList) {
+    public void prepareBigKeyboardCreation(int pageNumber, BigKeyboardType bigKeyboardType, StringBuilder message, List<String> buttonLabels, List<String> callbackDataList,
+                                           ResumeService resumeService, Long chatId) {
         final int pageSize = 5;
         switch (bigKeyboardType) {
             case INDUSTRIES, PROFESSIONAL_ROLES -> {
@@ -233,6 +235,20 @@ public class BotUtil {
                     if (i != (pageNumber + 1) * pageSize - 1) {
                         message.append('\n');
                     }
+                }
+            }
+            case RESUMES -> {
+                List<com.resume.bot.model.entity.Resume> resumes = resumeService.getResumesByUserId(chatId);
+
+                final int startCounter = pageNumber * pageSize;
+                int limit = (pageNumber + 1) * pageSize;
+                if ((pageNumber + 1) * pageSize > resumes.size()) {
+                    limit = startCounter + pageSize - (limit - resumes.size());
+                }
+
+                for (int i = startCounter; i < limit; i++) {
+                    buttonLabels.add(resumes.get(i).getTitle().substring(0, 20));
+                    callbackDataList.add(resumes.get(i).getTitle()  + "_" + i);
                 }
             }
         }

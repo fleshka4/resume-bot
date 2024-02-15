@@ -33,11 +33,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+import static com.resume.bot.display.MessageUtil.*;
+import static com.resume.bot.display.MessageUtil.executeEditMessageWithBigKeyBoard;
 import static com.resume.bot.display.MessageUtil.createSendMessageRequest;
 import static com.resume.bot.display.MessageUtil.sendMessage;
 import static com.resume.bot.json.JsonValidator.ValidationType.*;
 import static com.resume.bot.json.JsonValidator.checkExperience;
 import static com.resume.bot.json.JsonValidator.checks;
+import static com.resume.util.BigKeyboardType.RESUMES;
 import static com.resume.util.BotUtil.appendToField;
 import static com.resume.util.Constants.*;
 
@@ -217,36 +220,36 @@ public class ResumeBot extends TelegramLongPollingBot {
         sendMessage(this, EmojiParser.parseToUnicode("Супер!:fire: Вы успешно авторизовались, теперь мы можем продолжить работу!"), sendMessageRequest);
         BotUtil.userStates.put(chatId, BotState.MY_RESUMES);
 
-        List<Resume> resumeList = headHunterService.getClientResumes(hhBaseUrl, chatId);
+        List<Resume> hhResumes = headHunterService.getClientResumes(hhBaseUrl, chatId);
+        List<com.resume.bot.model.entity.Resume> resumesFromDB = resumeService.getResumesByUserId(chatId);
 
-        List<String> buttonLabels = new ArrayList<>(resumeList.stream()
+        List<String> buttonLabelsHH = new ArrayList<>(hhResumes.stream()
                 .map(Resume::getTitle)
                 .toList());
-        buttonLabels.add("Назад");
 
-        List<String> buttonIds = new ArrayList<>();
-        com.resume.bot.model.entity.Resume resume;
-        Resume resumeJson;
+        List<String> buttonLabelsDb = new ArrayList<>(resumesFromDB.stream()
+                .map(com.resume.bot.model.entity.Resume::getTitle)
+                .toList());
 
-        for (int i = 1; i <= resumeList.size(); i++) {
-            resume = new com.resume.bot.model.entity.Resume();
-            resumeJson = resumeList.get(i - 1);
-            buttonIds.add("resume_hh_" + i);
-            resume.setResumeData(JsonProcessor.createJsonFromEntity(resumeJson));
-            resume.setTitle(resumeJson.getTitle());
-            resume.setUser(userService.getUser(chatId));
-            resume.setLink(resumeJson.getAlternateUrl());
-            resume.setDownloadLink(resumeJson.getDownload().getPdf().getUrl());
-            resumeService.saveResume(resume);
+        buttonLabelsDb.addAll(buttonLabelsHH);
+
+        buttonLabelsDb.add("Назад");
+
+        List<String> buttonIdsAll = new ArrayList<>();
+
+        for (int i = 1; i <= resumesFromDB.size() + hhResumes.size(); i++) {
+            buttonIdsAll.add("res_" + buttonLabelsDb.get(i - 1) + "_" + i);
         }
-        buttonIds.add("back_to_menu_3");
-        sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, buttonIds));
-        sendMessage(this, EmojiParser.parseToUnicode("""
-                После выбора конкретного резюме, у вас будет возможность:
+        buttonIdsAll.add("back_to_menu_3");
 
-                - *Скачать ваше резюме*
-                - *Внести изменения в резюме*
-                """), sendMessageRequest);
+        executeMessageWithBigKeyBoard(this, EmojiParser.parseToUnicode("""
+                После выбора конкретного резюме, у вас будет возможность:
+                                
+                  - *Опубликовать его на HeadHunter*
+                  - *Скачать ваше резюме*
+                  - *Внести изменения в резюме*
+                  - *Удалить резюме*
+                """), chatId, buttonLabelsDb, buttonIdsAll, 0, resumesFromDB.size() + hhResumes.size(), RESUMES);
     }
 
     private void startDialogueWithClient(String receivedText, Long chatId, SendMessage sendMessageRequest) {
@@ -391,7 +394,7 @@ public class ResumeBot extends TelegramLongPollingBot {
                     List<String> callbackDataList = new ArrayList<>();
                     StringBuilder message = new StringBuilder();
                     message.append("Выберите сферу деятельности компании:\n\n");
-                    BotUtil.prepareBigKeyboardCreation(0, BigKeyboardType.INDUSTRIES, message, buttonLabels, callbackDataList);
+                    BotUtil.prepareBigKeyboardCreation(0, BigKeyboardType.INDUSTRIES, message, buttonLabels, callbackDataList, null, null);
                     sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, callbackDataList, BigKeyboardType.INDUSTRIES));
                     sendMessage(this, message.toString(), sendMessageRequest);
                 }
@@ -478,7 +481,7 @@ public class ResumeBot extends TelegramLongPollingBot {
                     List<String> callbackDataList = new ArrayList<>();
                     StringBuilder message = new StringBuilder();
                     message.append("Выберите специализацию:\n\n");
-                    BotUtil.prepareBigKeyboardCreation(0, BigKeyboardType.PROFESSIONAL_ROLES, message, buttonLabels, callbackDataList);
+                    BotUtil.prepareBigKeyboardCreation(0, BigKeyboardType.PROFESSIONAL_ROLES, message, buttonLabels, callbackDataList, null, null);
                     sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, callbackDataList, BigKeyboardType.PROFESSIONAL_ROLES));
                     sendMessage(this, message.toString(), sendMessageRequest);
                 }

@@ -64,8 +64,8 @@ public class BigKeyBoardHandler implements CallbackActionHandler {
         List<String> callbackDataList = new ArrayList<>();
 
         final int pageNumber = Integer.parseInt(callbackData.substring(bigKeyboardType.name().length() + 11));
-        BotUtil.prepareBigKeyboardCreation(pageNumber, bigKeyboardType, message, buttonLabels, callbackDataList);
+        BotUtil.prepareBigKeyboardCreation(pageNumber, bigKeyboardType, message, buttonLabels, callbackDataList, null, null);
 
-        executeEditMessageWithBigKeyBoard(bot, message.toString(), messageId, chatId, buttonLabels, callbackDataList, pageNumber, maxSize, bigKeyboardType.name());
+        executeEditMessageWithBigKeyBoard(bot, String.valueOf(message), messageId, chatId, buttonLabels, callbackDataList, pageNumber, maxSize, bigKeyboardType);
     }
 }

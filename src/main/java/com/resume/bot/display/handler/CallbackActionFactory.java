@@ -44,7 +44,7 @@ public class CallbackActionFactory {
         if (BotUtil.EXPORT_RESUME_IDS_LIST.contains(callbackData)) {
             return new ExportResumeActionHandler(pollingBot, hhConfig, headHunterService, hhBaseUrl, tokenHolderService, userService, resumeService);
         }
-        if (BotUtil.MY_RESUMES_IDS_LIST.contains(callbackData) || BotUtil.checkIfAction(callbackData)) {
+        if (BotUtil.MY_RESUMES_IDS_LIST.contains(callbackData) || BotUtil.checkIfAction(callbackData) || callbackData.startsWith("res_")) {
             return new MyResumesActionHandler(pollingBot, resumeService, templateService, headHunterService);
         }
         if (BotUtil.checkIfBigType(callbackData)) {
