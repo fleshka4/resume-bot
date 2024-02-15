@@ -15,9 +15,9 @@ CREATE TABLE resumes (
   resume_data text,
   pdf_path text,
   link text,
-  title varchar,
+  title varchar unique,
   user_id integer,
-  template_id integer UNIQUE
+  template_id integer
 );
 
 comment on column resumes.hh_link is 'link to hh resume';

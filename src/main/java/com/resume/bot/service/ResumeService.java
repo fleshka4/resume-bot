@@ -51,6 +51,10 @@ public class ResumeService {
         repository.updateResumeDataByResumeId(resumeData, resumeId);
     }
 
+    public void updatePdfPathByResumeId(String pdfPath, int resumeId) {
+        repository.updatePdfPathByResumeId(pdfPath, resumeId);
+    }
+
     public void deleteResume(Resume resume) {
         repository.delete(resume);
     }

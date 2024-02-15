@@ -1,44 +1,46 @@
 package com.resume.latex;
 
 import com.resume.bot.json.JsonValidator;
+import com.resume.bot.json.entity.client.Experience;
 import com.resume.bot.json.entity.client.Resume;
 import com.resume.bot.json.entity.client.education.Education;
 import com.resume.util.Constants;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Getter
 public enum Placeholder {
-    PLACE_FOR_NAME("{PLACE-FOR-NAME}") {
+    PLACE_FOR_NAME("PLACE-FOR-NAME") {
         @Override
         public String replaceValue(Resume resume) {
             return "%s %s %s".formatted(resume.getLastName(), resume.getFirstName(), resume.getMiddleName());
         }
     },
-    PLACE_FOR_POSITION("{PLACE-FOR-POSITION}") {
+    PLACE_FOR_POSITION("PLACE-FOR-POSITION") {
         @Override
         public String replaceValue(Resume resume) {
             return resume.getTitle();
         }
     },
-    PLACE_FOR_NUMBER("{PLACE-FOR-NUMBER}") {
+    PLACE_FOR_NUMBER("PLACE-FOR-NUMBER") {
         @Override
         public String replaceValue(Resume resume) {
             String contacts = resume.getContacts();
-            return !contacts.contains("@") ? contacts : "";
+            return contacts != null && !contacts.contains("@") ? contacts : "";
         }
     },
-    PLACE_FOR_EMAIL("{PLACE-FOR-EMAIL}") {
+    PLACE_FOR_EMAIL("PLACE-FOR-EMAIL") {
         @Override
         public String replaceValue(Resume resume) {
             String contacts = resume.getContacts();
-            return contacts.contains("@") ? contacts : "";
+            return contacts != null && contacts.contains("@") ? contacts : "";
         }
     },
-    PLACE_FOR_CITY("{PLACE-FOR-CITY}") {
+    PLACE_FOR_CITY("PLACE-FOR-CITY") {
         @Override
         public String replaceValue(Resume resume) {
             String[] areaParts = JsonValidator.getAreaString(
@@ -51,7 +53,7 @@ public enum Placeholder {
                     : "";
         }
     },
-    PLACE_FOR_COUNTRY("{PLACE-FOR-COUNTRY}") {
+    PLACE_FOR_COUNTRY("PLACE-FOR-COUNTRY") {
         @Override
         public String replaceValue(Resume resume) {
             return JsonValidator.getAreaString(
@@ -59,17 +61,20 @@ public enum Placeholder {
                             .get()).split(",")[0].trim();
         }
     },
-    PLACE_FOR_SKILLS("{PLACE-FOR-SKILLS}") {
+    PLACE_FOR_SKILLS("PLACE-FOR-SKILLS") {
         @Override
         public String replaceValue(Resume resume) {
-            return resume.getSkills();
+            String skills = resume.getSkills();
+            return skills != null ? skills : "";
         }
     },
-    PLACE_FOR_EDUCATION("{PLACE-FOR-EDUCATION}") {
+    PLACE_FOR_EDUCATION("PLACE-FOR-EDUCATION") {
         @Override
         public String replaceValue(Resume resume) {
             Education education = resume.getEducation();
-            return """
+            return education != null && education.getLevel() != null
+                    ?
+                    """
                     Уровень образования: %s
                                         
                     %s
@@ -88,13 +93,18 @@ public enum Placeholder {
                                     pe.getResult(),
                                     pe.getYear()
                             ))
-                            .collect(Collectors.joining()));
+                            .collect(Collectors.joining()))
+                    :
+                    "";
         }
     },
-    PLACE_FOR_EXPERIENCE("{PLACE-FOR-EXPERIENCE}") {
+    PLACE_FOR_EXPERIENCE("PLACE-FOR-EXPERIENCE") {
         @Override
         public String replaceValue(Resume resume) {
-            return resume.getExperience().stream()
+            List<Experience> experience = resume.getExperience();
+            return experience != null && !experience.isEmpty()
+                    ?
+                    experience.stream()
                     .map(exp -> """
                             Период работы: %s
                             Компания: %s
@@ -113,7 +123,9 @@ public enum Placeholder {
                             exp.getCompanyUrl(),
                             exp.getPosition(),
                             exp.getDescription()))
-                    .collect(Collectors.joining());
+                    .collect(Collectors.joining())
+                    :
+                    "";
         }
     };
 

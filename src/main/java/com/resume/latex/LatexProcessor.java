@@ -19,6 +19,7 @@ public class LatexProcessor {
         Path outputUserTex = outputUserDir.resolve(resumeName + ".txt");
         Path outputUserPdf = outputUserDir.resolve(resumeName + ".pdf");
 
+        Files.createDirectories(outputUserDir);
         Files.copy(sourceTmpFile, outputUserTex);
         String content = IOUtil.loadFileContent(outputUserTex);
         content = replaceContent(content, resume);
@@ -26,7 +27,7 @@ public class LatexProcessor {
 
         ProcessBuilder processBuilder = new ProcessBuilder("pdflatex",
                 "-output-directory=%s".formatted(outputUserDir.toString()),
-                outputUserPdf.toString());
+                outputUserTex.toString());
         Process process = processBuilder.start();
         if (process.waitFor() != 0) {
             throw new RuntimeException("pdflatex exited with non-zero code.");
@@ -47,11 +48,11 @@ public class LatexProcessor {
     }
 
     private static String insertValue(String content, Placeholder placeholder, String value) {
-        if (!content.contains(placeholder.toString())) {
+        if (!content.contains(placeholder.getValue())) {
             throw new RuntimeException("There is no %s".formatted(placeholder.getValue()));
         }
 
-        if (value == null || value.isEmpty()) {
+        if (value == null) {
             throw new RuntimeException("Value for %s is empty".formatted(placeholder.getValue()));
         }
 
