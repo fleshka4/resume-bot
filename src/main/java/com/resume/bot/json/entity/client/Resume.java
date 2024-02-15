@@ -55,7 +55,7 @@ public class Resume {
 //
 //    private List<Portfolio> portfolio;
 //
-//    @NonNull
+    @NonNull
     @JsonProperty("professional_roles")
     private List<Id> professionalRoles;
 
@@ -85,7 +85,7 @@ public class Resume {
 //    @JsonProperty("work_ticket")
 //    private List<Id> workTicket;
 
-//    @NonNull
+    @NonNull
     private Id area;
 
 //    @NonNull
@@ -94,13 +94,13 @@ public class Resume {
 //    @NonNull
 //    private List<Contact> contact;
 
-//    @NonNull
+    @NonNull
     private Education education;
 
-//    @NonNull
+    @NonNull
     private List<Experience> experience;
 
-//    @NonNull
+    @NonNull
     private Id gender;
 
     private List<Language> language;
