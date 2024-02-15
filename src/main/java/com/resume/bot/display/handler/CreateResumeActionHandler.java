@@ -41,6 +41,7 @@ import static org.apache.commons.lang3.math.NumberUtils.createLong;
 public class CreateResumeActionHandler implements CallbackActionHandler {
 
     private final TelegramLongPollingBot bot;
+
     private boolean isPrimaryEdu = true;
 
     private final ResumeService resumeService;

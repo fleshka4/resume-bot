@@ -22,6 +22,8 @@ public class Resume {
 
     private String link;
 
+    private String downloadLink;
+
     private String title;
 
     @ManyToOne

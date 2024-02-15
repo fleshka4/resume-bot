@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +24,10 @@ public class ResumeService {
         return repository.findById(resumeId).orElseThrow(
                 () -> new EntityNotFoundException("Resume not found")
         );
+    }
+
+    public Resume getResumeByTitle(String title) {
+        return repository.findByTitle(title).get();
     }
 
     public List<Resume> getResumesByUser(User user) {
