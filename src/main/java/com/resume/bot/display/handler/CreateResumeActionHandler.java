@@ -5,10 +5,7 @@ import com.resume.bot.display.CallbackActionHandler;
 import com.resume.bot.display.ResumeField;
 import com.resume.bot.json.JsonProcessor;
 import com.resume.bot.json.entity.Industry;
-import com.resume.bot.json.entity.client.Experience;
-import com.resume.bot.json.entity.client.Recommendation;
-import com.resume.bot.json.entity.client.Resume;
-import com.resume.bot.json.entity.client.Salary;
+import com.resume.bot.json.entity.client.*;
 import com.resume.bot.json.entity.client.education.Education;
 import com.resume.bot.json.entity.client.education.ElementaryEducation;
 import com.resume.bot.json.entity.client.education.PrimaryEducation;
@@ -242,15 +239,15 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
         }
 
         if (educationLevels.containsKey(callbackData)) {
-            appendToField(userData, ResumeField.EDUCATION_LEVEL.getValue(), callbackData);
             String chosenEducationLevel = educationLevels.get(callbackData);
+            appendToField(userData, ResumeField.EDUCATION_LEVEL.getValue(), chosenEducationLevel);
             if (chosenEducationLevel.equals("Среднее")) {
                 isPrimaryEdu = false;
             }
             List<String> buttonLabels = List.of("Хочу", "Пропустить");
             List<String> buttonIds = List.of("want_enter_education", "skip_education");
 
-            executeEditMessageWithKeyBoard(bot,  EmojiParser.parseToUnicode("Хотите ли Вы указать место учебы?:nerd_face:"),
+            executeEditMessageWithKeyBoard(bot,  "Хотите ли Вы указать место учебы?",
                     messageId, chatId, buttonLabels, buttonIds);
         }
 
@@ -361,7 +358,10 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                     List<String> items = Arrays.stream(fieldValue.split(ITEMS_DELIMITER)).toList();
                     initList(driverLicenseTypes, Id.class, items.size());
                     if (items.isEmpty()) {
+                        resume.setHasVehicle(false);
                         driverLicenseTypes = null;
+                    } else {
+                        resume.setHasVehicle(true);
                     }
 
                     for (String item : items) {
@@ -417,9 +417,6 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                 case "желаемый график работы" -> {
                     List<String> items = Arrays.stream(fieldValue.split(ITEMS_DELIMITER)).toList();
                     initList(schedules, Type.class, items.size());
-                    if (items.isEmpty()) {
-                        schedules = null;
-                    }
 
                     for (String item : items) {
                         Type typeSchedules = new Type();
@@ -432,6 +429,16 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             }
         }
 
+        if (busyness.isEmpty()) {
+            busyness = null;
+        }
+        if (schedules.isEmpty()) {
+            schedules = null;
+        }
+        if (resume.getHasVehicle() == null) {
+            resume.setHasVehicle(false);
+        }
+
         education.setPrimary(primaryEducations);
         education.setElementary(elementaryEducations);
 
@@ -441,6 +448,9 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
         resume.setRecommendation(recommendationList);
         resume.setEmployments(busyness);
         resume.setSchedules(schedules);
+
+        resume.setLanguage(List.of(new Language("rus", "Русский", new Type("l1", "Родной"))));
+
         BotUtil.clientsMap.put(chatId, resume);
 
         com.resume.bot.model.entity.Resume dbResume = new com.resume.bot.model.entity.Resume();

@@ -318,7 +318,10 @@ public class JsonValidator {
     }
 
     public static boolean checkName(String text) {
-        return Arrays.stream(text.split("-")).allMatch(s -> checkAlphaSpaceFormat(text.trim()));
+        boolean firstCheck = Arrays.stream(text.split("-")).allMatch(s -> checkAlphaSpaceFormat(text.trim()));
+        boolean nameRusCheck = text.matches("^[A-ЯЁ][а-яё]+");
+        boolean nameEngCheck = text.matches("^[A-Z][a-z]+");
+        return firstCheck && (nameRusCheck || nameEngCheck);
     }
 
     public static boolean checkStringWithPunctuation(String text) {
