@@ -477,9 +477,6 @@ public class ResumeBot extends TelegramLongPollingBot {
             }
             case ENTER_WISH_SALARY -> {
                 if (checkInput(receivedText, sendMessageRequest, NUMERIC_FORMAT)) {
-                    if (BotUtil.personAndProfessionalRole.containsKey(chatId)) {
-                        appendToField(resumeFields, ResumeField.WITH_PROFESSIONAL_ROLE.getValue(), BotUtil.personAndProfessionalRole.get(chatId));
-                    }
                     appendToField(resumeFields, ResumeField.WISH_SALARY.getValue(), receivedText);
 
                     List<String> keys = new ArrayList<>(employmentTypes.keySet().stream().toList());
