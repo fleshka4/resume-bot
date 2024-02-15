@@ -3,6 +3,7 @@ package com.resume.bot.service;
 import com.resume.bot.config.BotConfig;
 import com.resume.bot.display.BotState;
 import com.resume.bot.display.CallbackActionHandler;
+import com.resume.bot.display.MessageUtil;
 import com.resume.bot.display.ResumeField;
 import com.resume.bot.display.handler.CallbackActionFactory;
 import com.resume.bot.json.JsonProcessor;
@@ -141,6 +142,8 @@ public class ResumeBot extends TelegramLongPollingBot {
                         log.error(e.getMessage());
                         sendMessage(this, "Не найден файл, содержащий резюме. Попробуйте создать заново", chatId);
                     }
+
+                    BotUtil.createMenu(MessageUtil.createSendMessageRequest(this, chatId), this);
                 }
                 return;
             }
@@ -751,24 +754,7 @@ public class ResumeBot extends TelegramLongPollingBot {
     }
 
     private void createMenu(SendMessage sendMessageRequest) {
-        List<String> buttonLabels = Arrays.asList("Создать резюме", "Использовать резюме с hh.ru", "Мои резюме");
-        List<String> callbackData = Arrays.asList("create_resume", "export_resume_hh", "my_resumes");
-
-        sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, callbackData));
-
-        String menuInfo = """
-                Выберите действие:
-
-                *Создать резюме* :memo:
-                Начните процесс создания нового резюме с нуля!
-
-                *Экспорт резюме с hh.ru* :inbox_tray:
-                Экспортируйте свои данные с hh.ru для взаимодействия с ними.
-
-                *Мои резюме* :clipboard:
-                Посмотрите список ваших созданных резюме.""";
-
-        sendMessage(this, EmojiParser.parseToUnicode(menuInfo), sendMessageRequest);
+        BotUtil.createMenu(sendMessageRequest, this);
     }
 
     private boolean checkInput(String receivedText, SendMessage sendMessageRequest, JsonValidator.ValidationType validationType) {

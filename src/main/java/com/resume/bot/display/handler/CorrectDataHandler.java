@@ -42,6 +42,7 @@ public class CorrectDataHandler implements CallbackActionHandler {
                     BotUtil.publishResume(BotUtil.lastSavedResumeMap.get(chatId), chatId, resumeService, headHunterService,
                             bot, hhBaseUrl, false);
                     MessageUtil.executeEditMessage(bot, "Ваше резюме успешно опубликовано на hh.ru", messageId, chatId);
+                    BotUtil.createMenu(MessageUtil.createSendMessageRequest(bot, chatId), bot);
                 } else {
                     BotUtil.authorization(bot, hhConfig, "Чтобы опубликовать резюме необходимо авторизоваться на hh.ru" +
                             " по следующей [ссылке](%s)!:key:. После авторизации нажмите на кнопку публикации резюме еще раз", chatId);
@@ -63,6 +64,5 @@ public class CorrectDataHandler implements CallbackActionHandler {
             }
             default -> throw new RuntimeException(callbackData + " not handled");
         }
-
     }
 }
