@@ -3,6 +3,7 @@ package com.resume.bot.display.handler;
 import com.resume.bot.display.CallbackActionHandler;
 import com.resume.bot.service.*;
 import com.resume.hh_wrapper.config.HhConfig;
+import com.resume.hh_wrapper.impl.ApiClientTokenImpl;
 import com.resume.util.BotUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -26,6 +27,8 @@ public class CallbackActionFactory {
 
     private final HhConfig hhConfig;
 
+    private final ApiClientTokenImpl apiClientTokenImpl;
+
     private final TokenHolderService tokenHolderService;
 
     public CallbackActionHandler createCallbackActionHandler(TelegramLongPollingBot pollingBot, String callbackData) {
@@ -45,7 +48,7 @@ public class CallbackActionFactory {
             return new ExportResumeActionHandler(pollingBot, hhConfig, headHunterService, hhBaseUrl, tokenHolderService, userService, resumeService);
         }
         if (BotUtil.MY_RESUMES_IDS_LIST.contains(callbackData) || BotUtil.checkIfAction(callbackData) || callbackData.startsWith("res_")) {
-            return new MyResumesActionHandler(pollingBot, resumeService, templateService, headHunterService);
+            return new MyResumesActionHandler(pollingBot, resumeService, templateService, headHunterService, tokenHolderService, userService, apiClientTokenImpl);
         }
         if (BotUtil.checkIfBigType(callbackData)) {
             return new BigKeyBoardHandler(pollingBot);

@@ -83,7 +83,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
                         """), messageId, chatId, buttonLabels, buttonIds, 0, resumes.size(), RESUMES);
             }
             case "back_to_resumes" -> {
-                //todo
+                //todo back_to_resumes
             }
             case "back_to_menu_3" -> {
                 BotUtil.createMyResumesMenu(bot, messageId, chatId);
@@ -157,7 +157,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
     }
 
     private boolean updateResumeOnHh(String data, Long chatId) {
-        Pattern pattern = Pattern.compile("update_resume_([1-6])");
+        Pattern pattern = Pattern.compile("update_resume_([1-9]+)");
 
         Matcher matcher = pattern.matcher(data);
         if (!matcher.matches()) {
@@ -273,7 +273,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
     }
 
     private boolean editTemplateResume(String data, Integer messageId, Long chatId) {
-        Pattern pattern = Pattern.compile("edit_template_resume_([1-6])");
+        Pattern pattern = Pattern.compile("edit_template_resume_([1-9]+)");
 
         Matcher matcher = pattern.matcher(data);
         if (!matcher.matches()) {
@@ -304,7 +304,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
     }
 
     private boolean editTextResume(String data, Integer messageId, Long chatId) {
-        Pattern pattern = Pattern.compile("edit_text_resume_([1-6])");
+        Pattern pattern = Pattern.compile("edit_text_resume_([1-9]+)");
 
         Matcher matcher = pattern.matcher(data);
         if (!matcher.matches()) {
