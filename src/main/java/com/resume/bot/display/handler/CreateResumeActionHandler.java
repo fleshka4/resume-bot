@@ -4,7 +4,6 @@ import com.resume.bot.display.BotState;
 import com.resume.bot.display.CallbackActionHandler;
 import com.resume.bot.display.ResumeField;
 import com.resume.bot.json.JsonProcessor;
-import com.resume.bot.json.JsonValidator;
 import com.resume.bot.json.entity.Industry;
 import com.resume.bot.json.entity.client.Experience;
 import com.resume.bot.json.entity.client.Recommendation;
@@ -20,6 +19,7 @@ import com.resume.bot.service.ResumeService;
 import com.resume.bot.service.UserService;
 import com.resume.util.BotUtil;
 import com.resume.util.Constants;
+import com.resume.util.ConstantsUtil;
 import com.vdurmont.emoji.EmojiParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -310,7 +310,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                     Id areaId = new Id();
                     String[] items = fieldValue.split(",");
                     String cityName = items[items.length - 1].trim();
-                    areaId.setId(JsonValidator.getAreaByNameDeep(Constants.AREAS, cityName).get().getId());
+                    areaId.setId(ConstantsUtil.getAreaByNameDeep(Constants.AREAS, cityName).get().getId());
                     resume.setArea(areaId);
                 }
                 case "уровень образования" -> {
@@ -511,7 +511,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             case "название организации" -> workExperience.setCompany(fieldValue);
             case "город организации" -> {
                 com.resume.bot.json.entity.client.Area area = new com.resume.bot.json.entity.client.Area(
-                        JsonValidator.getAreaByNameDeep(Constants.AREAS, fieldValue).get().getId(), fieldValue);
+                        ConstantsUtil.getAreaByNameDeep(Constants.AREAS, fieldValue).get().getId(), fieldValue);
                 workExperience.setArea(area);
             }
             case "ссылка" -> workExperience.setCompanyUrl(fieldValue);
@@ -519,7 +519,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             case "обязанности" -> workExperience.setDescription(fieldValue);
             case "отрасль" -> {
                 List<Type> industries = null;
-                for (Industry industry: INDUSTRIES) {
+                for (Industry industry : INDUSTRIES) {
                     if (industry.getName().equals(fieldValue)) {
                         industries = industry.getIndustries();
                         break;

@@ -6,6 +6,7 @@ import com.resume.bot.json.entity.client.education.PrimaryEducation;
 import com.resume.bot.json.entity.common.Id;
 import com.resume.bot.json.entity.common.Type;
 import com.resume.util.Constants;
+import com.resume.util.ConstantsUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -119,7 +120,7 @@ public enum ResumeField {
 
         @Override
         public void editInResume(Resume resume, String param) {
-            JsonValidator.getAreaByNameDeep(Constants.AREAS, param)
+            ConstantsUtil.getAreaByNameDeep(Constants.AREAS, param)
                     .ifPresent(area -> resume.setArea(new Id(area.getId())));
         }
     },
@@ -283,7 +284,7 @@ public enum ResumeField {
         public void editInResume(Resume resume, String param) {
             List<Experience> list = resume.getExperience();
             if (!list.isEmpty()) {
-                JsonValidator.getAreaByNameDeep(Constants.AREAS, param)
+                ConstantsUtil.getAreaByNameDeep(Constants.AREAS, param)
                         .ifPresent(city -> list.getFirst().setArea(new Area(city.getId(), city.getName())));
             }
         }

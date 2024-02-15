@@ -4,6 +4,7 @@ import com.resume.bot.json.entity.area.Area;
 import com.resume.bot.json.entity.area.Country;
 import com.resume.bot.json.entity.common.Id;
 import com.resume.util.Constants;
+import com.resume.util.ConstantsUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.UrlValidator;
 
@@ -258,7 +259,7 @@ public class JsonValidator {
         }
 
         String countryName = items.getFirst();
-        Optional<Area> country = getAreaByNameDeep(Constants.AREAS, countryName);
+        Optional<Area> country = ConstantsUtil.getAreaByNameDeep(Constants.AREAS, countryName);
         if (country.isEmpty()) {
             return false;
         }
@@ -269,7 +270,7 @@ public class JsonValidator {
         if (items.size() == 2) {
             String cityName = items.get(1);
             return checkCountry(countryName) && checkCity(cityName) &&
-                    getAreaByNameDeep(country.get().getAreas(), cityName).isPresent();
+                    ConstantsUtil.getAreaByNameDeep(country.get().getAreas(), cityName).isPresent();
         }
         if (items.size() == 3) {
             String regionName = items.get(1);
@@ -280,34 +281,6 @@ public class JsonValidator {
                     getAreaByName(area.getAreas(), cityName).isPresent()).isPresent();
         }
         return false;
-    }
-
-    public static Optional<Area> getAreaByNameDeep(List<Area> areas, String name) {
-        for (Area area : areas) {
-            if (area.getName().equals(name)) {
-                return Optional.of(area);
-            } else if (!area.getAreas().isEmpty()) {
-                Optional<Area> childArea = getAreaByNameDeep(area.getAreas(), name);
-                if (childArea.isPresent()) {
-                    return childArea;
-                }
-            }
-        }
-        return Optional.empty();
-    }
-
-    public static Optional<Area> getAreaByIdDeep(List<Area> areas, String id) {
-        for (Area area : areas) {
-            if (area.getId().equals(id)) {
-                return Optional.of(area);
-            } else if (!area.getAreas().isEmpty()) {
-                Optional<Area> childArea = getAreaByIdDeep(area.getAreas(), id);
-                if (childArea.isPresent()) {
-                    return childArea;
-                }
-            }
-        }
-        return Optional.empty();
     }
 
     private static Optional<Area> getAreaByName(List<Area> areas, String name) {
@@ -342,16 +315,5 @@ public class JsonValidator {
             }
         }
         return true;
-    }
-
-    public static String getAreaString(Area area) {
-        StringBuilder areaSB = new StringBuilder();
-        while (area != null) {
-            if (!area.getId().equals(OTHER_COUNTRIES_JSON_ID)) {
-                areaSB.insert(0, area.getName()).insert(0, area.getParentId() != null ? ", " : "");
-            }
-            area = JsonValidator.getAreaByIdDeep(Constants.AREAS, area.getParentId()).orElse(null);
-        }
-        return areaSB.toString();
     }
 }
