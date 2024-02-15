@@ -111,7 +111,7 @@ public enum Placeholder {
                     : "";
 
             List<PrimaryEducation> primary = education.getPrimary();
-            String primaryStr = !primary.isEmpty()
+            String primaryStr = primary != null && !primary.isEmpty()
                     ? primary.stream()
                     .map(pe -> """
                             Учебное заведение: %s\\
@@ -129,7 +129,7 @@ public enum Placeholder {
                     : "";
 
             List<ElementaryEducation> elementary = education.getElementary();
-            String elementaryStr = !elementary.isEmpty()
+            String elementaryStr = elementary != null && !elementary.isEmpty()
                     ? elementary.stream()
                     .map(es -> """
                             Учебное заведение: %s\\
@@ -143,7 +143,7 @@ public enum Placeholder {
                     : "";
 
             List<Course> additional = education.getAdditional();
-            String additionalStr = !additional.isEmpty()
+            String additionalStr = additional != null && !additional.isEmpty()
                     ? additional.stream()
                     .map(as -> """
                             Название курса:%s\\
@@ -161,7 +161,7 @@ public enum Placeholder {
                     : "";
 
             List<Course> attestation = education.getAttestation();
-            String attestationStr = !attestation.isEmpty()
+            String attestationStr = attestation != null && !attestation.isEmpty()
                     ? attestation.stream()
                     .map(as -> """
                             Название курса:%s\\
