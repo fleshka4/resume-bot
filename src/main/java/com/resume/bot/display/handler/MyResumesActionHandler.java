@@ -16,7 +16,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
+import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
+import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
+import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.ByteArrayInputStream;
@@ -291,6 +294,15 @@ public class MyResumesActionHandler implements CallbackActionHandler {
         for (int i = 0; i < templates.size(); i++) {
             labels.add(String.valueOf(i + 1));
             ids.add(data.substring(5) + "_" + templates.get(i).getTemplateId()); // template_resume_([1-6])_templateId
+        }
+
+        try {
+            bot.execute(new SendMediaGroup(chatId.toString(),
+                    templateService.getTemplates().stream()
+                            .map(t -> (InputMedia) (new InputMediaPhoto(t.getImagePath()))).toList()));
+        } catch (TelegramApiException e) {
+            log.error(e.getMessage());
+            sendMessage(bot, "Что-то пошло не так. Попробуйте заново", chatId);
         }
 
         executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode("Выберите шаблон:slightly_smiling:"), // todo: добавить изображения шаблонов
