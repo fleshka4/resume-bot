@@ -4,6 +4,7 @@ import com.resume.bot.display.BotState;
 import com.resume.bot.display.CallbackActionHandler;
 import com.resume.bot.display.ResumeField;
 import com.resume.bot.json.JsonProcessor;
+import com.resume.bot.json.entity.Industry;
 import com.resume.bot.json.entity.client.*;
 import com.resume.bot.json.entity.client.education.Education;
 import com.resume.bot.json.entity.client.education.ElementaryEducation;
@@ -21,10 +22,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.resume.bot.display.MessageUtil.*;
@@ -67,6 +65,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                         messageId, chatId, buttonLabels, buttonIds);
             }
             case "start_dialogue" -> {
+                BotUtil.userResumeData.put(chatId, new LinkedHashMap<>());
                 BotUtil.userStates.put(chatId, BotState.START_DIALOGUE);
                 BotUtil.dialogueStates.put(chatId, BotState.ENTER_NAME);
                 sendMessage(bot, "Введите имя:", chatId);
@@ -278,9 +277,9 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             executeContinueKeyboardMessage(bot, "Выберите желаемый график.", messageId, chatId, unChosenSchedule, "skip_schedule");
         }
 
-        if (INDUSTRIES.stream()
-                .filter(ind -> ind.getName().equals(BotUtil.personAndIndustry.get(chatId)))
-                .findFirst().get().getIndustries()
+        Optional<Industry> industryOptional = INDUSTRIES.stream()
+                .filter(ind -> ind.getName().equals(BotUtil.personAndIndustry.get(chatId))).findFirst();
+        if (industryOptional.isPresent() && industryOptional.get().getIndustries()
                 .stream().anyMatch(ind -> ind.getId().equals(callbackData))
         ) {
             processOnChosenIndustry(callbackData, chatId, userData);
@@ -415,6 +414,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                 case "желаемая зарплата" -> {
                     Salary salary = new Salary();
                     salary.setAmount(createLong(fieldValue));
+                    salary.setCurrency("RUR");
                     resume.setSalary(salary);
                 }
                 case "желаемая занятость" -> {

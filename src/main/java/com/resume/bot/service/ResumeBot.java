@@ -404,9 +404,6 @@ public class ResumeBot extends TelegramLongPollingBot {
             case ENTER_POST_IN_ORGANIZATION -> {
                 if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
                         checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
-                    if (BotUtil.personAndIndustry.containsKey(chatId)) {
-                        appendToField(resumeFields, ResumeField.EXPERIENCE_ORG_INDUSTRY.getValue(), BotUtil.personAndIndustry.get(chatId));
-                    }
                     appendToField(resumeFields, ResumeField.EXPERIENCE_POST.getValue(), receivedText);
 
                     sendMessage(this, "Введите свои обязанности в организации:", sendMessageRequest);
