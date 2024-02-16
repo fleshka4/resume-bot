@@ -11,14 +11,12 @@ import com.resume.bot.json.JsonValidator;
 import com.resume.bot.json.entity.client.Resume;
 import com.resume.bot.model.entity.Template;
 import com.resume.bot.model.entity.User;
-import com.resume.hh_wrapper.config.HhConfig;
 import com.resume.latex.LatexProcessor;
 import com.resume.util.BigKeyboardType;
 import com.resume.util.BotUtil;
 import com.vdurmont.emoji.EmojiParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
@@ -33,8 +31,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-import static com.resume.bot.display.MessageUtil.*;
-import static com.resume.bot.display.MessageUtil.executeEditMessageWithBigKeyBoard;
 import static com.resume.bot.display.MessageUtil.*;
 import static com.resume.bot.json.JsonValidator.ValidationType.*;
 import static com.resume.bot.json.JsonValidator.checkExperience;
@@ -116,8 +112,7 @@ public class ResumeBot extends TelegramLongPollingBot {
             BotState currentState = BotUtil.userStates.get(chatId);
             if (callbackData.startsWith("template")) {
                 if (currentState == BotState.EDIT_MY_RESUME_TEMPLATE) {
-                    updateTemplate(callbackData, chatId);
-                    BotUtil.createMyResumesMenu(this, messageId, chatId);
+                    updateTemplate(callbackData, messageId, chatId);
                 } else if (currentState == BotState.CHOOSE_TEMPLATE) {
                     var resume = BotUtil.clientsMap.get(chatId);
                     var dbResume = BotUtil.lastSavedResumeMap.get(chatId);
@@ -127,7 +122,7 @@ public class ResumeBot extends TelegramLongPollingBot {
                     Template template = dbResume.getTemplate();
                     try {
                         pdfPath = LatexProcessor.compile(resume, template.getSourcePath(),
-                                                        chatId.toString(), dbResume.getTitle());
+                                chatId.toString(), dbResume.getTitle());
                     } catch (IOException | InterruptedException e) {
                         log.error(e.getMessage());
                         throw new RuntimeException(e);
@@ -167,7 +162,7 @@ public class ResumeBot extends TelegramLongPollingBot {
         }
     }
 
-    private void updateTemplate(String callbackData, Long chatId) {
+    private void updateTemplate(String callbackData, Integer messageId, Long chatId) {
         String[] splits = callbackData.split("_");
         if (splits.length == 4) {
             List<com.resume.bot.model.entity.Resume> resumes = resumeService.getResumesByUserId(chatId);
@@ -183,6 +178,7 @@ public class ResumeBot extends TelegramLongPollingBot {
                 throw new RuntimeException("Resume is not found");
             }
             setTemplate(resume, splits);
+            BotUtil.createActionsWithChosenResume(this, messageId, chatId, String.valueOf(current));
         }
     }
 
@@ -400,7 +396,7 @@ public class ResumeBot extends TelegramLongPollingBot {
                     List<String> callbackDataList = new ArrayList<>();
                     StringBuilder message = new StringBuilder();
                     message.append("Выберите сферу деятельности компании:\n\n");
-                    BotUtil.prepareBigKeyboardCreation(0, BigKeyboardType.INDUSTRIES, message, buttonLabels, callbackDataList, null, null);
+                    BotUtil.prepareBigKeyboardCreation(0, BigKeyboardType.INDUSTRIES, message, buttonLabels, callbackDataList);
                     sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, callbackDataList, BigKeyboardType.INDUSTRIES));
                     sendMessage(this, message.toString(), sendMessageRequest);
                 }
@@ -485,7 +481,7 @@ public class ResumeBot extends TelegramLongPollingBot {
                     List<String> callbackDataList = new ArrayList<>();
                     StringBuilder message = new StringBuilder();
                     message.append("Выберите специализацию:\n\n");
-                    BotUtil.prepareBigKeyboardCreation(0, BigKeyboardType.PROFESSIONAL_ROLES, message, buttonLabels, callbackDataList, null, null);
+                    BotUtil.prepareBigKeyboardCreation(0, BigKeyboardType.PROFESSIONAL_ROLES, message, buttonLabels, callbackDataList);
                     sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, callbackDataList, BigKeyboardType.PROFESSIONAL_ROLES));
                     sendMessage(this, message.toString(), sendMessageRequest);
                 }
@@ -562,10 +558,12 @@ public class ResumeBot extends TelegramLongPollingBot {
                         String[] actualValues = {};
                         try {
                             actualValues = resumeFields.get(fieldLabel).split(ITEMS_DELIMITER);
-                        } catch (Exception ignored) {}
+                        } catch (Exception ignored) {
+                        }
                         try {
                             actualValues = resumeFields.get(fieldLabelWithoutIdNumber).split(ITEMS_DELIMITER);
-                        } catch (Exception ignored) {}
+                        } catch (Exception ignored) {
+                        }
 
                         if (actualValues.length > 1) {
                             fieldLabel = fieldLabelWithoutIdNumber;
@@ -716,7 +714,7 @@ public class ResumeBot extends TelegramLongPollingBot {
                 Имя - Алексей
 
                 Чтобы отредактировать поле в одном из блоков резюме укажите его порядковый номер через пробел
-                
+                                
                 *Пример:*
                 Учебное заведение 2 - СПбПУ
 

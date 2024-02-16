@@ -16,13 +16,9 @@ import static com.resume.util.Constants.*;
 @AllArgsConstructor
 @Component
 public class CallbackActionFactory {
-
     private final ResumeService resumeService;
-
     private final HeadHunterService headHunterService;
-
     private final TemplateService templateService;
-
     private final UserService userService;
 
     private final String hhBaseUrl;
@@ -55,7 +51,7 @@ public class CallbackActionFactory {
             return new MyResumesActionHandler(pollingBot, resumeService, templateService, headHunterService, tokenHolderService, userService, apiClientTokenImpl, hhBaseUrl);
         }
         if (BotUtil.checkIfBigType(callbackData)) {
-            return new BigKeyBoardHandler(pollingBot);
+            return new BigKeyBoardHandler(pollingBot, resumeService);
         }
         return null;
     }
