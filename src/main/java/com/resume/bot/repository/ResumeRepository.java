@@ -20,6 +20,8 @@ public interface ResumeRepository extends JpaRepository<Resume, Integer> {
 
     Optional<Resume> findByTitle(String title);
 
+    List<Resume> findAllByTitle(String title);
+
     @Transactional
     @Modifying
     @Query("update Resume r set r.link = ?1 where r.resumeId = ?2")

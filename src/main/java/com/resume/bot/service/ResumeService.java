@@ -30,6 +30,11 @@ public class ResumeService {
         return repository.findByTitle(title).get();
     }
 
+    public Optional<Resume> getResumeByTitle(String title, Long userTgUId) {
+        return repository.findAllByTitle(title).stream()
+                .filter(resume -> resume.getUser().getTgUid().equals(userTgUId)).findFirst();
+    }
+
     public List<Resume> getResumesByUser(User user) {
         return repository.findByUser(user);
     }
