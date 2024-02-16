@@ -299,7 +299,11 @@ public class MyResumesActionHandler implements CallbackActionHandler {
         try {
             bot.execute(new SendMediaGroup(chatId.toString(),
                     templateService.getTemplates().stream()
-                            .map(t -> (InputMedia) (new InputMediaPhoto(t.getImagePath()))).toList()));
+                            .map(t -> {
+                                InputMedia im = new InputMediaPhoto();
+                                im.setMedia(new File(t.getImagePath()), "%d.png".formatted(t.getTemplateId()));
+                                return im;
+                            }).toList()));
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
             sendMessage(bot, "Что-то пошло не так. Попробуйте заново", chatId);
