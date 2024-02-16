@@ -470,8 +470,13 @@ public class ResumeBot extends TelegramLongPollingBot {
                 }
             }
             case ENTER_WISH_POSITION -> {
-                if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
-                        checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
+                if (checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
+                    if (resumeService.getResumeByTitle(receivedText, chatId).isPresent()) {
+                        sendMessage(this, EmojiParser.parseToUnicode("Упс, кажется, у вас уже существует, резюме с таким именем " +
+                                "попробуйте придумать новое."), sendMessageRequest);
+                        break;
+                    }
+
                     appendToField(resumeFields, ResumeField.WISH_POSITION.getValue(), receivedText);
 
                     List<String> buttonLabels = new ArrayList<>();

@@ -78,18 +78,13 @@ public class ExportResumeActionHandler implements CallbackActionHandler {
         int resumeCountFromDb = resumesFromDb.size();
         int counter = 0;
 
-        Set<String> titles = new HashSet<>(resumesFromDb.stream()
-                .map(com.resume.bot.model.entity.Resume::getTitle)
-                .toList());
-
         for (Resume resumeHh : resumesHh) {
             com.resume.bot.model.entity.Resume resume;
             Resume resumeJson;
-            if (!titles.contains(resumeHh.getTitle())) {
+            if (resumeService.getResumeByTitle(resumeHh.getTitle(), chatId).isEmpty()) {
                 resume = new com.resume.bot.model.entity.Resume();
                 resumeJson = resumeHh;
 
-                titles.add(resumeJson.getTitle());
                 buttonIds.add(resumeJson.getTitle() + "_" + (counter + 1));
 
                 resume.setResumeData(JsonProcessor.createJsonFromEntity(resumeJson));

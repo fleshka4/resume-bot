@@ -16,7 +16,7 @@ CREATE TABLE resumes (
   pdf_path text,
   link text,
   download_link text,
-  title varchar unique,
+  title varchar,
   user_id integer,
   template_id integer
 );
