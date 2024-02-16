@@ -1,7 +1,6 @@
 package com.resume.util;
 
 import com.resume.bot.display.BotState;
-import com.resume.bot.display.MessageUtil;
 import com.resume.bot.json.JsonProcessor;
 import com.resume.bot.json.entity.client.Experience;
 import com.resume.bot.json.entity.client.Recommendation;
@@ -139,7 +138,9 @@ public class BotUtil {
     public Resume convertResume(Resume resume) {
         resume.setExperience(resume.getExperience().stream().peek(experience -> {
             experience.setStart(reverseDate(experience.getStart()) + "-01");
-            experience.setEnd(reverseDate(experience.getEnd()) + "-01");
+            if (experience.getEnd() != null) {
+                experience.setEnd(reverseDate(experience.getEnd()) + "-01");
+            }
         }).toList());
         return resume;
     }
@@ -319,11 +320,16 @@ public class BotUtil {
     public com.resume.bot.model.entity.Resume getResume(String string, ResumeService resumeService, Long chatId, TelegramLongPollingBot bot) {
         int numOfResume = getResumeNumber(string);
         List<com.resume.bot.model.entity.Resume> resumes = resumeService.getResumesByUserId(chatId);
-        if (resumes.size() >= numOfResume) {
-            return resumes.get(numOfResume - 1);
+        resumes.sort(Comparator.comparing(com.resume.bot.model.entity.Resume::getResumeId));
+        if (resumes.size() <= numOfResume) {
+            if (resumes.size() == numOfResume) {
+                numOfResume -= 1;
+            } else {
+                sendMessage(bot, "Резюме не найдено. Попробуйте снова", chatId);
+                return null;
+            }
         }
-        sendMessage(bot, "Резюме не найдено. Попробуйте снова", chatId);
-        return null;
+        return resumes.get(numOfResume);
     }
 
     public int getResumeNumber(String string) {

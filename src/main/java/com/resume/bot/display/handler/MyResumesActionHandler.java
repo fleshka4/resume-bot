@@ -16,7 +16,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
+import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
+import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
+import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.ByteArrayInputStream;
@@ -63,7 +66,6 @@ public class MyResumesActionHandler implements CallbackActionHandler {
                 for (int i = 1; i <= resumes.size(); i++) {
                     buttonIds.add("res_" + resumes.get(i - 1).getTitle() + "_" + i);
                 }
-                buttonIds.add("back_to_menu_3");
 
                 executeEditMessageWithBigKeyBoard(bot, EmojiParser.parseToUnicode("""
                         Здесь Вы можете просматривать список всех созданных резюме.:page_with_curl:
@@ -200,7 +202,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
 
         Resume resume = BotUtil.getResume(matcher.group(), resumeService, chatId, bot);
         if (matcher.matches()) {
-            if (Objects.requireNonNull(resume).getDownloadLink() == null) {
+            if (Objects.requireNonNull(resume).getDownloadLink() == null || Objects.requireNonNull(resume).getTemplate() != null) {
                 String filePath = resume.getPdfPath();
                 if (filePath == null) {
                     if (resume.getTemplate() == null) {
@@ -242,7 +244,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
                 }
             }
         }
-//        BotUtil.createMenu(MessageUtil.createSendMessageRequest(bot, chatId), bot);
+        BotUtil.createMenu(MessageUtil.createSendMessageRequest(bot, chatId), bot);
         return true;
     }
 
@@ -256,7 +258,6 @@ public class MyResumesActionHandler implements CallbackActionHandler {
             return false;
         }
 
-        Resume resume = null;
         if (matcher.matches()) {
             List<String> labels = List.of("Изменить шаблон", "Изменить текст");
             String[] splits = data.split("_");
@@ -295,7 +296,20 @@ public class MyResumesActionHandler implements CallbackActionHandler {
             ids.add(data.substring(5) + "_" + templates.get(i).getTemplateId()); // template_resume_([1-6])_templateId
         }
 
-        executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode("Выберите шаблон:slightly_smiling:"), // todo: добавить изображения шаблонов
+        try {
+            bot.execute(new SendMediaGroup(chatId.toString(),
+                    templateService.getTemplates().stream()
+                            .map(t -> {
+                                InputMedia im = new InputMediaPhoto();
+                                im.setMedia(new File(t.getImagePath()), "%d.jpg".formatted(t.getTemplateId()));
+                                return im;
+                            }).toList()));
+        } catch (TelegramApiException e) {
+            log.error(e.getMessage());
+            sendMessage(bot, "Что-то пошло не так. Попробуйте заново", chatId);
+        }
+
+        executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode("Выберите шаблон:slightly_smiling:"),
                 messageId, chatId, labels, ids);
 
         return true;

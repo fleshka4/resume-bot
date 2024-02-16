@@ -147,7 +147,7 @@ public enum ResumeField {
     EDUCATION_INSTITUTION("учебное заведение") {
         @Override
         public boolean processCheck(String checkValue) {
-            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_512) && JsonValidator.checkStringWithPunctuation(checkValue);
+            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_512);
         }
 
         @Override
@@ -167,7 +167,7 @@ public enum ResumeField {
     EDUCATION_FACULTY("факультет") {
         @Override
         public boolean processCheck(String checkValue) {
-            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_128) && JsonValidator.checkAlphaSpaceFormat(checkValue);
+            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_128);
         }
 
         @Override
@@ -187,7 +187,7 @@ public enum ResumeField {
     EDUCATION_SPECIALIZATION("специализация") {
         @Override
         public boolean processCheck(String checkValue) {
-            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_128) && JsonValidator.checkAlphaSpaceFormat(checkValue);
+            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_128);
         }
 
         @Override
@@ -336,7 +336,7 @@ public enum ResumeField {
     EXPERIENCE_POST("должность") {
         @Override
         public boolean processCheck(String checkValue) {
-            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_128) && JsonValidator.checkAlphaSpaceFormat(checkValue);
+            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_128);
         }
 
         @Override
@@ -356,7 +356,7 @@ public enum ResumeField {
     EXPERIENCE_DUTIES("обязанности") {
         @Override
         public boolean processCheck(String checkValue) {
-            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_4096) && JsonValidator.checkStringWithPunctuation(checkValue);
+            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_4096);
         }
 
         @Override
@@ -449,7 +449,7 @@ public enum ResumeField {
     REC_POST("должность выдавшего рекомендацию") {
         @Override
         public boolean processCheck(String checkValue) {
-            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_128) && JsonValidator.checkAlphaSpaceFormat(checkValue);
+            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_128);
         }
 
         @Override
@@ -469,7 +469,7 @@ public enum ResumeField {
     REC_ORGANIZATION("организация выдавшего рекомендацию") {
         @Override
         public boolean processCheck(String checkValue) {
-            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_128) && JsonValidator.checkStringWithPunctuation(checkValue);
+            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_128);
         }
 
         @Override
@@ -489,7 +489,7 @@ public enum ResumeField {
     WISH_POSITION("желаемая позиция") {
         @Override
         public boolean processCheck(String checkValue) {
-            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_128) && JsonValidator.checkAlphaSpaceFormat(checkValue);
+            return JsonValidator.checkSymbolsLimit(checkValue, MAX_LEN_128);
         }
 
         @Override

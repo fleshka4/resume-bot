@@ -459,7 +459,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
         resume.setEducation(education);
         resume.setExperience(workExperiences);
         resume.setDriverLicenseTypes(driverLicenseTypes);
-        resume.setRecommendation(recommendationList);
+        resume.setRecommendation(null);
         resume.setEmployments(busyness);
         resume.setSchedules(schedules);
 

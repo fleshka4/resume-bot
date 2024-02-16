@@ -34,7 +34,6 @@ public class Experience {
 
     private Type industry;
 
-    @NonNull
     private String position;
 
     @NonNull

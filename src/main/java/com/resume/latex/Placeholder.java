@@ -3,7 +3,6 @@ package com.resume.latex;
 import com.resume.bot.json.entity.area.Area;
 import com.resume.bot.json.entity.client.Experience;
 import com.resume.bot.json.entity.client.Resume;
-import com.resume.bot.json.entity.client.TotalExperience;
 import com.resume.bot.json.entity.client.education.Course;
 import com.resume.bot.json.entity.client.education.Education;
 import com.resume.bot.json.entity.client.education.ElementaryEducation;
@@ -46,7 +45,8 @@ public enum Placeholder {
     PLACE_FOR_DRIVER_LICENSE("PLACE-FOR-DRIVER-LICENSE") {
         @Override
         public String replaceValue(Resume resume) {
-            return resume.getDriverLicenseTypes().stream().map(Id::getId).collect(Collectors.joining(", "));
+            var list = resume.getDriverLicenseTypes();
+            return list != null ? resume.getDriverLicenseTypes().stream().map(Id::getId).collect(Collectors.joining(", ")) : "";
         }
     },
     PLACE_FOR_POSITION("PLACE-FOR-POSITION") {
@@ -108,75 +108,71 @@ public enum Placeholder {
         public String replaceValue(Resume resume) {
             Education education = resume.getEducation();
             String levelStr = education.getLevel() != null
-                    ? "Уровень образования: %s\\\\".formatted(education.getLevel().getName())
+                    ? "Уровень образования: %s\\\\\\\\".formatted(education.getLevel().getName())
                     : "";
 
             List<PrimaryEducation> primary = education.getPrimary();
             String primaryStr = primary != null && !primary.isEmpty()
                     ? primary.stream()
                     .map(pe -> """
-                            Учебное заведение: %s\\
-                            Факультет: %s\\
-                            Специализация: %s\\
-                            Год окончания: %d\\
-                            \\
+                            Учебное заведение: %s\\\\\\\\
+                            Факультет: %s\\\\\\\\
+                            Специализация: %s\\\\\\\\
+                            Год окончания: %d\\\\\\\\
                             """.formatted(
                             pe.getName(),
                             pe.getOrganization(),
                             pe.getResult(),
                             pe.getYear()
                     ))
-                    .collect(Collectors.joining("", "Высшее образование:\\\\", ""))
+                    .collect(Collectors.joining("", "Высшее образование:\\\\\\\\", ""))
                     : "";
 
             List<ElementaryEducation> elementary = education.getElementary();
             String elementaryStr = elementary != null && !elementary.isEmpty()
                     ? elementary.stream()
                     .map(es -> """
-                            Учебное заведение: %s\\
-                            Год окончания: %d\\
-                            \\
+                            Учебное заведение: %s\\\\\\\\
+                            Год окончания: %d\\\\\\\\
                             """.formatted(
                             es.getName(),
                             es.getYear()
                     ))
-                    .collect(Collectors.joining("", "Среднее образование:\\\\", ""))
+                    .collect(Collectors.joining("", "Среднее образование:\\\\\\\\", ""))
                     : "";
 
             List<Course> additional = education.getAdditional();
             String additionalStr = additional != null && !additional.isEmpty()
                     ? additional.stream()
                     .map(as -> """
-                            Название курса:%s\\
-                            Организация: %s\\
-                            Специальность: %s\\
-                            Год окончания: %d\\
-                            \\
+                            Название курса:%s\\\\\\\\
+                            Организация: %s\\\\\\\\
+                            Специальность: %s\\\\\\\\
+                            Год окончания: %d\\\\\\\\
                             """.formatted(
                             as.getName(),
                             as.getOrganization(),
                             as.getResult(),
                             as.getYear()
                     ))
-                    .collect(Collectors.joining("", "Курсы повышения квалификации:\\\\", ""))
+                    .collect(Collectors.joining("", "Курсы повышения квалификации:\\\\\\\\", ""))
                     : "";
 
             List<Course> attestation = education.getAttestation();
             String attestationStr = attestation != null && !attestation.isEmpty()
                     ? attestation.stream()
                     .map(as -> """
-                            Название курса:%s\\
-                            Организация: %s\\
-                            Специальность: %s\\
-                            Год окончания: %d\\
-                            \\
+                            Название курса:%s\\\\\\\\
+                            Организация: %s\\\\\\\\
+                            Специальность: %s\\\\\\\\
+                            Год окончания: %d\\\\\\\\
                             """.formatted(
                             as.getName(),
                             as.getOrganization(),
                             as.getResult(),
                             as.getYear()
                     ))
-                    .collect(Collectors.joining("", "Пройденные тесты:\\\\", ""))
+                    .collect(Collectors.joining("", "Пройденные тесты:\\\\\\\\", ""))
                     : "";
 
             return """
@@ -194,36 +190,40 @@ public enum Placeholder {
             List<Experience> experience = resume.getExperience();
             return !experience.isEmpty()
                     ? experience.stream()
-                    .map(exp -> """
-                            Период работы: %s\\
-                            Компания: %s\\
-                            Город: %s\\
-                            Ссылка: %s\\
-                            Должность: %s\\
-                            Обязанности: %s\\
-                            \\
-                            """.formatted("%s - %s".formatted(
-                                    exp.getStart(),
-                                    exp.getEnd() != null && !exp.getEnd().isEmpty()
-                                            ? exp.getEnd()
-                                            : "настоящее время"),
-                            exp.getCompany(),
-                            ConstantsUtil.getAreaString(
-                                    ConstantsUtil.getAreaByIdDeep(Constants.AREAS, exp.getArea().getId()).orElse(null)),
-                            exp.getCompanyUrl(),
-                            exp.getPosition(),
-                            exp.getDescription()))
+                    .map(exp -> {
+                        if (exp.getArea() == null) {
+                            return "";
+                        }
+                        return """
+                    Период работы: %s\\\\\\\\
+                    Компания: %s\\\\\\\\
+                    Город: %s\\\\\\\\
+                    Ссылка: %s\\\\\\\\
+                    Должность: %s\\\\\\\\
+                    Обязанности: %s\\\\\\\\
+                    """.formatted("%s - %s".formatted(
+                                        exp.getStart(),
+                                        exp.getEnd() != null && !exp.getEnd().isEmpty()
+                                                ? exp.getEnd()
+                                                : "настоящее время"),
+                                exp.getCompany(),
+                                ConstantsUtil.getAreaString(
+                                        ConstantsUtil.getAreaByIdDeep(Constants.AREAS, exp.getArea().getId()).orElse(null)),
+                                exp.getCompanyUrl(),
+                                exp.getPosition(),
+                                exp.getDescription());
+                    })
                     .collect(Collectors.joining())
                     : "";
         }
-    },
-    PLACE_FOR_TOTAL_EXPERIENCE("PLACE-FOR-TOTAL-EXPERIENCE") {
-        @Override
-        public String replaceValue(Resume resume) {
-            TotalExperience totalExperience = resume.getTotalExperience();
-            return totalExperience != null ? totalExperience.getMonths().toString() : "0";
-        }
     };
+//    PLACE_FOR_TOTAL_EXPERIENCE("PLACE-FOR-TOTAL-EXPERIENCE") {
+//        @Override
+//        public String replaceValue(Resume resume) {
+//            TotalExperience totalExperience = resume.getTotalExperience();
+//            return totalExperience != null ? totalExperience.getMonths().toString() : "0";
+//        }
+//    };
 
     private final String value;
 

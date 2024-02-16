@@ -333,7 +333,7 @@ public class ResumeBot extends TelegramLongPollingBot {
                 }
             }
             case ENTER_FACULTY -> {
-                if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
+                if (checkInput(receivedText, sendMessageRequest, STRING_WITH_PUNCTUATION) &&
                         checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
                     appendToField(resumeFields, ResumeField.EDUCATION_FACULTY.getValue(), receivedText);
 
@@ -342,7 +342,7 @@ public class ResumeBot extends TelegramLongPollingBot {
                 }
             }
             case ENTER_SPECIALIZATION -> {
-                if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
+                if (checkInput(receivedText, sendMessageRequest, STRING_WITH_PUNCTUATION) &&
                         checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
                     appendToField(resumeFields, ResumeField.EDUCATION_SPECIALIZATION.getValue(), receivedText);
 
@@ -402,7 +402,7 @@ public class ResumeBot extends TelegramLongPollingBot {
                 }
             }
             case ENTER_POST_IN_ORGANIZATION -> {
-                if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
+                if (checkInput(receivedText, sendMessageRequest, STRING_WITH_PUNCTUATION) &&
                         checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
                     appendToField(resumeFields, ResumeField.EXPERIENCE_POST.getValue(), receivedText);
 
@@ -450,7 +450,7 @@ public class ResumeBot extends TelegramLongPollingBot {
                 }
             }
             case ENTER_REC_POST -> {
-                if (checkInput(receivedText, sendMessageRequest, ALPHA_SPACE_FORMAT) &&
+                if (checkInput(receivedText, sendMessageRequest, STRING_WITH_PUNCTUATION) &&
                         checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
                     appendToField(resumeFields, ResumeField.REC_POST.getValue(), receivedText);
 
@@ -470,7 +470,8 @@ public class ResumeBot extends TelegramLongPollingBot {
                 }
             }
             case ENTER_WISH_POSITION -> {
-                if (checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
+                if (checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT) &&
+                        checkInput(receivedText, sendMessageRequest, STRING_WITH_PUNCTUATION)) {
                     if (resumeService.getResumeByTitle(receivedText, chatId).isPresent()) {
                         sendMessage(this, EmojiParser.parseToUnicode("Упс, кажется, у вас уже существует, резюме с таким именем " +
                                 "попробуйте придумать новое."), sendMessageRequest);
@@ -653,55 +654,57 @@ public class ResumeBot extends TelegramLongPollingBot {
 
         for (Map.Entry<String, String> entry : resumeFields.entrySet()) {
             String key = entry.getKey();
-            String value = entry.getValue();
+            if (!key.equals("отрасль")) {
+                String value = entry.getValue();
 
-            if (key.equals(ResumeField.NAME.getValue())) {
-                currentBlock = "*Основная информация*";
-                resume.append(currentBlock).append("\n");
-            } else if (key.equals(ResumeField.EDUCATION_LEVEL.getValue())) {
-                currentBlock = "*Образование*";
-                resume.append("\n\n").append(currentBlock).append("\n");
-            } else if (key.equals(ResumeField.EXPERIENCE_PERIOD.getValue())) {
-                currentBlock = "*Опыт*";
-                resume.append("\n\n").append(currentBlock).append("\n");
-            } else if (key.equals(ResumeField.SKILLS.getValue())) {
-                currentBlock = "*Навыки*";
-                resume.append("\n\n").append(currentBlock).append("\n");
-            } else if (key.equals(ResumeField.ABOUT_ME.getValue())) {
-                currentBlock = "*Дополнительная информация*";
-                resume.append("\n\n").append(currentBlock).append("\n");
-            } else if (key.equals(ResumeField.REC_NAME.getValue())) {
-                currentBlock = "*Список рекомендаций*";
-                resume.append("\n\n").append(currentBlock).append("\n");
-            } else if (key.equals(ResumeField.WISH_POSITION.getValue())) {
-                resume.append("\n\n");
-            }
-
-            // For fields with multiple values
-            List<String> items = Arrays.stream(value.split(ITEMS_DELIMITER)).toList();
-            resumeFieldToValues.put(key, items);
-
-            if (isEndOfFieldsBlock(key)) {
-                for (int i = 0; i < items.size(); i++) {
-                    for (Map.Entry<String, List<String>> resumeFieldEntry : resumeFieldToValues.entrySet()) {
-                        String currentKey = resumeFieldEntry.getKey();
-                        String currentValue = resumeFieldEntry.getValue().get(i);
-                        resume.append("\n").append("*").append(currentKey).append("*").append(": ").append(currentValue);
-                    }
-                    if (i < items.size() - 1) {
-                        resume.append("\n");
-                    }
+                if (key.equals(ResumeField.NAME.getValue())) {
+                    currentBlock = "*Основная информация*";
+                    resume.append(currentBlock).append("\n");
+                } else if (key.equals(ResumeField.EDUCATION_LEVEL.getValue())) {
+                    currentBlock = "*Образование*";
+                    resume.append("\n\n").append(currentBlock).append("\n");
+                } else if (key.equals(ResumeField.EXPERIENCE_PERIOD.getValue())) {
+                    currentBlock = "*Опыт*";
+                    resume.append("\n\n").append(currentBlock).append("\n");
+                } else if (key.equals(ResumeField.SKILLS.getValue())) {
+                    currentBlock = "*Навыки*";
+                    resume.append("\n\n").append(currentBlock).append("\n");
+                } else if (key.equals(ResumeField.ABOUT_ME.getValue())) {
+                    currentBlock = "*Дополнительная информация*";
+                    resume.append("\n\n").append(currentBlock).append("\n");
+                } else if (key.equals(ResumeField.REC_NAME.getValue())) {
+                    currentBlock = "*Список рекомендаций*";
+                    resume.append("\n\n").append(currentBlock).append("\n");
+                } else if (key.equals(ResumeField.WISH_POSITION.getValue())) {
+                    resume.append("\n\n");
                 }
-                resumeFieldToValues.clear();
-            } else if (isCommaSeparatedMultipleField(key)) {
-                value = value.replace(ITEMS_DELIMITER, ", ");
-                resume.append("\n").append("*").append(key).append("*").append(": ").append(value);
-                resumeFieldToValues.clear();
-            } else {
-                // For fields with single value
-                if (items.size() == 1) {
+
+                // For fields with multiple values
+                List<String> items = Arrays.stream(value.split(ITEMS_DELIMITER)).toList();
+                resumeFieldToValues.put(key, items);
+
+                if (isEndOfFieldsBlock(key)) {
+                    for (int i = 0; i < items.size(); i++) {
+                        for (Map.Entry<String, List<String>> resumeFieldEntry : resumeFieldToValues.entrySet()) {
+                            String currentKey = resumeFieldEntry.getKey();
+                            String currentValue = resumeFieldEntry.getValue().get(i);
+                            resume.append("\n").append("*").append(currentKey).append("*").append(": ").append(currentValue);
+                        }
+                        if (i < items.size() - 1) {
+                            resume.append("\n");
+                        }
+                    }
+                    resumeFieldToValues.clear();
+                } else if (isCommaSeparatedMultipleField(key)) {
+                    value = value.replace(ITEMS_DELIMITER, ", ");
                     resume.append("\n").append("*").append(key).append("*").append(": ").append(value);
                     resumeFieldToValues.clear();
+                } else {
+                    // For fields with single value
+                    if (items.size() == 1) {
+                        resume.append("\n").append("*").append(key).append("*").append(": ").append(value);
+                        resumeFieldToValues.clear();
+                    }
                 }
             }
         }
