@@ -4,7 +4,6 @@ import com.resume.bot.display.BotState;
 import com.resume.bot.display.CallbackActionHandler;
 import com.resume.bot.display.ResumeField;
 import com.resume.bot.json.JsonProcessor;
-import com.resume.bot.json.entity.Industry;
 import com.resume.bot.json.entity.client.*;
 import com.resume.bot.json.entity.client.education.Education;
 import com.resume.bot.json.entity.client.education.ElementaryEducation;
@@ -30,7 +29,6 @@ import java.util.stream.Collectors;
 
 import static com.resume.bot.display.MessageUtil.*;
 import static com.resume.util.BotUtil.appendToField;
-import static com.resume.util.BotUtil.personAndIndustry;
 import static com.resume.util.Constants.*;
 import static org.apache.commons.lang3.math.NumberUtils.createLong;
 
@@ -281,7 +279,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
         }
 
         if (INDUSTRIES.stream()
-                .filter(ind -> ind.getName().equals(personAndIndustry.get(chatId)))
+                .filter(ind -> ind.getName().equals(BotUtil.personAndIndustry.get(chatId)))
                 .findFirst().get().getIndustries()
                 .stream().anyMatch(ind -> ind.getId().equals(callbackData))
         ) {
@@ -561,7 +559,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             case "обязанности" -> workExperience.setDescription(fieldValue);
             case "отрасль" -> {
                 Type industry = INDUSTRIES.stream()
-                        .filter(ind -> ind.getName().equals(personAndIndustry.get(chatId)))
+                        .filter(ind -> ind.getName().equals(BotUtil.personAndIndustry.get(chatId)))
                         .findFirst().get().getIndustries()
                         .stream().filter(ind -> ind.getId().equals(fieldValue)).findFirst().get();
                 workExperience.setIndustries(List.of(industry));

@@ -10,7 +10,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 
-import static com.resume.util.BotUtil.personAndIndustry;
 import static com.resume.util.Constants.*;
 
 @AllArgsConstructor
