@@ -320,6 +320,7 @@ public class BotUtil {
     public com.resume.bot.model.entity.Resume getResume(String string, ResumeService resumeService, Long chatId, TelegramLongPollingBot bot) {
         int numOfResume = getResumeNumber(string);
         List<com.resume.bot.model.entity.Resume> resumes = resumeService.getResumesByUserId(chatId);
+        resumes.sort(Comparator.comparing(com.resume.bot.model.entity.Resume::getResumeId));
         if (resumes.size() <= numOfResume) {
             if (resumes.size() == numOfResume) {
                 numOfResume -= 1;

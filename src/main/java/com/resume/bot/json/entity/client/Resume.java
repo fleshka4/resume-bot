@@ -55,7 +55,7 @@ public class Resume {
 //
 //    private List<Portfolio> portfolio;
 //
-    @NonNull
+//    @NonNull
     @JsonProperty("professional_roles")
     private List<Id> professionalRoles;
 

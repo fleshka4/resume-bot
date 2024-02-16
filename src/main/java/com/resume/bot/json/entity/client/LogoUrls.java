@@ -10,14 +10,14 @@ import lombok.NonNull;
 @AllArgsConstructor
 @Data
 public class LogoUrls {
-    @NonNull
+//    @NonNull
     @JsonProperty("90")
     private String ninety;
 
-    @NonNull
+//    @NonNull
     @JsonProperty("240")
     private String twoForty;
 
-    @NonNull
+//    @NonNull
     private String original;
 }

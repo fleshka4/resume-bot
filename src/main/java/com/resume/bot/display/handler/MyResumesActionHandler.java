@@ -202,7 +202,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
 
         Resume resume = BotUtil.getResume(matcher.group(), resumeService, chatId, bot);
         if (matcher.matches()) {
-            if (Objects.requireNonNull(resume).getDownloadLink() == null) {
+            if (Objects.requireNonNull(resume).getDownloadLink() == null || Objects.requireNonNull(resume).getTemplate() != null) {
                 String filePath = resume.getPdfPath();
                 if (filePath == null) {
                     if (resume.getTemplate() == null) {

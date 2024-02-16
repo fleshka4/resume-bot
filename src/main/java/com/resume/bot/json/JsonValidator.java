@@ -2,7 +2,6 @@ package com.resume.bot.json;
 
 import com.resume.bot.json.entity.area.Area;
 import com.resume.bot.json.entity.area.Country;
-import com.resume.bot.json.entity.common.Id;
 import com.resume.util.Constants;
 import com.resume.util.ConstantsUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -24,6 +23,7 @@ public class JsonValidator {
         EXPERIENCE,
         ALPHA_FORMAT,
         ALPHA_SPACE_FORMAT,
+        STRING_WITH_PUNCTUATION,
         ALPHANUMERIC_FORMAT,
         NUMERIC_FORMAT,
         DATE_FORMAT,
@@ -63,6 +63,7 @@ public class JsonValidator {
         checks.put(ValidationType.EXPERIENCE, objects -> checkExperience((String) objects[0], (String) objects[1]));
         checks.put(ValidationType.ALPHA_FORMAT, objects -> checkAlphaFormat((String) objects[0]));
         checks.put(ValidationType.ALPHA_SPACE_FORMAT, objects -> checkAlphaSpaceFormat((String) objects[0]));
+        checks.put(ValidationType.STRING_WITH_PUNCTUATION, objects -> checkStringWithPunctuation((String) objects[0]));
         checks.put(ValidationType.ALPHANUMERIC_FORMAT, objects -> checkAlphanumericFormat((String) objects[0]));
         checks.put(ValidationType.NUMERIC_FORMAT, objects -> checkNumericFormat((String) objects[0]));
         checks.put(ValidationType.DATE_FORMAT, objects -> checkDateFormat((String) objects[0]));
@@ -327,6 +328,6 @@ public class JsonValidator {
     }
 
     public static boolean checkStringWithPunctuation(String text) {
-        return Arrays.stream(text.split("[-,;\"'!?:.]")).allMatch(s -> checkAlphaSpaceFormat(text.trim()));
+        return Arrays.stream(text.split("[-,;\"'!?:.+#]")).allMatch(s -> checkAlphaSpaceFormat(text.trim()));
     }
 }

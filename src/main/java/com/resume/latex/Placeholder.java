@@ -3,7 +3,6 @@ package com.resume.latex;
 import com.resume.bot.json.entity.area.Area;
 import com.resume.bot.json.entity.client.Experience;
 import com.resume.bot.json.entity.client.Resume;
-import com.resume.bot.json.entity.client.TotalExperience;
 import com.resume.bot.json.entity.client.education.Course;
 import com.resume.bot.json.entity.client.education.Education;
 import com.resume.bot.json.entity.client.education.ElementaryEducation;
@@ -46,7 +45,8 @@ public enum Placeholder {
     PLACE_FOR_DRIVER_LICENSE("PLACE-FOR-DRIVER-LICENSE") {
         @Override
         public String replaceValue(Resume resume) {
-            return resume.getDriverLicenseTypes().stream().map(Id::getId).collect(Collectors.joining(", "));
+            var list = resume.getDriverLicenseTypes();
+            return list != null ? resume.getDriverLicenseTypes().stream().map(Id::getId).collect(Collectors.joining(", ")) : "";
         }
     },
     PLACE_FOR_POSITION("PLACE-FOR-POSITION") {
@@ -190,35 +190,40 @@ public enum Placeholder {
             List<Experience> experience = resume.getExperience();
             return !experience.isEmpty()
                     ? experience.stream()
-                    .map(exp -> """
-                            Период работы: %s\\\\\\\\
-                            Компания: %s\\\\\\\\
-                            Город: %s\\\\\\\\
-                            Ссылка: %s\\\\\\\\
-                            Должность: %s\\\\\\\\
-                            Обязанности: %s\\\\\\\\
-                            """.formatted("%s - %s".formatted(
-                                    exp.getStart(),
-                                    exp.getEnd() != null && !exp.getEnd().isEmpty()
-                                            ? exp.getEnd()
-                                            : "настоящее время"),
-                            exp.getCompany(),
-                            ConstantsUtil.getAreaString(
-                                    ConstantsUtil.getAreaByIdDeep(Constants.AREAS, exp.getArea().getId()).orElse(null)),
-                            exp.getCompanyUrl(),
-                            exp.getPosition(),
-                            exp.getDescription()))
+                    .map(exp -> {
+                        if (exp.getArea() == null) {
+                            return "";
+                        }
+                        return """
+                    Период работы: %s\\\\\\\\
+                    Компания: %s\\\\\\\\
+                    Город: %s\\\\\\\\
+                    Ссылка: %s\\\\\\\\
+                    Должность: %s\\\\\\\\
+                    Обязанности: %s\\\\\\\\
+                    """.formatted("%s - %s".formatted(
+                                        exp.getStart(),
+                                        exp.getEnd() != null && !exp.getEnd().isEmpty()
+                                                ? exp.getEnd()
+                                                : "настоящее время"),
+                                exp.getCompany(),
+                                ConstantsUtil.getAreaString(
+                                        ConstantsUtil.getAreaByIdDeep(Constants.AREAS, exp.getArea().getId()).orElse(null)),
+                                exp.getCompanyUrl(),
+                                exp.getPosition(),
+                                exp.getDescription());
+                    })
                     .collect(Collectors.joining())
                     : "";
         }
-    },
-    PLACE_FOR_TOTAL_EXPERIENCE("PLACE-FOR-TOTAL-EXPERIENCE") {
-        @Override
-        public String replaceValue(Resume resume) {
-            TotalExperience totalExperience = resume.getTotalExperience();
-            return totalExperience != null ? totalExperience.getMonths().toString() : "0";
-        }
     };
+//    PLACE_FOR_TOTAL_EXPERIENCE("PLACE-FOR-TOTAL-EXPERIENCE") {
+//        @Override
+//        public String replaceValue(Resume resume) {
+//            TotalExperience totalExperience = resume.getTotalExperience();
+//            return totalExperience != null ? totalExperience.getMonths().toString() : "0";
+//        }
+//    };
 
     private final String value;
 
