@@ -63,7 +63,6 @@ public class MyResumesActionHandler implements CallbackActionHandler {
                 for (int i = 1; i <= resumes.size(); i++) {
                     buttonIds.add("res_" + resumes.get(i - 1).getTitle() + "_" + i);
                 }
-                buttonIds.add("back_to_menu_3");
 
                 executeEditMessageWithBigKeyBoard(bot, EmojiParser.parseToUnicode("""
                         Здесь Вы можете просматривать список всех созданных резюме.:page_with_curl:
@@ -242,7 +241,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
                 }
             }
         }
-//        BotUtil.createMenu(MessageUtil.createSendMessageRequest(bot, chatId), bot);
+        BotUtil.createMenu(MessageUtil.createSendMessageRequest(bot, chatId), bot);
         return true;
     }
 
@@ -256,7 +255,6 @@ public class MyResumesActionHandler implements CallbackActionHandler {
             return false;
         }
 
-        Resume resume = null;
         if (matcher.matches()) {
             List<String> labels = List.of("Изменить шаблон", "Изменить текст");
             String[] splits = data.split("_");

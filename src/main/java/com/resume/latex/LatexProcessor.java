@@ -18,7 +18,7 @@ public class LatexProcessor {
     public static String compile(Resume resume, String sourcePath, String userId, String resumeName) throws IOException, InterruptedException {
         Path sourceTmpFile = Paths.get(sourcePath);
         Path outputUserDir = tempDir.resolve(userId);
-        Path outputUserTex = outputUserDir.resolve(resumeName + ".txt");
+        Path outputUserTex = outputUserDir.resolve(resumeName + ".tex");
         Path outputUserPdf = outputUserDir.resolve(resumeName + ".pdf");
 
         Files.createDirectories(outputUserDir);

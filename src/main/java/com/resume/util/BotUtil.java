@@ -1,7 +1,6 @@
 package com.resume.util;
 
 import com.resume.bot.display.BotState;
-import com.resume.bot.display.MessageUtil;
 import com.resume.bot.json.JsonProcessor;
 import com.resume.bot.json.entity.client.Experience;
 import com.resume.bot.json.entity.client.Recommendation;
@@ -139,7 +138,9 @@ public class BotUtil {
     public Resume convertResume(Resume resume) {
         resume.setExperience(resume.getExperience().stream().peek(experience -> {
             experience.setStart(reverseDate(experience.getStart()) + "-01");
-            experience.setEnd(reverseDate(experience.getEnd()) + "-01");
+            if (experience.getEnd() != null) {
+                experience.setEnd(reverseDate(experience.getEnd()) + "-01");
+            }
         }).toList());
         return resume;
     }
