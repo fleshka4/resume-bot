@@ -108,75 +108,71 @@ public enum Placeholder {
         public String replaceValue(Resume resume) {
             Education education = resume.getEducation();
             String levelStr = education.getLevel() != null
-                    ? "Уровень образования: %s\\\\".formatted(education.getLevel().getName())
+                    ? "Уровень образования: %s\\\\\\\\".formatted(education.getLevel().getName())
                     : "";
 
             List<PrimaryEducation> primary = education.getPrimary();
             String primaryStr = primary != null && !primary.isEmpty()
                     ? primary.stream()
                     .map(pe -> """
-                            Учебное заведение: %s\\
-                            Факультет: %s\\
-                            Специализация: %s\\
-                            Год окончания: %d\\
-                            \\
+                            Учебное заведение: %s\\\\\\\\
+                            Факультет: %s\\\\\\\\
+                            Специализация: %s\\\\\\\\
+                            Год окончания: %d\\\\\\\\
                             """.formatted(
                             pe.getName(),
                             pe.getOrganization(),
                             pe.getResult(),
                             pe.getYear()
                     ))
-                    .collect(Collectors.joining("", "Высшее образование:\\\\", ""))
+                    .collect(Collectors.joining("", "Высшее образование:\\\\\\\\", ""))
                     : "";
 
             List<ElementaryEducation> elementary = education.getElementary();
             String elementaryStr = elementary != null && !elementary.isEmpty()
                     ? elementary.stream()
                     .map(es -> """
-                            Учебное заведение: %s\\
-                            Год окончания: %d\\
-                            \\
+                            Учебное заведение: %s\\\\\\\\
+                            Год окончания: %d\\\\\\\\
                             """.formatted(
                             es.getName(),
                             es.getYear()
                     ))
-                    .collect(Collectors.joining("", "Среднее образование:\\\\", ""))
+                    .collect(Collectors.joining("", "Среднее образование:\\\\\\\\", ""))
                     : "";
 
             List<Course> additional = education.getAdditional();
             String additionalStr = additional != null && !additional.isEmpty()
                     ? additional.stream()
                     .map(as -> """
-                            Название курса:%s\\
-                            Организация: %s\\
-                            Специальность: %s\\
-                            Год окончания: %d\\
-                            \\
+                            Название курса:%s\\\\\\\\
+                            Организация: %s\\\\\\\\
+                            Специальность: %s\\\\\\\\
+                            Год окончания: %d\\\\\\\\
                             """.formatted(
                             as.getName(),
                             as.getOrganization(),
                             as.getResult(),
                             as.getYear()
                     ))
-                    .collect(Collectors.joining("", "Курсы повышения квалификации:\\\\", ""))
+                    .collect(Collectors.joining("", "Курсы повышения квалификации:\\\\\\\\", ""))
                     : "";
 
             List<Course> attestation = education.getAttestation();
             String attestationStr = attestation != null && !attestation.isEmpty()
                     ? attestation.stream()
                     .map(as -> """
-                            Название курса:%s\\
-                            Организация: %s\\
-                            Специальность: %s\\
-                            Год окончания: %d\\
-                            \\
+                            Название курса:%s\\\\\\\\
+                            Организация: %s\\\\\\\\
+                            Специальность: %s\\\\\\\\
+                            Год окончания: %d\\\\\\\\
                             """.formatted(
                             as.getName(),
                             as.getOrganization(),
                             as.getResult(),
                             as.getYear()
                     ))
-                    .collect(Collectors.joining("", "Пройденные тесты:\\\\", ""))
+                    .collect(Collectors.joining("", "Пройденные тесты:\\\\\\\\", ""))
                     : "";
 
             return """
@@ -195,13 +191,12 @@ public enum Placeholder {
             return !experience.isEmpty()
                     ? experience.stream()
                     .map(exp -> """
-                            Период работы: %s\\
-                            Компания: %s\\
-                            Город: %s\\
-                            Ссылка: %s\\
-                            Должность: %s\\
-                            Обязанности: %s\\
-                            \\
+                            Период работы: %s\\\\\\\\
+                            Компания: %s\\\\\\\\
+                            Город: %s\\\\\\\\
+                            Ссылка: %s\\\\\\\\
+                            Должность: %s\\\\\\\\
+                            Обязанности: %s\\\\\\\\
                             """.formatted("%s - %s".formatted(
                                     exp.getStart(),
                                     exp.getEnd() != null && !exp.getEnd().isEmpty()

@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.TimeUnit;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
@@ -31,9 +32,7 @@ public class LatexProcessor {
                 "-output-directory=%s".formatted(outputUserDir.toString()),
                 outputUserTex.toString());
         Process process = processBuilder.start();
-        if (process.waitFor() != 0) {
-            throw new RuntimeException("pdflatex exited with non-zero code.");
-        }
+        process.waitFor(5, TimeUnit.SECONDS);
 
         if (!outputUserTex.toFile().delete()) {
             log.warn("File with path: %s was not deleted".formatted(outputUserTex.toString()));

@@ -320,11 +320,15 @@ public class BotUtil {
     public com.resume.bot.model.entity.Resume getResume(String string, ResumeService resumeService, Long chatId, TelegramLongPollingBot bot) {
         int numOfResume = getResumeNumber(string);
         List<com.resume.bot.model.entity.Resume> resumes = resumeService.getResumesByUserId(chatId);
-        if (resumes.size() >= numOfResume) {
-            return resumes.get(numOfResume - 1);
+        if (resumes.size() <= numOfResume) {
+            if (resumes.size() == numOfResume) {
+                numOfResume -= 1;
+            } else {
+                sendMessage(bot, "Резюме не найдено. Попробуйте снова", chatId);
+                return null;
+            }
         }
-        sendMessage(bot, "Резюме не найдено. Попробуйте снова", chatId);
-        return null;
+        return resumes.get(numOfResume);
     }
 
     public int getResumeNumber(String string) {
