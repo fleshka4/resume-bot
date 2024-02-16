@@ -2,6 +2,8 @@ package com.resume.bot.display.handler;
 
 import com.resume.bot.display.BotState;
 import com.resume.bot.display.CallbackActionHandler;
+import com.resume.bot.json.entity.Industry;
+import com.resume.bot.json.entity.common.Type;
 import com.resume.util.BigKeyboardType;
 import com.resume.util.BotUtil;
 import com.resume.util.Constants;
@@ -13,8 +15,8 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.resume.bot.display.MessageUtil.executeEditMessageWithBigKeyBoard;
-import static com.resume.bot.display.MessageUtil.sendMessage;
+import static com.resume.bot.display.MessageUtil.*;
+import static com.resume.util.Constants.INDUSTRIES;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -42,9 +44,19 @@ public class BigKeyBoardHandler implements CallbackActionHandler {
             final int index = Integer.parseInt(callbackData.substring(bigKeyboardType.name().length() + 1));
             String message;
             if (bigKeyboardType == BigKeyboardType.INDUSTRIES) {
-                BotUtil.personAndIndustry.put(chatId, Constants.INDUSTRIES.get(index).getName());
-                BotUtil.dialogueStates.put(chatId, BotState.ENTER_POST_IN_ORGANIZATION);
-                message = "Введите свою должность в организации:";
+                String fieldValue = Constants.INDUSTRIES.get(index).getName();
+                BotUtil.personAndIndustry.put(chatId, fieldValue);
+
+                List<Type> industries = new ArrayList<>();
+                for (Industry industry : INDUSTRIES) {
+                    if (industry.getName().equals(fieldValue)) {
+                        industries = industry.getIndustries();
+                        break;
+                    }
+                }
+
+                executeEditMessageWithKeyBoard(bot, "Выберите отрасль:", messageId, chatId,
+                        industries.stream().map(Type::getName).toList(), industries.stream().map(Type::getId).toList());
             } else {
                 BotUtil.personAndProfessionalRole.put(chatId, Constants.PROFESSIONAL_ROLES.getCategories().get(index).getName());
                 BotUtil.dialogueStates.put(chatId, BotState.ENTER_WISH_SALARY);
@@ -52,8 +64,8 @@ public class BigKeyBoardHandler implements CallbackActionHandler {
                 List<String> callbackDataList = List.of("want_enter_salary", "skip_salary");
                 sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, callbackDataList));
                 message = "Хотите ли Вы указать желаемую зарплату?";
+                sendMessage(bot, message, sendMessageRequest);
             }
-            sendMessage(bot, message, sendMessageRequest);
             return;
         }
 

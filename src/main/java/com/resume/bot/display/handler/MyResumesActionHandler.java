@@ -175,7 +175,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
             String[] split = hhLink.split("/");
             String resumeId = split[split.length - 1];
             headHunterService.putEditClient(hhBaseUrl, chatId, resumeId,
-                    JsonProcessor.createEntityFromJson(resume.getResumeData(), com.resume.bot.json.entity.client.Resume.class));
+                    BotUtil.convertResume(JsonProcessor.createEntityFromJson(resume.getResumeData(), com.resume.bot.json.entity.client.Resume.class)));
         } catch (Exception exception) {
             log.error(exception.getMessage());
             sendMessage(bot, "Произошла ошибка при обновлении резюме. " +
@@ -217,8 +217,8 @@ public class MyResumesActionHandler implements CallbackActionHandler {
                     }
 
                     try {
-                        filePath = LatexProcessor.compile(JsonProcessor.createEntityFromJson(resume.getResumeData(),
-                                        com.resume.bot.json.entity.client.Resume.class),
+                        filePath = LatexProcessor.compile(BotUtil.convertResume(JsonProcessor.createEntityFromJson(resume.getResumeData(),
+                                        com.resume.bot.json.entity.client.Resume.class)),
                                 resume.getTemplate().getSourcePath(), chatId.toString(), resume.getTitle());
                     } catch (IOException | InterruptedException e) {
                         log.error(e.getMessage());

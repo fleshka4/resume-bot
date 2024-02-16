@@ -48,6 +48,7 @@ public class JsonValidator {
         REGION_NAME,
         CITY_NAME,
         LOCATION,
+        NAME,
         SKILLS,
         IN_LIST,
         IN_MAP
@@ -87,6 +88,7 @@ public class JsonValidator {
         checks.put(ValidationType.CITY_NAME, objects -> checkCity((String) objects[0]));
         checks.put(ValidationType.LOCATION, objects -> checkLocation((String) objects[0]));
         checks.put(ValidationType.SKILLS, objects -> checkSkills((String) objects[0]));
+        checks.put(ValidationType.NAME, objects -> checkName((String) objects[0]));
         checks.put(ValidationType.IN_LIST, objects -> isInList((String) objects[0], List.of((String[]) objects[1])));
         checks.put(ValidationType.IN_MAP, objects -> isInMap((String) objects[0], (Map<String, String>) objects[1]));
     }

@@ -19,6 +19,15 @@ import java.util.Map;
 @Slf4j
 @UtilityClass
 public class MessageUtil {
+    public static void executeMessageWithKeyBoard(TelegramLongPollingBot bot, String message,
+                                                  Long chatId, List<String> buttonLabels, List<String> buttonIds) {
+        SendMessage sendMessageRequest = createSendMessageRequest(bot, chatId);
+        sendMessageRequest.setText(message);
+
+        sendMessageRequest.setReplyMarkup(BotUtil.createInlineKeyboard(buttonLabels, buttonIds));
+        executeMessage(bot, sendMessageRequest);
+    }
+
     public static void executeEditMessageWithKeyBoard(TelegramLongPollingBot bot, String editMessageToSend, Integer messageId,
                                                       Long chatId, List<String> buttonLabels, List<String> buttonIds) {
         EditMessageText editMessage = new EditMessageText();

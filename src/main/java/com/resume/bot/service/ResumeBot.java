@@ -255,11 +255,11 @@ public class ResumeBot extends TelegramLongPollingBot {
         Map<String, String> resumeFields = checkAvailabilityResumeFields(chatId);
 
         receivedText = receivedText.trim();
-
         switch (currentDialogueState) {
             case ENTER_NAME -> {
                 if (checkInput(receivedText, sendMessageRequest, ALPHA_FORMAT) &&
-                        checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
+                        checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT) &&
+                        checkInput(receivedText, sendMessageRequest, NAME)) {
                     appendToField(resumeFields, ResumeField.NAME.getValue(), receivedText);
 
                     sendMessage(this, "Введите фамилию:", sendMessageRequest);
@@ -268,7 +268,8 @@ public class ResumeBot extends TelegramLongPollingBot {
             }
             case ENTER_SURNAME -> {
                 if (checkInput(receivedText, sendMessageRequest, ALPHA_FORMAT) &&
-                        checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
+                        checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT) &&
+                        checkInput(receivedText, sendMessageRequest, NAME)) {
                     appendToField(resumeFields, ResumeField.SURNAME.getValue(), receivedText);
 
                     sendMessage(this, "Введите отчество:", sendMessageRequest);
@@ -277,7 +278,8 @@ public class ResumeBot extends TelegramLongPollingBot {
             }
             case ENTER_PATRONYMIC -> {
                 if (checkInput(receivedText, sendMessageRequest, ALPHA_FORMAT) &&
-                        checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT)) {
+                        checkInput(receivedText, 128L, sendMessageRequest, SYMBOLS_LIMIT) &&
+                        checkInput(receivedText, sendMessageRequest, NAME)) {
                     appendToField(resumeFields, ResumeField.PATRONYMIC.getValue(), receivedText);
 
                     sendMessage(this, "Введите дату рождения в формате ДД-ММ-ГГГГ:", sendMessageRequest);

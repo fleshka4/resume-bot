@@ -42,7 +42,6 @@ public class CorrectDataHandler implements CallbackActionHandler {
                 if (tokenHolderService.checkTokenHolderExists(userService.getUser(chatId))) {
                     BotUtil.publishResume(BotUtil.lastSavedResumeMap.get(chatId), chatId, resumeService, headHunterService,
                             bot, hhBaseUrl, false);
-                    MessageUtil.executeEditMessage(bot, "Ваше резюме успешно опубликовано на hh.ru", messageId, chatId);
                     BotUtil.createMenu(MessageUtil.createSendMessageRequest(bot, chatId), bot);
                 } else {
                     BotUtil.authorization(bot, hhConfig,

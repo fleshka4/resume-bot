@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 
 import static com.resume.bot.display.MessageUtil.*;
 import static com.resume.util.BotUtil.appendToField;
+import static com.resume.util.BotUtil.personAndIndustry;
 import static com.resume.util.Constants.*;
 import static org.apache.commons.lang3.math.NumberUtils.createLong;
 
@@ -278,6 +279,16 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
 
             executeContinueKeyboardMessage(bot, "Выберите желаемый график.", messageId, chatId, unChosenSchedule, "skip_schedule");
         }
+
+        if (INDUSTRIES.stream()
+                .filter(ind -> ind.getName().equals(personAndIndustry.get(chatId)))
+                .findFirst().get().getIndustries()
+                .stream().anyMatch(ind -> ind.getId().equals(callbackData))
+        ) {
+            processOnChosenIndustry(callbackData, chatId, userData);
+            BotUtil.dialogueStates.put(chatId, BotState.ENTER_POST_IN_ORGANIZATION);
+            executeEditMessage(bot, "Введите свою должность в организации:", messageId, chatId);
+        }
     }
 
     private void fillClientData(Long chatId) {
@@ -325,6 +336,11 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                     List<String> items = Arrays.stream(fieldValue.split(ITEMS_DELIMITER)).toList();
                     initList(primaryEducations, PrimaryEducation.class, items.size());
                     initList(elementaryEducations, ElementaryEducation.class, items.size());
+                    if (isPrimaryEdu) {
+                        elementaryEducations = null;
+                    } else {
+                        primaryEducations = null;
+                    }
                     if (items.isEmpty()) {
                         primaryEducations = null;
                         elementaryEducations = null;
@@ -349,14 +365,14 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                     for (int i = 0; i < items.size(); i++) {
                         String item = items.get(i);
                         Experience workExperience = workExperiences.get(i);
-                        processOnWorkExperience(workExperience, fieldLabel, item);
+                        processOnWorkExperience(workExperience, fieldLabel, item, chatId);
                     }
                 }
                 case "навыки" ->
                         resume.setSkillSet(Arrays.stream(fieldValue.split(",")).map(String::trim).collect(Collectors.toSet()));
                 case "категория прав" -> {
                     List<String> items = Arrays.stream(fieldValue.split(ITEMS_DELIMITER)).toList();
-                    initList(driverLicenseTypes, Id.class, items.size());
+                    //initList(driverLicenseTypes, Id.class, items.size());
                     if (items.isEmpty()) {
                         resume.setHasVehicle(false);
                         driverLicenseTypes = null;
@@ -372,7 +388,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                 }
                 case "имя выдавшего рекомендацию", "должность выдавшего рекомендацию", "организация выдавшего рекомендацию" -> {
                     List<String> items = Arrays.stream(fieldValue.split(ITEMS_DELIMITER)).toList();
-                    initList(recommendationList, Recommendation.class, items.size());
+                    //initList(recommendationList, Recommendation.class, items.size());
                     if (items.isEmpty()) {
                         recommendationList = null;
                     }
@@ -405,7 +421,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                 }
                 case "желаемая занятость" -> {
                     List<String> items = Arrays.stream(fieldValue.split(ITEMS_DELIMITER)).toList();
-                    initList(busyness, Type.class, items.size());
+                    //initList(busyness, Type.class, items.size());
 
                     for (String item : items) {
                         Type typeBusyness = new Type();
@@ -414,9 +430,9 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                         busyness.add(typeBusyness);
                     }
                 }
-                case "желаемый график работы" -> {
+                case "желаемый график" -> {
                     List<String> items = Arrays.stream(fieldValue.split(ITEMS_DELIMITER)).toList();
-                    initList(schedules, Type.class, items.size());
+                    //initList(schedules, Type.class, items.size());
 
                     for (String item : items) {
                         Type typeSchedules = new Type();
@@ -461,7 +477,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
     }
 
     private <T> void initList(List<T> listToInit, Class<T> type, int size) {
-        if (listToInit.isEmpty()) {
+        if (listToInit != null && listToInit.isEmpty()) {
             for (int i = 0; i < size; i++) {
                 try {
                     listToInit.add(type.getDeclaredConstructor().newInstance());
@@ -512,6 +528,11 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
         BotUtil.userResumeData.put(chatId, userData);
     }
 
+    private void processOnChosenIndustry(String industry, Long chatId, Map<String, String> userData) {
+        appendToField(userData, ResumeField.EXPERIENCE_ORG_INDUSTRY.getValue(), industry);
+        BotUtil.userResumeData.put(chatId, userData);
+    }
+
     private void processOnRecommendations(Recommendation recommendation, String fieldLabel, String fieldValue) {
         switch (fieldLabel) {
             case "имя выдавшего рекомендацию" -> recommendation.setName(fieldValue);
@@ -520,7 +541,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
         }
     }
 
-    private void processOnWorkExperience(Experience workExperience, String fieldLabel, String fieldValue) {
+    private void processOnWorkExperience(Experience workExperience, String fieldLabel, String fieldValue, Long chatId) {
         switch (fieldLabel) {
             case "опыт работы" -> {
                 String[] dates = fieldValue.split(EXPERIENCE_DELIMITER);
@@ -539,17 +560,11 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
             case "должность" -> workExperience.setPosition(fieldValue);
             case "обязанности" -> workExperience.setDescription(fieldValue);
             case "отрасль" -> {
-                List<Type> industries = null;
-                for (Industry industry : INDUSTRIES) {
-                    if (industry.getName().equals(fieldValue)) {
-                        industries = industry.getIndustries();
-                        break;
-                    }
-                }
-                if (industries == null) {
-                    throw new RuntimeException("Industry is null");
-                }
-                workExperience.setIndustries(industries);
+                Type industry = INDUSTRIES.stream()
+                        .filter(ind -> ind.getName().equals(personAndIndustry.get(chatId)))
+                        .findFirst().get().getIndustries()
+                        .stream().filter(ind -> ind.getId().equals(fieldValue)).findFirst().get();
+                workExperience.setIndustries(List.of(industry));
             }
         }
     }

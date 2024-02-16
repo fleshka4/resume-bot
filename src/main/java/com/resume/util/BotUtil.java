@@ -1,6 +1,7 @@
 package com.resume.util;
 
 import com.resume.bot.display.BotState;
+import com.resume.bot.display.MessageUtil;
 import com.resume.bot.json.JsonProcessor;
 import com.resume.bot.json.entity.client.Experience;
 import com.resume.bot.json.entity.client.Recommendation;
@@ -133,6 +134,20 @@ public class BotUtil {
     public final Map<Long, String> personAndIndustry = new HashMap<>(); // chatId, industry
     public final Map<Long, String> personAndProfessionalRole = new HashMap<>(); // chatId, professionalRole
     public final Random random = new Random();
+
+
+    public Resume convertResume(Resume resume) {
+        resume.setExperience(resume.getExperience().stream().peek(experience -> {
+            experience.setStart(reverseDate(experience.getStart()) + "-01");
+            experience.setEnd(reverseDate(experience.getEnd()) + "-01");
+        }).toList());
+        return resume;
+    }
+
+    private String reverseDate(String date) {
+        String[] parts = date.split("-");
+        return parts[1] + "-" + parts[0];
+    }
 
     public InlineKeyboardMarkup createInlineKeyboard(List<String> buttonLabels, List<String> callbackData, BigKeyboardType type) {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
@@ -295,8 +310,10 @@ public class BotUtil {
         if (resume != null) {
             try {
                 String hhLink = headHunterService.postCreateClient(hhBaseUrl, chatId,
-                        JsonProcessor.createEntityFromJson(resume.getResumeData(), com.resume.bot.json.entity.client.Resume.class));
+                        convertResume(JsonProcessor.createEntityFromJson(resume.getResumeData(), com.resume.bot.json.entity.client.Resume.class)));
                 resumeService.updateHhLinkByResumeId(hhLink, resume.getResumeId());
+                String message = "Ваше резюме успешно опубликовано на hh.ru";
+                sendMessage(bot, message, chatId);
             } catch (Exception exception) {
                 log.error(exception.getMessage());
                 String message = "Произошла ошибка при публикации резюме. " +
@@ -322,7 +339,7 @@ public class BotUtil {
     }
 
     public String askToEditMyResume(com.resume.bot.model.entity.Resume resume, Long chatId) {
-        Resume res = JsonProcessor.createEntityFromJson(resume.getResumeData(), Resume.class);
+        Resume res = convertResume(JsonProcessor.createEntityFromJson(resume.getResumeData(), Resume.class));
 
         String areaStr = ConstantsUtil.getAreaString(
                 ConstantsUtil.getAreaByIdDeep(Constants.AREAS, res.getArea().getId()).orElse(null));

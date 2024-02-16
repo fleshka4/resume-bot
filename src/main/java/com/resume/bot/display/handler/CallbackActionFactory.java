@@ -1,6 +1,7 @@
 package com.resume.bot.display.handler;
 
 import com.resume.bot.display.CallbackActionHandler;
+import com.resume.bot.json.entity.Industry;
 import com.resume.bot.service.*;
 import com.resume.hh_wrapper.config.HhConfig;
 import com.resume.hh_wrapper.impl.ApiClientTokenImpl;
@@ -9,6 +10,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 
+import static com.resume.util.BotUtil.personAndIndustry;
 import static com.resume.util.Constants.*;
 
 @AllArgsConstructor
@@ -39,7 +41,8 @@ public class CallbackActionFactory {
                 driverLicenseTypes.containsKey(callbackData) ||
                 employmentTypes.containsKey(callbackData) ||
                 scheduleTypes.containsKey(callbackData) ||
-                contactTypes.containsKey(callbackData)) {
+                contactTypes.containsKey(callbackData) ||
+                isInChildIndustries(callbackData)) {
             return new CreateResumeActionHandler(pollingBot, resumeService, userService);
         }
         if (BotUtil.CORRECT_DATA_IDS_LIST.contains(callbackData)) {
@@ -55,5 +58,17 @@ public class CallbackActionFactory {
             return new BigKeyBoardHandler(pollingBot);
         }
         return null;
+    }
+
+    private boolean isInChildIndustries(String id) {
+        boolean ans = false;
+        for (Industry industry : INDUSTRIES) {
+            ans = industry.getIndustries()
+                    .stream().anyMatch(ind -> ind.getId().equals(id));
+            if (ans == true) {
+                return ans;
+            }
+        }
+        return ans;
     }
 }
