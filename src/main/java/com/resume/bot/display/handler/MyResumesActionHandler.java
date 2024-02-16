@@ -301,7 +301,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
                     templateService.getTemplates().stream()
                             .map(t -> {
                                 InputMedia im = new InputMediaPhoto();
-                                im.setMedia(new File(t.getImagePath()), "%d.png".formatted(t.getTemplateId()));
+                                im.setMedia(new File(t.getImagePath()), "%d.jpg".formatted(t.getTemplateId()));
                                 return im;
                             }).toList()));
         } catch (TelegramApiException e) {
@@ -309,7 +309,7 @@ public class MyResumesActionHandler implements CallbackActionHandler {
             sendMessage(bot, "Что-то пошло не так. Попробуйте заново", chatId);
         }
 
-        executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode("Выберите шаблон:slightly_smiling:"), // todo: добавить изображения шаблонов
+        executeEditMessageWithKeyBoard(bot, EmojiParser.parseToUnicode("Выберите шаблон:slightly_smiling:"),
                 messageId, chatId, labels, ids);
 
         return true;
