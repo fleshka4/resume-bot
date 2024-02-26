@@ -1,5 +1,7 @@
 package com.resume.bot.json.entity.roles;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,4 +21,12 @@ public class Category {
 
     @NonNull
     private List<Role> roles;
+
+    @JsonCreator
+    public static Category createCategory(
+            @JsonProperty("id") @NonNull String id,
+            @JsonProperty("name") @NonNull String name,
+            @JsonProperty("roles") @NonNull List<Role> roles) {
+        return new Category(id, name, roles);
+    }
 }

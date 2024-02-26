@@ -1,12 +1,11 @@
 package com.resume.bot.json.entity.client.education;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
-@NoArgsConstructor
 @AllArgsConstructor
 @Data
 public class PrimaryEducation {
@@ -27,4 +26,16 @@ public class PrimaryEducation {
     private String resultId;
 
     private long year;
+
+    @JsonCreator
+    public static PrimaryEducation createPrimaryEducation(
+            @JsonProperty("name") String name,
+            @JsonProperty("name_id") String nameId,
+            @JsonProperty("organization") String organization,
+            @JsonProperty("organization_id") String organizationId,
+            @JsonProperty("result") String result,
+            @JsonProperty("result_id") String resultId,
+            @JsonProperty("year") long year) {
+        return new PrimaryEducation(name, nameId, organization, organizationId, result, resultId, year);
+    }
 }

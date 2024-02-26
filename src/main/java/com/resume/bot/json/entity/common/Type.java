@@ -1,5 +1,7 @@
 package com.resume.bot.json.entity.common;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,4 +16,11 @@ public class Type {
 
     @NonNull
     private String name;
+
+    @JsonCreator
+    public static Type createType(
+            @JsonProperty("id") @NonNull String id,
+            @JsonProperty("name") @NonNull String name) {
+        return new Type(id, name);
+    }
 }

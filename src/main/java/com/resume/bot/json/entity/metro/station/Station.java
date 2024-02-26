@@ -1,5 +1,7 @@
 package com.resume.bot.json.entity.metro.station;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,4 +28,15 @@ public class Station {
 
     @NonNull
     private Long order;
+
+    @JsonCreator
+    public static Station createStation(
+            @JsonProperty("id") @NonNull String id,
+            @JsonProperty("lat") @NonNull Double lat,
+            @JsonProperty("line") @NonNull Line line,
+            @JsonProperty("lng") @NonNull Double lng,
+            @JsonProperty("name") @NonNull String name,
+            @JsonProperty("order") @NonNull Long order) {
+        return new Station(id, lat, line, lng, name, order);
+    }
 }

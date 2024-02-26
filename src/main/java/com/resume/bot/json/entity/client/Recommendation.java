@@ -1,5 +1,7 @@
 package com.resume.bot.json.entity.client;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,4 +22,13 @@ public class Recommendation {
 
     @NonNull
     private String position;
+
+    @JsonCreator
+    public static Recommendation createRecommendation(
+            @JsonProperty("contact") @NonNull String contact,
+            @JsonProperty("name") @NonNull String name,
+            @JsonProperty("organization") @NonNull String organization,
+            @JsonProperty("position") @NonNull String position) {
+        return new Recommendation(contact, name, organization, position);
+    }
 }
