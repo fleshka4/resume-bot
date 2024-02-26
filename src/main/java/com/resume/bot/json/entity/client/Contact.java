@@ -7,7 +7,6 @@ import lombok.*;
 
 import java.util.Arrays;
 
-@NoArgsConstructor
 @AllArgsConstructor
 @Data
 public class Contact {

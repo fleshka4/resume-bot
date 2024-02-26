@@ -1,7 +1,6 @@
 package com.resume.bot.json.entity.client;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.resume.bot.json.JsonValidator;
 import com.resume.bot.json.entity.client.education.Education;
 import com.resume.bot.json.entity.common.Id;
 import com.resume.bot.json.entity.common.Type;
@@ -12,7 +11,6 @@ import lombok.NonNull;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @NoArgsConstructor
 @AllArgsConstructor

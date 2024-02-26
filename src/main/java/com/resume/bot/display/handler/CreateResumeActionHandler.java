@@ -295,7 +295,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
         List<ElementaryEducation> elementaryEducations = new ArrayList<>();
         List<Experience> workExperiences = new ArrayList<>();
         List<Id> driverLicenseTypes = new ArrayList<>();
-        Recommendation recommendation = new Recommendation();
+        Recommendation recommendation = new Recommendation("", "", "", "");
         List<Recommendation> recommendationList = new ArrayList<>();
         List<Type> busyness = new ArrayList<>();
         List<Type> schedules = new ArrayList<>();
@@ -309,23 +309,19 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                 case "фамилия" -> resume.setLastName(fieldValue);
                 case "отчество" -> resume.setMiddleName(fieldValue);
                 case "пол" -> {
-                    Id genderId = new Id();
-                    genderId.setId(fieldValue.equals("Мужской") ? "male" : "female");
+                    Id genderId = new Id(fieldValue.equals("Мужской") ? "male" : "female");
                     resume.setGender(genderId);
                 }
                 case "место жительства" -> {
-                    Id areaId = new Id();
                     String[] items = fieldValue.split(",");
                     String cityName = items[items.length - 1].trim();
-                    areaId.setId(ConstantsUtil.getAreaByNameDeep(Constants.AREAS, cityName).get().getId());
+                    Id areaId = new Id(ConstantsUtil.getAreaByNameDeep(Constants.AREAS, cityName).get().getId());
                     resume.setArea(areaId);
                 }
                 case "уровень образования" -> {
                     String[] items = fieldValue.split(ITEMS_DELIMITER);
                     for (String item : items) {
-                        Type typeEdu = new Type();
-                        typeEdu.setId(getKeyByValue(educationLevels, item));
-                        typeEdu.setName(item);
+                        Type typeEdu = new Type(getKeyByValue(educationLevels, item), item);
                         education.setLevel(typeEdu);
                     }
                 }
@@ -378,8 +374,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                     }
 
                     for (String item : items) {
-                        Id idLicense = new Id();
-                        idLicense.setId(item);
+                        Id idLicense = new Id(item);
                         driverLicenseTypes.add(idLicense);
                     }
                 }
@@ -412,9 +407,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                     }
                 }
                 case "желаемая зарплата" -> {
-                    Salary salary = new Salary();
-                    salary.setAmount(createLong(fieldValue));
-                    salary.setCurrency("RUR");
+                    Salary salary = new Salary(createLong(fieldValue), "RUR");
                     resume.setSalary(salary);
                 }
                 case "желаемая занятость" -> {
@@ -422,9 +415,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                     //initList(busyness, Type.class, items.size());
 
                     for (String item : items) {
-                        Type typeBusyness = new Type();
-                        typeBusyness.setId(getKeyByValue(employmentTypes, item));
-                        typeBusyness.setName(item);
+                        Type typeBusyness = new Type(getKeyByValue(employmentTypes, item), item);
                         busyness.add(typeBusyness);
                     }
                 }
@@ -433,8 +424,7 @@ public class CreateResumeActionHandler implements CallbackActionHandler {
                     //initList(schedules, Type.class, items.size());
 
                     for (String item : items) {
-                        Type typeSchedules = new Type();
-                        typeSchedules.setId(getKeyByValue(scheduleTypes, item));
+                        Type typeSchedules = new Type(getKeyByValue(scheduleTypes, item), item);
                         typeSchedules.setName(item);
                         schedules.add(typeSchedules);
                     }
