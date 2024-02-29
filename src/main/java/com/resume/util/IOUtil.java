@@ -12,14 +12,7 @@ import java.nio.file.Paths;
 @UtilityClass
 public class IOUtil {
     public static String loadFileContent(String filePath) {
-        try {
-            Path path = Paths.get(filePath);
-            byte[] fileBytes = Files.readAllBytes(path);
-            return new String(fileBytes);
-        } catch (IOException e) {
-            log.error(e.getMessage());
-            return null;
-        }
+        return loadFileContent(Paths.get(filePath));
     }
 
     public static String loadFileContent(Path path) {

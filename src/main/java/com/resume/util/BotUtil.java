@@ -341,7 +341,7 @@ public class BotUtil {
         Resume res = convertResume(JsonProcessor.createEntityFromJson(resume.getResumeData(), Resume.class));
 
         String areaStr = ConstantsUtil.getAreaString(
-                ConstantsUtil.getAreaByIdDeep(Constants.AREAS, res.getArea().getId()).orElse(null));
+                Constants.AREAS, ConstantsUtil.getAreaByIdDeep(Constants.AREAS, res.getArea().getId()).orElse(null));
 
         Education education = res.getEducation();
         String educStr = education != null && !education.getPrimary().isEmpty()
