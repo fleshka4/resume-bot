@@ -54,45 +54,43 @@ public class JsonValidator {
         IN_MAP
     }
 
-    public static final Map<ValidationType, Function<Object[], Boolean>> checks = new HashMap<>();
-
-    static {
-        checks.put(ValidationType.GRADUATION_YEAR_WITH_YEAR, objects -> checkGraduationYear((String) objects[0]));
-        checks.put(ValidationType.SYMBOLS_LIMIT, objects -> checkSymbolsLimit((String) objects[0], (Long) objects[1]));
-        checks.put(ValidationType.BIRTHDAY, objects -> checkBirthday((String) objects[0]));
-        checks.put(ValidationType.EXPERIENCE, objects -> checkExperience((String) objects[0], (String) objects[1]));
-        checks.put(ValidationType.ALPHA_FORMAT, objects -> checkAlphaFormat((String) objects[0]));
-        checks.put(ValidationType.ALPHA_SPACE_FORMAT, objects -> checkAlphaSpaceFormat((String) objects[0]));
-        checks.put(ValidationType.STRING_WITH_PUNCTUATION, objects -> checkStringWithPunctuation((String) objects[0]));
-        checks.put(ValidationType.ALPHANUMERIC_FORMAT, objects -> checkAlphanumericFormat((String) objects[0]));
-        checks.put(ValidationType.NUMERIC_FORMAT, objects -> checkNumericFormat((String) objects[0]));
-        checks.put(ValidationType.DATE_FORMAT, objects -> checkDateFormat((String) objects[0]));
-        checks.put(ValidationType.PHONE_NUMBER_FORMAT, objects -> checkPhoneFormat((String) objects[0]));
-        checks.put(ValidationType.EMAIL_FORMAT, objects -> checkEmailFormat((String) objects[0]));
-        checks.put(ValidationType.RESUME_VISIBILITY_TYPE, objects -> checkVisibilityType((String) objects[0]));
-        checks.put(ValidationType.BUSINESS_TRIP_READINESS, objects -> checkTripReadiness((String) objects[0]));
-        checks.put(ValidationType.DRIVER_LICENSE_TYPE, objects -> checkDriverLicenseType((String) objects[0]));
-        checks.put(ValidationType.EMPLOYMENT_TYPE, objects -> checkEmploymentType((String) objects[0]));
-        checks.put(ValidationType.HIDDEN_FIELD, objects -> checkHiddenField((String) objects[0]));
-        checks.put(ValidationType.SCHEDULE_TYPE, objects -> checkScheduleType((String) objects[0]));
-        checks.put(ValidationType.TRAVEL_TIME, objects -> checkTravelTime((String) objects[0]));
-        checks.put(ValidationType.SEX, objects -> checkSex((String) objects[0]));
-        checks.put(ValidationType.RELOCATION_READINESS, objects -> checkRelocationReadiness((String) objects[0]));
-        checks.put(ValidationType.CURRENCY, objects -> checkCurrency((String) objects[0]));
-        checks.put(ValidationType.SITE_TYPE, objects -> checkSiteType((String) objects[0]));
-        checks.put(ValidationType.LINK, objects -> checkLinkFormat((String) objects[0]));
-        checks.put(ValidationType.CONTACT_TYPE, objects -> checkContactType((String) objects[0]));
-        checks.put(ValidationType.EDUCATION_LEVEL, objects -> checkEducationLevel((String) objects[0]));
-        checks.put(ValidationType.LANGUAGE_LEVEL, objects -> checkLanguageLevel((String) objects[0]));
-        checks.put(ValidationType.COUNTRY_NAME, objects -> checkCountry((String) objects[0]));
-        checks.put(ValidationType.REGION_NAME, objects -> checkRegion((String) objects[0]));
-        checks.put(ValidationType.CITY_NAME, objects -> checkCity((String) objects[0]));
-        checks.put(ValidationType.LOCATION, objects -> checkLocation((String) objects[0]));
-        checks.put(ValidationType.SKILLS, objects -> checkSkills((String) objects[0]));
-        checks.put(ValidationType.NAME, objects -> checkName((String) objects[0]));
-        checks.put(ValidationType.IN_LIST, objects -> isInList((String) objects[0], List.of((String[]) objects[1])));
-        checks.put(ValidationType.IN_MAP, objects -> isInMap((String) objects[0], (Map<String, String>) objects[1]));
-    }
+    public static final Map<ValidationType, Function<Object[], Boolean>> checks = new HashMap<>() {{
+            put(ValidationType.GRADUATION_YEAR_WITH_YEAR, objects -> checkGraduationYear((String) objects[0]));
+            put(ValidationType.SYMBOLS_LIMIT, objects -> checkSymbolsLimit((String) objects[0], (Long) objects[1]));
+            put(ValidationType.BIRTHDAY, objects -> checkBirthday((String) objects[0]));
+            put(ValidationType.EXPERIENCE, objects -> checkExperience((String) objects[0], (String) objects[1]));
+            put(ValidationType.ALPHA_FORMAT, objects -> checkAlphaFormat((String) objects[0]));
+            put(ValidationType.ALPHA_SPACE_FORMAT, objects -> checkAlphaSpaceFormat((String) objects[0]));
+            put(ValidationType.STRING_WITH_PUNCTUATION, objects -> checkStringWithPunctuation((String) objects[0]));
+            put(ValidationType.ALPHANUMERIC_FORMAT, objects -> checkAlphanumericFormat((String) objects[0]));
+            put(ValidationType.NUMERIC_FORMAT, objects -> checkNumericFormat((String) objects[0]));
+            put(ValidationType.DATE_FORMAT, objects -> checkDateFormat((String) objects[0]));
+            put(ValidationType.PHONE_NUMBER_FORMAT, objects -> checkPhoneFormat((String) objects[0]));
+            put(ValidationType.EMAIL_FORMAT, objects -> checkEmailFormat((String) objects[0]));
+            put(ValidationType.RESUME_VISIBILITY_TYPE, objects -> checkVisibilityType((String) objects[0]));
+            put(ValidationType.BUSINESS_TRIP_READINESS, objects -> checkTripReadiness((String) objects[0]));
+            put(ValidationType.DRIVER_LICENSE_TYPE, objects -> checkDriverLicenseType((String) objects[0]));
+            put(ValidationType.EMPLOYMENT_TYPE, objects -> checkEmploymentType((String) objects[0]));
+            put(ValidationType.HIDDEN_FIELD, objects -> checkHiddenField((String) objects[0]));
+            put(ValidationType.SCHEDULE_TYPE, objects -> checkScheduleType((String) objects[0]));
+            put(ValidationType.TRAVEL_TIME, objects -> checkTravelTime((String) objects[0]));
+            put(ValidationType.SEX, objects -> checkSex((String) objects[0]));
+            put(ValidationType.RELOCATION_READINESS, objects -> checkRelocationReadiness((String) objects[0]));
+            put(ValidationType.CURRENCY, objects -> checkCurrency((String) objects[0]));
+            put(ValidationType.SITE_TYPE, objects -> checkSiteType((String) objects[0]));
+            put(ValidationType.LINK, objects -> checkLinkFormat((String) objects[0]));
+            put(ValidationType.CONTACT_TYPE, objects -> checkContactType((String) objects[0]));
+            put(ValidationType.EDUCATION_LEVEL, objects -> checkEducationLevel((String) objects[0]));
+            put(ValidationType.LANGUAGE_LEVEL, objects -> checkLanguageLevel((String) objects[0]));
+            put(ValidationType.COUNTRY_NAME, objects -> checkCountry((String) objects[0]));
+            put(ValidationType.REGION_NAME, objects -> checkRegion((String) objects[0]));
+            put(ValidationType.CITY_NAME, objects -> checkCity((String) objects[0]));
+            put(ValidationType.LOCATION, objects -> checkLocation((String) objects[0]));
+            put(ValidationType.SKILLS, objects -> checkSkills((String) objects[0]));
+            put(ValidationType.NAME, objects -> checkName((String) objects[0]));
+            put(ValidationType.IN_LIST, objects -> isInList((String) objects[0], List.of((String[]) objects[1])));
+            put(ValidationType.IN_MAP, objects -> isInMap((String) objects[0], (Map<String, String>) objects[1]));
+    }};
 
     private static final int GRADUATION_DATE_MIN_YEAR = 1950;
     private static final int BIRTH_DATE_MIN_YEAR = 1900;
