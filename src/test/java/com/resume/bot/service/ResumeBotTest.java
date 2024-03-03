@@ -1,10 +1,9 @@
-package com.resume.bot;
+package com.resume.bot.service;
 
 import com.resume.bot.config.BotConfig;
 import com.resume.bot.display.BotState;
 import com.resume.bot.display.MessageUtil;
 import com.resume.bot.display.handler.CallbackActionFactory;
-import com.resume.bot.service.*;
 import com.resume.util.BotUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
