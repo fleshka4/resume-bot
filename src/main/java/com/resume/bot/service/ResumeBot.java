@@ -144,7 +144,7 @@ public class ResumeBot extends TelegramLongPollingBot {
             }
 
             switch (callbackData) {
-                case "yes_go_to_menu" -> createMenu(sendMessageRequest);
+                case "yes_go_to_menu" -> BotUtil.createMenu(sendMessageRequest, this);
                 case "no_go_to_menu" ->
                         sendMessage(this, EmojiParser.parseToUnicode("Продолжим работу.:wink:"), sendMessageRequest);
                 case "skip_contacts" -> {
@@ -162,7 +162,7 @@ public class ResumeBot extends TelegramLongPollingBot {
         }
     }
 
-    private void updateTemplate(String callbackData, Integer messageId, Long chatId) {
+    public void updateTemplate(String callbackData, Integer messageId, Long chatId) {
         String[] splits = callbackData.split("_");
         if (splits.length == 4) {
             List<com.resume.bot.model.entity.Resume> resumes = resumeService.getResumesByUserId(chatId);
@@ -182,7 +182,7 @@ public class ResumeBot extends TelegramLongPollingBot {
         }
     }
 
-    private void setTemplate(com.resume.bot.model.entity.Resume resume, String[] splits) {
+    public void setTemplate(com.resume.bot.model.entity.Resume resume, String[] splits) {
         Template template = templateService.getTemplate(Integer.parseInt(splits[splits.length - 1]));
         if (template == null) {
             throw new RuntimeException("Template is not found");
@@ -191,7 +191,7 @@ public class ResumeBot extends TelegramLongPollingBot {
         resumeService.updateTemplateByResumeId(template, resume.getResumeId());
     }
 
-    private void startCommandReceived(Message message, SendMessage sendMessageRequest) {
+    public void startCommandReceived(Message message, SendMessage sendMessageRequest) {
         String startMessage = "Привет " + message.getChat().getFirstName() + " !:wave:\nЯ бот для создания резюме. " +
                 "Давай вместе составим профессиональное резюме для твоего будущего успеха!:star2:\n" +
                 "Просто следуй моим инструкциям.";
@@ -199,10 +199,10 @@ public class ResumeBot extends TelegramLongPollingBot {
         log.info("Replied to user: " + message.getChat().getFirstName());
 
         sendMessage(this, EmojiParser.parseToUnicode(startMessage), sendMessageRequest);
-        createMenu(sendMessageRequest);
+        BotUtil.createMenu(sendMessageRequest, this);
     }
 
-    private void menuCommandReceived(SendMessage sendMessageRequest) {
+    public void menuCommandReceived(SendMessage sendMessageRequest) {
         List<String> buttonLabels = Arrays.asList("Да", "Нет");
         List<String> callbackData = Arrays.asList("yes_go_to_menu", "no_go_to_menu");
 
@@ -530,7 +530,7 @@ public class ResumeBot extends TelegramLongPollingBot {
         }
     }
 
-    private void finishDialogueWithClient(Long chatId, SendMessage sendMessageRequest) {
+    public void finishDialogueWithClient(Long chatId, SendMessage sendMessageRequest) {
         if (BotUtil.userStates.get(chatId) == BotState.FINISH_DIALOGUE) {
             Map<String, String> resumeFields = BotUtil.userResumeData.get(chatId);
             if (BotUtil.personAndProfessionalRole.containsKey(chatId)) {
@@ -647,7 +647,7 @@ public class ResumeBot extends TelegramLongPollingBot {
         }
     }
 
-    private void sendResultMessageAboutClientData(Map<String, String> resumeFields, SendMessage sendMessageRequest) {
+    public void sendResultMessageAboutClientData(Map<String, String> resumeFields, SendMessage sendMessageRequest) {
         StringBuilder resume = new StringBuilder().append("Пожалуйста, проверьте введенные данные:\n\n");
         Map<String, List<String>> resumeFieldToValues = new LinkedHashMap<>();
         String currentBlock;
@@ -752,10 +752,6 @@ public class ResumeBot extends TelegramLongPollingBot {
     @Override
     public String getBotToken() {
         return botConfig.getToken();
-    }
-
-    private void createMenu(SendMessage sendMessageRequest) {
-        BotUtil.createMenu(sendMessageRequest, this);
     }
 
     private boolean checkInput(String receivedText, SendMessage sendMessageRequest, JsonValidator.ValidationType validationType) {
