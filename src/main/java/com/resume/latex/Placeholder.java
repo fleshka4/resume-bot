@@ -217,13 +217,6 @@ public enum Placeholder {
                     : "";
         }
     };
-//    PLACE_FOR_TOTAL_EXPERIENCE("PLACE-FOR-TOTAL-EXPERIENCE") {
-//        @Override
-//        public String replaceValue(Resume resume) {
-//            TotalExperience totalExperience = resume.getTotalExperience();
-//            return totalExperience != null ? totalExperience.getMonths().toString() : "0";
-//        }
-//    };
 
     private final String value;
 
