@@ -129,7 +129,6 @@ public class BotUtil {
     public final Map<Long, com.resume.bot.model.entity.Resume> lastSavedResumeMap = new HashMap<>(); // chatId, last Resume which was created from 0
     public final String ERROR_TEXT = "Error occurred: ";
     public final Map<Long, Long> states = new HashMap<>(); // authorize: state, chatId
-    public final Map<Long, String> personAndIndustryType = new HashMap<>(); // chatId, industryType
     public final Map<Long, String> personAndIndustry = new HashMap<>(); // chatId, industry
     public final Map<Long, String> personAndProfessionalRole = new HashMap<>(); // chatId, professionalRole
     public final Random random = new Random();

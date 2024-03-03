@@ -1,9 +1,10 @@
-package com.resume.bot.service;
+package com.resume.bot;
 
 import com.resume.bot.config.BotConfig;
 import com.resume.bot.display.BotState;
 import com.resume.bot.display.MessageUtil;
 import com.resume.bot.display.handler.CallbackActionFactory;
+import com.resume.bot.service.*;
 import com.resume.util.BotUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 
 @SpringBootTest
-public class ResumeBotTests {
+public class ResumeBotTest {
     private Long chatId = 882258832L;
     private Long tgUId = 882258832L;
 
