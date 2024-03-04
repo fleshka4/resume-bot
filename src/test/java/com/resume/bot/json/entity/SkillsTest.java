@@ -58,11 +58,11 @@ public class SkillsTest {
         Skills skills2 = new Skills(items2);
         Skills skills3 = new Skills(items3);
 
-        // Test equals
+        
         assertEquals(skills1, skills2);
         assertNotEquals(skills1, skills3);
 
-        // Test hashCode
+        
         assertEquals(skills1.hashCode(), skills2.hashCode());
         assertNotEquals(skills1.hashCode(), skills3.hashCode());
     }

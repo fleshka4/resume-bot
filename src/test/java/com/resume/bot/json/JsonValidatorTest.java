@@ -27,233 +27,242 @@ public class JsonValidatorTest {
     }
 
     @Test
-    public void testCheckGraduationYearWithYearValidYearTestTest() {
+    public void testCheckGraduationYearWithYearValidYearTest() {
         assertTrue(JsonValidator.checkGraduationYear("2022"));
     }
 
     @Test
-    public void testCheckGraduationYearWithYearNotIntegerYearTestTest() {
+    public void testCheckGraduationYearWithYearNotIntegerYearTest() {
         assertFalse(JsonValidator.checkGraduationYear("invalid"));
     }
 
     @Test
-    public void testCheckGraduationYearWithYearInvalidYearTestTest() {
+    public void testCheckGraduationYearWithYearInvalidYearTest() {
         assertFalse(JsonValidator.checkGraduationYear("1700"));
     }
 
     @Test
-    public void testCheckSymbolsLimitValidTextTestTest() {
+    public void testCheckSymbolsLimitValidTextTest() {
         assertTrue(JsonValidator.checkSymbolsLimit("Lorem ipsum dolor sit amet", 50));
     }
 
     @Test
-    public void testCheckSymbolsLimitInvalidTextTestTest() {
+    public void testCheckSymbolsLimitInvalidTextTest() {
         assertFalse(JsonValidator.checkSymbolsLimit("Lorem ipsum dolor sit amet", 10));
     }
 
     @Test
-    public void testCheckLinkFormatValidUrlTestTest() {
+    public void testCheckLinkFormatValidUrlTest() {
         assertTrue(JsonValidator.checkLinkFormat("https://example.com"));
     }
 
     @Test
-    public void testCheckLinkFormatInvalidUrlTestTest() {
+    public void testCheckLinkFormatInvalidUrlTest() {
         assertFalse(JsonValidator.checkLinkFormat("example.com"));
     }
 
+    @Test
+    public void testCheckBirthdayMaxDateTest() {
+        assertTrue(JsonValidator.checkBirthday("01-01-2010"));
+    }
 
     @Test
-    public void testCheckBirthdayValidDateTestTest() {
+    public void testCheckBirthdayMaxInvalidDateTest() {
+        assertFalse(JsonValidator.checkBirthday("01-01-2020"));
+    }
+
+    @Test
+    public void testCheckBirthdayMinDateTest() {
         assertTrue(JsonValidator.checkBirthday("01-01-1990"));
     }
 
     @Test
-    public void testCheckBirthdayInvalidDateTestTest() {
+    public void testCheckBirthdayMinInvalidDateTest() {
         assertFalse(JsonValidator.checkBirthday("31-02-1700"));
     }
 
     @Test
-    public void testCheckBirthdayNotIntegerDateTestTest() {
+    public void testCheckBirthdayNotIntegerDateTest() {
         assertFalse(JsonValidator.checkBirthday("invalid"));
     }
 
     @Test
-    public void testCheckExperienceValidDatesTestTest() {
+    public void testCheckExperienceValidDatesTest() {
         assertTrue(JsonValidator.checkExperience("01-2020 - 02-2021", "01-01-1990"));
     }
 
     @Test
-    public void testCheckExperienceInvalidDatesTestTest() {
+    public void testCheckExperienceInvalidDatesTest() {
         assertFalse(JsonValidator.checkExperience("01-01-2022 - 01-01-2021", "01-01-1990"));
     }
 
     @Test
-    public void testCheckAlphaFormatValidAlphaTestTest() {
+    public void testCheckAlphaFormatValidAlphaTest() {
         assertTrue(JsonValidator.checkAlphaFormat("Lorem"));
     }
 
     @Test
-    public void testCheckAlphaFormatInvalidAlphaTestTest() {
+    public void testCheckAlphaFormatInvalidAlphaTest() {
         assertFalse(JsonValidator.checkAlphaFormat("123"));
     }
 
     @Test
-    public void testCheckAlphaSpaceFormatValidAlphaSpaceTestTest() {
+    public void testCheckAlphaSpaceFormatValidAlphaSpaceTest() {
         assertTrue(JsonValidator.checkAlphaSpaceFormat("John Doe"));
     }
 
     @Test
-    public void testCheckAlphaSpaceFormatInvalidAlphaSpaceTestTest() {
+    public void testCheckAlphaSpaceFormatInvalidAlphaSpaceTest() {
         assertFalse(JsonValidator.checkAlphaSpaceFormat("John123"));
     }
 
     @Test
-    public void testCheckStringWithPunctuationValidStringTestTest() {
+    public void testCheckStringWithPunctuationValidStringTest() {
         assertTrue(JsonValidator.checkStringWithPunctuation("Hello world"));
     }
 
     @Test
-    public void testCheckStringWithPunctuationInvalidStringTestTest() {
+    public void testCheckStringWithPunctuationInvalidStringTest() {
         assertFalse(JsonValidator.checkStringWithPunctuation("123@abc"));
     }
 
     @Test
-    public void testCheckAlphanumericFormatValidAlphanumericTestTest() {
+    public void testCheckAlphanumericFormatValidAlphanumericTest() {
         assertTrue(JsonValidator.checkAlphanumericFormat("abc123"));
     }
 
     @Test
-    public void testCheckAlphanumericFormatInvalidAlphanumericTestTest() {
+    public void testCheckAlphanumericFormatInvalidAlphanumericTest() {
         assertFalse(JsonValidator.checkAlphanumericFormat("abc@123"));
     }
 
     @Test
-    public void testCheckNumericFormatValidNumericTestTest() {
+    public void testCheckNumericFormatValidNumericTest() {
         assertTrue(JsonValidator.checkNumericFormat("123456"));
     }
 
     @Test
-    public void testCheckNumericFormatInvalidNumericTestTest() {
+    public void testCheckNumericFormatInvalidNumericTest() {
         assertFalse(JsonValidator.checkNumericFormat("123abc"));
     }
 
     @Test
-    public void testCheckDateFormatValidDateTestTest() {
+    public void testCheckDateFormatValidDateTest() {
         assertTrue(JsonValidator.checkDateFormat("01-01-2022"));
     }
 
     @Test
-    public void testCheckDateFormatInvalidDateTestTest() {
+    public void testCheckDateFormatInvalidDateTest() {
         assertFalse(JsonValidator.checkDateFormat("2022-01-01")); // Invalid date format
     }
 
     @Test
-    public void testCheckPhoneFormatValidPhoneTestTest() {
+    public void testCheckPhoneFormatValidPhoneTest() {
         assertTrue(JsonValidator.checkPhoneFormat("12345678901"));
     }
 
     @Test
-    public void testCheckPhoneFormatInvalidPhoneTestTest() {
+    public void testCheckPhoneFormatInvalidPhoneTest() {
         assertFalse(JsonValidator.checkPhoneFormat("12345"));
     }
 
     @Test
-    public void testCheckEmailFormatValidEmailTestTest() {
+    public void testCheckEmailFormatValidEmailTest() {
         assertTrue(JsonValidator.checkEmailFormat("test@example.com"));
     }
 
     @Test
-    public void testCheckEmailFormatInvalidEmailTestTest() {
+    public void testCheckEmailFormatInvalidEmailTest() {
         assertFalse(JsonValidator.checkEmailFormat("test@example"));
     }
 
     @Test
-    public void testCheckVisibilityTypeValidTypeTestTest() {
+    public void testCheckVisibilityTypeValidTypeTest() {
         assertTrue(JsonValidator.checkVisibilityType("не видно никому"));
     }
 
     @Test
-    public void testCheckVisibilityTypeInvalidTypeTestTest() {
+    public void testCheckVisibilityTypeInvalidTypeTest() {
         assertFalse(JsonValidator.checkVisibilityType("invalid"));
     }
 
     @Test
-    public void testCheckTripReadinessValidTypeTestTest() {
+    public void testCheckTripReadinessValidTypeTest() {
         assertTrue(JsonValidator.checkTripReadiness("готов к командировкам"));
     }
 
     @Test
-    public void testCheckTripReadinessInvalidTypeTestTest() {
+    public void testCheckTripReadinessInvalidTypeTest() {
         assertFalse(JsonValidator.checkTripReadiness("unavailable"));
     }
 
     @Test
-    public void testCheckDriverLicenseTypeValidTypeTestTest() {
+    public void testCheckDriverLicenseTypeValidTypeTest() {
         assertTrue(JsonValidator.checkDriverLicenseType("B"));
     }
 
     @Test
-    public void testCheckDriverLicenseTypeInvalidTypeTestTest() {
+    public void testCheckDriverLicenseTypeInvalidTypeTest() {
         assertFalse(JsonValidator.checkDriverLicenseType("invalid"));
     }
 
     @Test
-    public void testCheckEmploymentTypeValidTypeTestTest() {
+    public void testCheckEmploymentTypeValidTypeTest() {
         assertTrue(JsonValidator.checkEmploymentType("Полная занятость"));
     }
 
     @Test
-    public void testCheckEmploymentTypeInvalidTypeTestTest() {
+    public void testCheckEmploymentTypeInvalidTypeTest() {
         assertFalse(JsonValidator.checkEmploymentType("part-time"));
     }
 
     @Test
-    public void testCheckHiddenFieldValidTypeTestTest() {
+    public void testCheckHiddenFieldValidTypeTest() {
         assertTrue(JsonValidator.checkHiddenField("ФИО и фотографию"));
     }
 
     @Test
-    public void testCheckHiddenFieldInvalidTypeTestTest() {
+    public void testCheckHiddenFieldInvalidTypeTest() {
         assertFalse(JsonValidator.checkHiddenField("visible"));
     }
 
     @Test
-    public void testCheckScheduleTypeValidTypeTestTest() {
+    public void testCheckScheduleTypeValidTypeTest() {
         assertTrue(JsonValidator.checkScheduleType("Полный день"));
     }
 
     @Test
-    public void testCheckScheduleTypeInvalidTypeTestTest() {
+    public void testCheckScheduleTypeInvalidTypeTest() {
         assertFalse(JsonValidator.checkScheduleType("fixed"));
     }
 
     @Test
-    public void testCheckTravelTimeValidTypeTestTest() {
+    public void testCheckTravelTimeValidTypeTest() {
         assertTrue(JsonValidator.checkTravelTime("Не имеет значения"));
     }
 
     @Test
-    public void testCheckTravelTimeInvalidTypeTestTest() {
+    public void testCheckTravelTimeInvalidTypeTest() {
         assertFalse(JsonValidator.checkTravelTime("one-hour"));
     }
 
     @Test
-    public void testCheckSexValidTypeTestTest() {
+    public void testCheckSexValidTypeTest() {
         assertTrue(JsonValidator.checkSex("Мужской"));
     }
 
     @Test
-    public void testCheckSexInvalidTypeTestTest() {
+    public void testCheckSexInvalidTypeTest() {
         assertFalse(JsonValidator.checkSex("female"));
     }
 
     @Test
-    public void testCheckRelocationReadinessValidTypeTestTest() {
+    public void testCheckRelocationReadinessValidTypeTest() {
         assertTrue(JsonValidator.checkRelocationReadiness("не готов к переезду"));
     }
 
     @Test
-    public void testCheckRelocationReadinessInvalidTypeTestTest() {
+    public void testCheckRelocationReadinessInvalidTypeTest() {
         assertFalse(JsonValidator.checkRelocationReadiness("not-ready"));
     }
 
@@ -326,11 +335,6 @@ public class JsonValidatorTest {
     @Test
     public void testCheckNameInvalidNameTest() {
         assertFalse(JsonValidator.checkName("1234"));
-    }
-
-    @Test
-    public void testCheckStringWithPunctuationInvalidStringTest() {
-        assertFalse(JsonValidator.checkStringWithPunctuation("This*is*not*valid"));
     }
 
     @Test

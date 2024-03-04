@@ -126,7 +126,7 @@ public class PortfolioTest {
 
     @Test
     public void allArgsConstructorTest() {
-        // Ensure that the all-args constructor throws NPE for non-null members
+        
         assertThrows(NullPointerException.class, () -> new Portfolio("description", null, "small", "id"));
         assertThrows(NullPointerException.class, () -> new Portfolio("description", "medium", null, "id"));
         assertThrows(NullPointerException.class, () -> new Portfolio("description", "medium", "small", null));

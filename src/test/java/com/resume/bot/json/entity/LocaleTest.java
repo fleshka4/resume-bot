@@ -66,11 +66,11 @@ public class LocaleTest {
         Locale locale2 = new Locale(true, "en_US", "English (US)");
         Locale locale3 = new Locale(false, "fr_FR", "French (France)");
 
-        // Test equals
+        
         assertEquals(locale1, locale2);
         assertNotEquals(locale1, locale3);
 
-        // Test hashCode
+        
         assertEquals(locale1.hashCode(), locale2.hashCode());
         assertNotEquals(locale1.hashCode(), locale3.hashCode());
     }

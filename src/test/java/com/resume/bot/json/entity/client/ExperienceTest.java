@@ -10,22 +10,22 @@ import java.util.Collections;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ExperienceTest {
-//    @Test
-//    public void gettersAndSettersTest() {
-//        Experience experience = new Experience();
+
+
+
 //
-//        assertDoesNotThrow(() -> experience.setArea(null));
-//        assertDoesNotThrow(() -> experience.setCompany(null));
-//        assertDoesNotThrow(() -> experience.setCompanyId(null));
-//        assertDoesNotThrow(() -> experience.setCompanyUrl(null));
-//        assertDoesNotThrow(() -> experience.setDescription(null));
-//        assertDoesNotThrow(() -> experience.setEmployer(null));
-//        assertDoesNotThrow(() -> experience.setEnd(null));
-//        assertThrows(NullPointerException.class, () -> experience.setIndustries(null));
-//        assertDoesNotThrow(() -> experience.setIndustry(null));
-//        assertDoesNotThrow(() -> experience.setPosition(null));
-//        assertThrows(NullPointerException.class, () -> experience.setStart(null));
-//    }
+
+
+
+
+
+
+
+
+
+
+
+
 
     @Test
     public void createExperienceWithValidJsonTest() {
