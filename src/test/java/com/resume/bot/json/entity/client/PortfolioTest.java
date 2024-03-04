@@ -31,7 +31,7 @@ public class PortfolioTest {
         Portfolio portfolio = Portfolio.createPortfolio(null, medium, small, id);
 
         assertNotNull(portfolio);
-        assertEquals(null, portfolio.getDescription());
+        assertNull(portfolio.getDescription());
         assertEquals(medium, portfolio.getMedium());
         assertEquals(small, portfolio.getSmall());
         assertEquals(id, portfolio.getId());
@@ -74,5 +74,61 @@ public class PortfolioTest {
         assertEquals("medium-url", portfolio.getMedium());
         assertEquals("small-url", portfolio.getSmall());
         assertEquals("123", portfolio.getId());
+    }
+
+    @Test
+    public void gettersAndSettersTest() {
+        Portfolio portfolio = new Portfolio();
+        portfolio.setDescription("TestDescription");
+        portfolio.setMedium("TestMedium");
+        portfolio.setSmall("TestSmall");
+        portfolio.setId("1");
+
+        assertEquals("TestDescription", portfolio.getDescription());
+        assertEquals("TestMedium", portfolio.getMedium());
+        assertEquals("TestSmall", portfolio.getSmall());
+        assertEquals("1", portfolio.getId());
+
+        portfolio.setDescription(null);
+        assertNull(portfolio.getDescription());
+    }
+
+    @Test
+    public void noArgsConstructorTest() {
+        Portfolio portfolio = new Portfolio();
+
+        assertNull(portfolio.getDescription());
+        assertNull(portfolio.getMedium());
+        assertNull(portfolio.getSmall());
+        assertNull(portfolio.getId());
+    }
+
+    @Test
+    public void setNullMediumThrowsNPE() {
+        Portfolio portfolio = new Portfolio();
+
+        assertThrows(NullPointerException.class, () -> portfolio.setMedium(null));
+    }
+
+    @Test
+    public void setNullSmallThrowsNPE() {
+        Portfolio portfolio = new Portfolio();
+
+        assertThrows(NullPointerException.class, () -> portfolio.setSmall(null));
+    }
+
+    @Test
+    public void setNullIdThrowsNPE() {
+        Portfolio portfolio = new Portfolio();
+
+        assertThrows(NullPointerException.class, () -> portfolio.setId(null));
+    }
+
+    @Test
+    public void allArgsConstructorTest() {
+        // Ensure that the all-args constructor throws NPE for non-null members
+        assertThrows(NullPointerException.class, () -> new Portfolio("description", null, "small", "id"));
+        assertThrows(NullPointerException.class, () -> new Portfolio("description", "medium", null, "id"));
+        assertThrows(NullPointerException.class, () -> new Portfolio("description", "medium", "small", null));
     }
 }

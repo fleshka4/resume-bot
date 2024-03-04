@@ -1,6 +1,6 @@
 package com.resume.bot.config;
 
-import com.resume.bot.service.ResumeBot;
+import com.resume.bot.ResumeBot;
 import com.resume.util.BotUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

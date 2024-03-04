@@ -41,12 +41,19 @@ public class Experience {
     private String start;
 
     @JsonCreator
-    public static Employer createEmployer(
-            @JsonProperty("alternate_url") @NonNull String alternateUrl,
-            @JsonProperty("id") @NonNull String id,
-            @JsonProperty("logo_urls") LogoUrls logoUrls,
-            @JsonProperty("name") @NonNull String name,
-            @JsonProperty("url") @NonNull String url) {
-        return new Employer(alternateUrl, id, logoUrls, name, url);
+    public static Experience createExperience(
+            @JsonProperty("area") Area area,
+            @JsonProperty("company") String company,
+            @JsonProperty("company_id") String companyId,
+            @JsonProperty("company_url") String companyUrl,
+            @JsonProperty("description") String description,
+            @JsonProperty("employer") Employer employer,
+            @JsonProperty("end") String end,
+            @JsonProperty("industries") @NonNull List<Type> industries,
+            @JsonProperty("industry") Type industry,
+            @JsonProperty("position") String position,
+            @JsonProperty("start") @NonNull String start) {
+        return new Experience(area, company, companyId, companyUrl, description, employer, end,
+                industries, industry, position, start);
     }
 }

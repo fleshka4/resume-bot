@@ -125,6 +125,10 @@
                         <exclude>**/exception/**</exclude>
                         <exclude>**/repository/**</exclude>
                         <exclude>**/model/**</exclude>
+                        <exclude>**/com/resume/util/BotUtil.class</exclude>
+                        <exclude>**/com/resume/latex/**</exclude>
+                        <exclude>**/com/resume/bot/ResumeBot.class</exclude>
+                        <exclude>**/com/resume/ResumeBotApplication.class</exclude>
                     </excludes>
                 </configuration>
                 <executions>

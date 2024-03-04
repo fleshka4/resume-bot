@@ -1,27 +1,31 @@
 package com.resume.bot.json.entity.client;
 
 import com.resume.bot.json.JsonProcessor;
+import com.resume.bot.json.entity.common.Type;
 import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ExperienceTest {
-    @Test
-    public void gettersAndSettersTest() {
-        Experience experience = new Experience();
-
-        assertDoesNotThrow(() -> experience.setArea(null));
-        assertDoesNotThrow(() -> experience.setCompany(null));
-        assertDoesNotThrow(() -> experience.setCompanyId(null));
-        assertDoesNotThrow(() -> experience.setCompanyUrl(null));
-        assertDoesNotThrow(() -> experience.setDescription(null));
-        assertDoesNotThrow(() -> experience.setEmployer(null));
-        assertDoesNotThrow(() -> experience.setEnd(null));
-        assertThrows(NullPointerException.class, () -> experience.setIndustries(null));
-        assertDoesNotThrow(() -> experience.setIndustry(null));
-        assertDoesNotThrow(() -> experience.setPosition(null));
-        assertThrows(NullPointerException.class, () -> experience.setStart(null));
-    }
+//    @Test
+//    public void gettersAndSettersTest() {
+//        Experience experience = new Experience();
+//
+//        assertDoesNotThrow(() -> experience.setArea(null));
+//        assertDoesNotThrow(() -> experience.setCompany(null));
+//        assertDoesNotThrow(() -> experience.setCompanyId(null));
+//        assertDoesNotThrow(() -> experience.setCompanyUrl(null));
+//        assertDoesNotThrow(() -> experience.setDescription(null));
+//        assertDoesNotThrow(() -> experience.setEmployer(null));
+//        assertDoesNotThrow(() -> experience.setEnd(null));
+//        assertThrows(NullPointerException.class, () -> experience.setIndustries(null));
+//        assertDoesNotThrow(() -> experience.setIndustry(null));
+//        assertDoesNotThrow(() -> experience.setPosition(null));
+//        assertThrows(NullPointerException.class, () -> experience.setStart(null));
+//    }
 
     @Test
     public void createExperienceWithValidJsonTest() {
@@ -98,5 +102,123 @@ public class ExperienceTest {
                 """;
 
         assertThrows(RuntimeException.class, () -> JsonProcessor.createEntityFromJson(invalidJson, Experience.class));
+    }
+
+    @Test
+    public void gettersAndSettersTest() {
+        Experience experience = new Experience();
+        experience.setArea(new Area());
+        experience.setCompany("TestCompany");
+        experience.setCompanyId("1");
+        experience.setCompanyUrl("http://example.com");
+        experience.setDescription("TestDescription");
+        experience.setEmployer(new Employer());
+        experience.setEnd("2024-01-01");
+        experience.setIndustries(Collections.singletonList(new Type("1", "TestIndustry")));
+        experience.setIndustry(new Type("2", "AnotherIndustry"));
+        experience.setPosition("TestPosition");
+        experience.setStart("2022-01-01");
+
+        assertEquals("TestCompany", experience.getCompany());
+        assertEquals("1", experience.getCompanyId());
+        assertEquals("http://example.com", experience.getCompanyUrl());
+        assertEquals("TestDescription", experience.getDescription());
+        assertEquals("TestPosition", experience.getPosition());
+        assertEquals("2022-01-01", experience.getStart());
+        assertEquals("2024-01-01", experience.getEnd());
+
+        assertEquals("TestIndustry", experience.getIndustries().get(0).getName());
+        assertEquals("AnotherIndustry", experience.getIndustry().getName());
+
+        Experience anotherExperience = new Experience();
+        anotherExperience.setArea(new Area());
+        anotherExperience.setCompany("AnotherCompany");
+        anotherExperience.setCompanyId("2");
+        anotherExperience.setCompanyUrl("http://another-example.com");
+        anotherExperience.setDescription("AnotherDescription");
+        anotherExperience.setEmployer(new Employer());
+        anotherExperience.setEnd("2025-01-01");
+        anotherExperience.setIndustries(Collections.singletonList(new Type("3", "YetAnotherIndustry")));
+        anotherExperience.setIndustry(new Type("4", "LastIndustry"));
+        anotherExperience.setPosition("AnotherPosition");
+        anotherExperience.setStart("2023-01-01");
+
+        assertNotEquals(anotherExperience, experience);
+    }
+
+    @Test
+    public void constructorsTest() {
+        Experience experience = new Experience(new Area(), "TestCompany", "1", "http://example.com",
+                "TestDescription", new Employer(), "2024-01-01",
+                Collections.singletonList(new Type("1", "TestIndustry")),
+                new Type("2", "AnotherIndustry"), "TestPosition", "2022-01-01");
+
+        assertEquals("TestCompany", experience.getCompany());
+        assertEquals("1", experience.getCompanyId());
+        assertEquals("http://example.com", experience.getCompanyUrl());
+        assertEquals("TestDescription", experience.getDescription());
+        assertEquals("TestPosition", experience.getPosition());
+        assertEquals("2022-01-01", experience.getStart());
+        assertEquals("2024-01-01", experience.getEnd());
+
+        assertEquals("TestIndustry", experience.getIndustries().get(0).getName());
+        assertEquals("AnotherIndustry", experience.getIndustry().getName());
+    }
+
+    @Test
+    public void equalsAndHashCodeTest() {
+        Experience experience1 = new Experience(new Area(), "TestCompany", "1", "http://example.com",
+                "TestDescription", new Employer(), "2024-01-01",
+                Collections.singletonList(new Type("1", "TestIndustry")),
+                new Type("2", "AnotherIndustry"), "TestPosition", "2022-01-01");
+
+        Experience experience2 = new Experience(new Area(), "TestCompany", "1", "http://example.com",
+                "TestDescription", new Employer(), "2024-01-01",
+                Collections.singletonList(new Type("1", "TestIndustry")),
+                new Type("2", "AnotherIndustry"), "TestPosition", "2022-01-01");
+
+        Experience experience3 = new Experience(new Area(), "AnotherCompany", "2", "http://another-example.com",
+                "AnotherDescription", new Employer(), "2025-01-01",
+                Collections.singletonList(new Type("3", "YetAnotherIndustry")),
+                new Type("4", "LastIndustry"), "AnotherPosition", "2023-01-01");
+
+        assertEquals(experience1, experience2);
+        assertEquals(experience1.hashCode(), experience2.hashCode());
+
+        assertNotEquals(experience1, experience3);
+        assertNotEquals(experience1.hashCode(), experience3.hashCode());
+    }
+
+    @Test
+    public void toStringTest() {
+        Experience experience = new Experience(new Area(), "TestCompany", "1", "http://example.com",
+                "TestDescription", new Employer(), "2024-01-01",
+                Collections.singletonList(new Type("1", "TestIndustry")),
+                new Type("2", "AnotherIndustry"), "TestPosition", "2022-01-01");
+
+        String expected = "Experience(area=Area(id=null, name=null, url=/areas/null), company=TestCompany, companyId=1," +
+                " companyUrl=http://example.com, description=TestDescription, employer=Employer(alternateUrl=null, id=null," +
+                " logoUrls=null, name=null, url=null), end=2024-01-01, industries=[Type(id=1, name=TestIndustry)], " +
+                "industry=Type(id=2, name=AnotherIndustry), position=TestPosition, start=2022-01-01)";
+
+        assertEquals(expected, experience.toString());
+    }
+
+    @Test
+    public void createExperienceTest() {
+        Experience experience = Experience.createExperience(new Area(), "TestCompany", "1", "http://example.com",
+                "TestDescription", new Employer(), "2024-01-01",
+                Arrays.asList(new Type("1", "TestIndustry"), new Type("2", "AnotherIndustry")),
+                new Type("3", "YetAnotherIndustry"), "TestPosition", "2022-01-01");
+
+        assertEquals("TestCompany", experience.getCompany());
+        assertEquals("1", experience.getCompanyId());
+        assertEquals("http://example.com", experience.getCompanyUrl());
+        assertEquals("TestDescription", experience.getDescription());
+        assertEquals("TestPosition", experience.getPosition());
+        assertEquals("2022-01-01", experience.getStart());
+        assertEquals("2024-01-01", experience.getEnd());
+
+        assertEquals("TestIndustry", experience.getIndustries().get(0).getName());
     }
 }

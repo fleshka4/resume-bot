@@ -1,5 +1,6 @@
 package com.resume.bot.service;
 
+import com.resume.bot.ResumeBot;
 import com.resume.bot.config.BotConfig;
 import com.resume.bot.display.BotState;
 import com.resume.bot.display.CallbackActionHandler;

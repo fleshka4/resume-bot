@@ -1,4 +1,4 @@
-package com.resume.bot.service;
+package com.resume.bot;
 
 import com.resume.bot.config.BotConfig;
 import com.resume.bot.display.BotState;
@@ -11,6 +11,10 @@ import com.resume.bot.json.JsonValidator;
 import com.resume.bot.json.entity.client.Resume;
 import com.resume.bot.model.entity.Template;
 import com.resume.bot.model.entity.User;
+import com.resume.bot.service.HeadHunterService;
+import com.resume.bot.service.ResumeService;
+import com.resume.bot.service.TemplateService;
+import com.resume.bot.service.UserService;
 import com.resume.latex.LatexProcessor;
 import com.resume.util.BigKeyboardType;
 import com.resume.util.BotUtil;
