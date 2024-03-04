@@ -1,5 +1,6 @@
 package com.resume.latex;
 
+import com.resume.bot.json.entity.area.Country;
 import com.resume.bot.json.entity.client.Area;
 import com.resume.bot.json.entity.client.Experience;
 import com.resume.bot.json.entity.client.Resume;
@@ -7,6 +8,7 @@ import com.resume.bot.json.entity.client.education.Education;
 import com.resume.bot.json.entity.client.education.PrimaryEducation;
 import com.resume.bot.json.entity.common.Id;
 import com.resume.bot.json.entity.common.Type;
+import com.resume.util.Constants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -25,6 +27,14 @@ public class PlaceholderTest {
     private static final String emailContacts = "gagag@xxx.ru";
     private static final Id areaId = new Id("1");
     private static final String skills = "Good programmer.";
+
+    private static final com.resume.bot.json.entity.area.Area city =
+            new com.resume.bot.json.entity.area.Area("5", "2", "Город", List.of());
+    private static final com.resume.bot.json.entity.area.Area region =
+            new com.resume.bot.json.entity.area.Area("2", "113", "Регион", List.of(city));
+    private static final com.resume.bot.json.entity.area.Area moscow =
+            new com.resume.bot.json.entity.area.Area("1", "113", "Москва", List.of());
+
     private static final Education education = new Education(null,
             null,
             null,
@@ -73,6 +83,9 @@ public class PlaceholderTest {
         resume.setSkills(skills);
         resume.setEducation(education);
         resume.setExperience(experience);
+
+        Constants.AREAS = List.of(new com.resume.bot.json.entity.area.Area("113", null, "Россия", List.of(region, moscow)), moscow, region, city);
+        Constants.COUNTRIES = List.of(new Country("113", "Россия", "url"));
     }
 
     @Test
@@ -135,17 +148,17 @@ public class PlaceholderTest {
         Assertions.assertEquals(Placeholder.PLACE_FOR_EMAIL.replaceValue(resume), expectedValue);
     }
 
-//    @Test
-//    public void testReplaceValueCity() {
-//        String expectedValue = "%s %s %s".formatted(lastName, firstName, middleName);
-//        Assertions.assertEquals(Placeholder.PLACE_FOR_CITY.replaceValue(resume), expectedValue);
-//    }
-//
-//    @Test
-//    public void testReplaceValueCountry() {
-//        String expectedValue = "%s %s %s".formatted(lastName, firstName, middleName);
-//        Assertions.assertEquals(Placeholder.PLACE_FOR_COUNTRY.replaceValue(resume), expectedValue);
-//    }
+    @Test
+    public void testReplaceValueCity() {
+        String expectedValue = moscow.getName();
+        Assertions.assertEquals(Placeholder.PLACE_FOR_CITY.replaceValue(resume), expectedValue);
+    }
+
+    @Test
+    public void testReplaceValueCountry() {
+        String expectedValue = Constants.COUNTRIES.get(0).getName();
+        Assertions.assertEquals(Placeholder.PLACE_FOR_COUNTRY.replaceValue(resume), expectedValue);
+    }
 
     @Test
     public void testReplaceValueAbout() {
@@ -157,52 +170,53 @@ public class PlaceholderTest {
         Assertions.assertEquals(Placeholder.PLACE_FOR_ABOUT.replaceValue(resume), expectedValue);
     }
 
-//    @Test
-//    public void testReplaceValueEducation() {
-//        String level = "Уровень образования: %s".formatted(education.getLevel().getName());
-//        PrimaryEducation pe = education.getPrimary().get(0);
-//        String primary = """
-//                Учебное заведение: %s\\\\\\\\
-//                Факультет: %s\\\\\\\\
-//                Специализация: %s\\\\\\\\
-//                Год окончания: %d\\\\\\\\
-//                """.formatted(
-//                pe.getName(),
-//                pe.getOrganization(),
-//                pe.getResult(),
-//                pe.getYear());
-//        String expectedValue = """
-//                %s
-//                %s
-//                %s
-//                %s
-//                %s
-//                """.formatted(level,
-//                primary,
-//                "",
-//                "",
-//                "");
-//        Assertions.assertEquals(Placeholder.PLACE_FOR_EDUCATION.replaceValue(resume), expectedValue);
-//    }
-//
-//    @Test
-//    public void testReplaceValueExperience() {
-//        Experience exp = experience.get(0);
-//        String expectedValue = """
-//                    Период работы: %s\\\\\\\\
-//                    Компания: %s\\\\\\\\
-//                    Город: %s\\\\\\\\
-//                    Ссылка: %s\\\\\\\\
-//                    Должность: %s\\\\\\\\
-//                    Обязанности: %s\\\\\\\\
-//                    """.formatted("%s - %s".formatted(
-//                        exp.getStart(),
-//                        exp.getEnd()),
-//                exp.getCompany(),
-//                exp.getArea().getName(),
-//                exp.getCompanyUrl(),
-//                exp.getPosition(),
-//                exp.getDescription());
-//        Assertions.assertEquals(Placeholder.PLACE_FOR_EXPERIENCE.replaceValue(resume), expectedValue);
-//    }
+    @Test
+    public void testReplaceValueEducation() {
+        String level = "Уровень образования: %s\\\\\\\\".formatted(education.getLevel().getName());
+        PrimaryEducation pe = education.getPrimary().get(0);
+        String primary = """
+                Высшее образование:\\\\\\\\
+                Учебное заведение: %s\\\\\\\\
+                Факультет: %s\\\\\\\\
+                Специализация: %s\\\\\\\\
+                Год окончания: %d\\\\\\\\
+                """.formatted(
+                pe.getName(),
+                pe.getOrganization(),
+                pe.getResult(),
+                pe.getYear());
+        String expectedValue = """
+                %s
+                %s
+                %s
+                %s
+                %s
+                """.formatted(level,
+                primary,
+                "",
+                "",
+                "");
+        Assertions.assertEquals(Placeholder.PLACE_FOR_EDUCATION.replaceValue(resume), expectedValue);
+    }
+
+    @Test
+    public void testReplaceValueExperience() {
+        Experience exp = experience.get(0);
+        String expectedValue = """
+                    Период работы: %s\\\\\\\\
+                    Компания: %s\\\\\\\\
+                    Город: %s\\\\\\\\
+                    Ссылка: %s\\\\\\\\
+                    Должность: %s\\\\\\\\
+                    Обязанности: %s\\\\\\\\
+                    """.formatted("%s - %s".formatted(
+                        exp.getStart(),
+                        exp.getEnd()),
+                exp.getCompany(),
+                "%s, %s".formatted(Constants.COUNTRIES.get(0).getName(), moscow.getName()),
+                exp.getCompanyUrl(),
+                exp.getPosition(),
+                exp.getDescription());
+        Assertions.assertEquals(Placeholder.PLACE_FOR_EXPERIENCE.replaceValue(resume), expectedValue);
+    }
 }

@@ -125,7 +125,7 @@ public enum Placeholder {
                             pe.getResult(),
                             pe.getYear()
                     ))
-                    .collect(Collectors.joining("", "Высшее образование:\\\\\\\\", ""))
+                    .collect(Collectors.joining("", "Высшее образование:\\\\\\\\\n", ""))
                     : "";
 
             List<ElementaryEducation> elementary = education.getElementary();
