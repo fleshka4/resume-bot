@@ -77,7 +77,7 @@ public enum Placeholder {
                 return "";
             }
 
-            String[] areaParts = ConstantsUtil.getAreaString(area).split(",");
+            String[] areaParts = ConstantsUtil.getAreaString(Constants.AREAS, area).split(",");
             return areaParts.length == 2
                     ? areaParts[1].trim()
                     : areaParts.length == 3
@@ -93,7 +93,7 @@ public enum Placeholder {
                 return "";
             }
 
-            return ConstantsUtil.getAreaString(area).split(",")[0].trim();
+            return ConstantsUtil.getAreaString(Constants.AREAS, area).split(",")[0].trim();
         }
     },
     PLACE_FOR_ABOUT("PLACE-FOR-ABOUT") {
@@ -125,7 +125,7 @@ public enum Placeholder {
                             pe.getResult(),
                             pe.getYear()
                     ))
-                    .collect(Collectors.joining("", "Высшее образование:\\\\\\\\", ""))
+                    .collect(Collectors.joining("", "Высшее образование:\\\\\\\\\n", ""))
                     : "";
 
             List<ElementaryEducation> elementary = education.getElementary();
@@ -208,7 +208,7 @@ public enum Placeholder {
                                                 : "настоящее время"),
                                 exp.getCompany(),
                                 ConstantsUtil.getAreaString(
-                                        ConstantsUtil.getAreaByIdDeep(Constants.AREAS, exp.getArea().getId()).orElse(null)),
+                                        Constants.AREAS, ConstantsUtil.getAreaByIdDeep(Constants.AREAS, exp.getArea().getId()).orElse(null)),
                                 exp.getCompanyUrl(),
                                 exp.getPosition(),
                                 exp.getDescription());
@@ -217,13 +217,6 @@ public enum Placeholder {
                     : "";
         }
     };
-//    PLACE_FOR_TOTAL_EXPERIENCE("PLACE-FOR-TOTAL-EXPERIENCE") {
-//        @Override
-//        public String replaceValue(Resume resume) {
-//            TotalExperience totalExperience = resume.getTotalExperience();
-//            return totalExperience != null ? totalExperience.getMonths().toString() : "0";
-//        }
-//    };
 
     private final String value;
 

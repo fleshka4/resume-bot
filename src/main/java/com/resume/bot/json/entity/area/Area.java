@@ -1,5 +1,6 @@
 package com.resume.bot.json.entity.area;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,4 +23,13 @@ public class Area {
     private String name;
 
     private List<Area> areas;
+
+    @JsonCreator
+    public static Area createArea(
+            @JsonProperty("id") String id,
+            @JsonProperty("parent_id") String parentId,
+            @JsonProperty("name") String name,
+            @JsonProperty("areas") List<Area> areas) {
+        return new Area(id, parentId, name, areas);
+    }
 }

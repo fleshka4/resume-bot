@@ -38,13 +38,13 @@ public class ConstantsUtil {
         return Optional.empty();
     }
 
-    public static String getAreaString(Area area) {
+    public static String getAreaString(List<Area> areas, Area area) {
         StringBuilder areaSB = new StringBuilder();
         while (area != null) {
             if (!area.getId().equals(OTHER_COUNTRIES_JSON_ID)) {
                 areaSB.insert(0, area.getName()).insert(0, area.getParentId() != null ? ", " : "");
             }
-            area = getAreaByIdDeep(Constants.AREAS, area.getParentId()).orElse(null);
+            area = getAreaByIdDeep(areas, area.getParentId()).orElse(null);
         }
         return areaSB.toString();
     }

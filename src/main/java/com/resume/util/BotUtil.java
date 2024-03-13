@@ -129,7 +129,6 @@ public class BotUtil {
     public final Map<Long, com.resume.bot.model.entity.Resume> lastSavedResumeMap = new HashMap<>(); // chatId, last Resume which was created from 0
     public final String ERROR_TEXT = "Error occurred: ";
     public final Map<Long, Long> states = new HashMap<>(); // authorize: state, chatId
-    public final Map<Long, String> personAndIndustryType = new HashMap<>(); // chatId, industryType
     public final Map<Long, String> personAndIndustry = new HashMap<>(); // chatId, industry
     public final Map<Long, String> personAndProfessionalRole = new HashMap<>(); // chatId, professionalRole
     public final Random random = new Random();
@@ -341,7 +340,7 @@ public class BotUtil {
         Resume res = convertResume(JsonProcessor.createEntityFromJson(resume.getResumeData(), Resume.class));
 
         String areaStr = ConstantsUtil.getAreaString(
-                ConstantsUtil.getAreaByIdDeep(Constants.AREAS, res.getArea().getId()).orElse(null));
+                Constants.AREAS, ConstantsUtil.getAreaByIdDeep(Constants.AREAS, res.getArea().getId()).orElse(null));
 
         Education education = res.getEducation();
         String educStr = education != null && !education.getPrimary().isEmpty()

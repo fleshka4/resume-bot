@@ -1,5 +1,6 @@
 package com.resume.bot.json.entity.client;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,4 +24,14 @@ public class Certificate {
     private String type;
 
     private String url;
+
+    @JsonCreator
+    public static Certificate createCertificate(
+            @JsonProperty("achieved_at") @NonNull String achievedAt,
+            @JsonProperty("owner") String owner,
+            @JsonProperty("title") @NonNull String title,
+            @JsonProperty("type") @NonNull String type,
+            @JsonProperty("url") String url) {
+        return new Certificate(achievedAt, owner, title, type, url);
+    }
 }
