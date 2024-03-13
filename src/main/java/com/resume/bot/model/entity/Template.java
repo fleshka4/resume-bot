@@ -1,15 +1,16 @@
 package com.resume.bot.model.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Table(name = "templates")
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Getter
 @Setter
+@EqualsAndHashCode
 public class Template {
 
     @Id

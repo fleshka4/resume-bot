@@ -5,14 +5,14 @@ import com.resume.bot.model.entity.Template;
 import com.resume.bot.repository.TemplateRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.persistence.EntityNotFoundException;
 
-import java.util.Optional;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class TemplateServiceTest extends IntegrationBaseTest {
 
-//    @Mock
     @Autowired
     private TemplateRepository repository;
 
@@ -25,48 +25,53 @@ public class TemplateServiceTest extends IntegrationBaseTest {
 
     @Test
     public void testSaveTemplate() {
-        Template template = new Template();
+        Template template = Template.builder()
+                .templateId(1)
+                .build();
+
+        templateService.saveTemplate(template);
+
+        Template savedTemplate = repository.findById(template.getTemplateId()).get();
+
+        assertEquals(template, savedTemplate);
+    }
+
+    @Test
+    public void testGetTemplate() {
+        Template template = Template.builder()
+                .templateId(1)
+                .build();
 
         repository.save(template);
 
-        Optional<Template> savedTemplateOpt = repository.findById(template.getTemplateId());
+        Template savedTemplate = templateService.getTemplate(template.getTemplateId());
 
-        assertTrue(savedTemplateOpt.isPresent());
-        assertTrue(template.getTemplateId() == savedTemplateOpt.get().getTemplateId());
+        assertEquals(template, savedTemplate);
     }
 
-//    @Test
-//    public void testGetTemplateExists() {
-//        Template template = new Template();
-//
-//        when(repository.findById(anyInt())).thenReturn(Optional.of(template));
-//
-//        Template retrievedTemplate = templateService.getTemplate(1);
-//
-//        assertNotNull(retrievedTemplate);
-//        assertEquals(template, retrievedTemplate);
-//    }
-//
-//    @Test
-//    public void testGetTemplateNotFound() {
-//        when(repository.findById(anyInt())).thenReturn(Optional.empty());
-//
-//        assertThrows(EntityNotFoundException.class, () -> templateService.getTemplate(1));
-//    }
-//
-//    @Test
-//    public void testGetTemplates() {
-//        List<Template> templates = Arrays.asList(
-//                new Template(),
-//                new Template(),
-//                new Template()
-//        );
-//
-//        when(repository.findAll()).thenReturn(templates);
-//
-//        List<Template> retrievedTemplates = templateService.getTemplates();
-//        assertNotNull(retrievedTemplates);
-//        assertEquals(templates.size(), retrievedTemplates.size());
-//        assertTrue(retrievedTemplates.containsAll(templates));
-//    }
+    @Test
+    public void testGetTemplateNotFound() {
+        assertThrows(EntityNotFoundException.class, () -> templateService.getTemplate(1));
+    }
+
+    @Test
+    public void testGetTemplates() {
+        List<Template> templates = List.of(
+                Template.builder()
+                        .templateId(1)
+                        .build(),
+                Template.builder()
+                        .templateId(2)
+                        .build(),
+                Template.builder()
+                        .templateId(3)
+                        .build()
+        );
+
+        repository.saveAll(templates);
+
+        List<Template> retrievedTemplates = templateService.getTemplates();
+        assertEquals(templates.size(), retrievedTemplates.size());
+        assertTrue(retrievedTemplates.containsAll(templates));
+    }
 }
