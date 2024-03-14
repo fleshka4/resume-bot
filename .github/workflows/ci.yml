@@ -6,6 +6,11 @@ on:
     branches:
       - master
       - develop
+env:
+  CLIENT_ID: ${{ vars.CLIENT_ID }}
+  CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+  BOT_NAME: ${{ vars.BOT_NAME }}
+  BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
 
 jobs:
   build:
