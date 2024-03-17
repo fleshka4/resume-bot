@@ -36,11 +36,16 @@ public class TokenHolderServiceTest extends IntegrationBaseTest {
 
         userRepository.save(user);
         tokenHolderRepository.save(tokenHolder);
+
         TokenHolder retrievedTokenHolder = tokenHolderService.getUserToken(user);
 
         assertNotNull(retrievedTokenHolder);
         assertEquals(tokenHolder.getHhTokensId(), retrievedTokenHolder.getHhTokensId());
+
+        tokenHolderRepository.delete(tokenHolder);
+        userRepository.delete(user);
     }
+
     @Test
     public void testCheckTokenHolderExists() {
         User user = User.builder()
@@ -59,6 +64,9 @@ public class TokenHolderServiceTest extends IntegrationBaseTest {
         boolean exists = tokenHolderService.checkTokenHolderExists(user);
 
         assertTrue(exists);
+
+        tokenHolderRepository.delete(tokenHolder);
+        userRepository.delete(user);
     }
 
     @Test

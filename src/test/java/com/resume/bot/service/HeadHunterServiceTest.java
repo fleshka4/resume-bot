@@ -10,7 +10,6 @@ import com.resume.bot.json.entity.common.Type;
 import com.resume.bot.json.entity.metro.Metro;
 import com.resume.bot.json.entity.roles.ProfessionalRoles;
 import com.resume.hh_wrapper.impl.ApiClientImpl;
-import com.resume.hh_wrapper.impl.ApiClientTokenImpl;
 import com.resume.util.HHUriConstants;
 import org.json.JSONArray;
 import org.json.JSONException;
