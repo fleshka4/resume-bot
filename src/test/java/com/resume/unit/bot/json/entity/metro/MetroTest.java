@@ -14,7 +14,7 @@ public class MetroTest {
     @Test
     public void gettersAndSettersTest() {
         String id = "1";
-        List<Line> lines = List.of(new Line("#ff0000", "1", "Red Line", List.of(new Station("A", 40.7128, new com.resume.bot.json.entity.metro.station.Line("#0000ff", "3", "Blue Line"), -74.0060, "Station A", 1L))));
+        List<Line> lines = List.of(new Line("1", "#ff0000", "Red Line", List.of(new Station("A", "Station A", 40.7128, -74.0060, 1L, new com.resume.bot.json.entity.metro.station.Line("3", "#0000ff", "Blue Line")))));
         String name = "City Metro";
         String url = "https://example.com/metro";
 
@@ -43,7 +43,7 @@ public class MetroTest {
     @Test
     public void constructorWithArgsTest() {
         String id = "2";
-        List<Line> lines = List.of(new Line("#00ff00", "2", "Green Line", List.of(new Station("B", 34.0522, new com.resume.bot.json.entity.metro.station.Line("#0000ff", "3", "Blue Line"), -118.2437, "Station B", 2L))));
+        List<Line> lines = List.of(new Line("2", "#00ff00", "Green Line", List.of(new Station("B", "Station B", 34.0522, -118.2437, 2L, new com.resume.bot.json.entity.metro.station.Line("3", "#0000ff", "Blue Line")))));
         String name = "City Subway";
         String url = "https://example.com/subway";
 
@@ -57,10 +57,10 @@ public class MetroTest {
 
     @Test
     public void constructorWithArgsAndNullTest() {
-        assertThrows(NullPointerException.class, () -> new Metro(null, "City Metro", "https://example.com/metro", List.of(new Line("#ff0000", "1", "Red Line", List.of(new Station("A", 40.7128, new com.resume.bot.json.entity.metro.station.Line("#0000ff", "3", "Blue Line"), -74.0060, "Station A", 1L))))));
+        assertThrows(NullPointerException.class, () -> new Metro(null, "City Metro", "https://example.com/metro", List.of(new Line("1", "#ff0000", "Red Line", List.of(new Station("A", "Station A", 40.7128, -74.0060, 1L, new com.resume.bot.json.entity.metro.station.Line("3", "#0000ff", "Blue Line")))))));
+        assertThrows(NullPointerException.class, () -> new Metro("1", null, "https://example.com/metro", List.of(new Line("1", "#ff0000", "Red Line", List.of(new Station("A", "Station A", 40.7128, -74.0060, 1L, new com.resume.bot.json.entity.metro.station.Line("3", "#0000ff", "Blue Line")))))));
+        assertThrows(NullPointerException.class, () -> new Metro("1", "City Metro", null, List.of(new Line("1", "#ff0000", "Red Line", List.of(new Station("A", "Station A", 40.7128, -74.0060, 1L, new com.resume.bot.json.entity.metro.station.Line("3", "#0000ff", "Blue Line")))))));
         assertThrows(NullPointerException.class, () -> new Metro("1", "City Metro", "https://example.com/metro", null));
-        assertThrows(NullPointerException.class, () -> new Metro("1", null, "https://example.com/metro", List.of(new Line("#ff0000", "1", "Red Line", List.of(new Station("A", 40.7128, new com.resume.bot.json.entity.metro.station.Line("#0000ff", "3", "Blue Line"), -74.0060, "Station A", 1L))))));
-        assertThrows(NullPointerException.class, () -> new Metro("1", "City Metro", null, List.of(new Line("#ff0000", "1", "Red Line", List.of(new Station("A", 40.7128, new com.resume.bot.json.entity.metro.station.Line("#0000ff", "3", "Blue Line"), -74.0060, "Station A", 1L))))));
     }
 
     @Test
@@ -75,9 +75,9 @@ public class MetroTest {
 
     @Test
     public void equalsAndHashCodeTest() {
-        List<Line> lines1 = List.of(new Line("#ff0000", "1", "Red Line", List.of(new Station("A", 40.7128, new com.resume.bot.json.entity.metro.station.Line("#0000ff", "3", "Blue Line"), -74.0060, "Station A", 1L))));
-        List<Line> lines2 = List.of(new Line("#ff0000", "1", "Red Line", List.of(new Station("A", 40.7128, new com.resume.bot.json.entity.metro.station.Line("#0000ff", "3", "Blue Line"), -74.0060, "Station A", 1L))));
-        List<Line> lines3 = List.of(new Line("#00ff00", "2", "Green Line", List.of(new Station("B", 34.0522, new com.resume.bot.json.entity.metro.station.Line("#0000ff", "3", "Blue Line"), -118.2437, "Station B", 2L))));
+        List<Line> lines1 = List.of(new Line("#ff0000", "1", "Red Line", List.of(new Station("A", "Station A", 40.7128, -74.0060, 1L, new com.resume.bot.json.entity.metro.station.Line("3", "#0000ff", "Blue Line")))));
+        List<Line> lines2 = List.of(new Line("#ff0000", "1", "Red Line", List.of(new Station("A", "Station A", 40.7128, -74.0060, 1L, new com.resume.bot.json.entity.metro.station.Line("3", "#0000ff", "Blue Line")))));
+        List<Line> lines3 = List.of(new Line("#00ff00", "2", "Green Line", List.of(new Station("B", "Station B", 34.0522, -118.2437, 2L, new com.resume.bot.json.entity.metro.station.Line("3", "#0000ff", "Blue Line")))));
 
         Metro metro1 = new Metro("1", "City Metro", "https://example.com/metro", lines1);
         Metro metro2 = new Metro("1", "City Metro", "https://example.com/metro", lines2);
@@ -92,10 +92,10 @@ public class MetroTest {
 
     @Test
     public void toStringMethodTest() {
-        List<Line> lines = List.of(new Line("#ff0000", "1", "Red Line", List.of(new Station("A", 40.7128, new com.resume.bot.json.entity.metro.station.Line("#0000ff", "3", "Blue Line"), -74.0060, "Station A", 1L))));
+        List<Line> lines = List.of(new Line("1", "#ff0000", "Red Line", List.of(new Station("A", "Station A", 40.7128, -74.0060, 1L, new com.resume.bot.json.entity.metro.station.Line("#0000ff", "3", "Blue Line")))));
         Metro metro = new Metro("1", "City Metro", "https://example.com/metro", lines);
 
-        String expectedToString = "Metro(id=1, lines=[Line(hexColor=#ff0000, id=1, name=Red Line, stations=[Station(id=A, lat=40.7128, line=Line(hexColor=#0000ff, id=3, name=Blue Line), lng=-74.006, name=Station A, order=1)])], name=City Metro, url=https://example.com/metro)";
+        String expectedToString = "Metro(id=1, lines=[Line(id=1, hexColor=#ff0000, name=Red Line, stations=[Station(id=A, name=Station A, lat=40.7128, lng=-74.006, order=1, line=Line(hexColor=#0000ff, id=3, name=Blue Line))])], name=City Metro, url=https://example.com/metro)";
         assertEquals(expectedToString, metro.toString());
     }
 
@@ -133,7 +133,7 @@ public class MetroTest {
         Metro metro = JsonProcessor.createEntityFromJson(json, Metro.class);
 
         assertEquals(metro.getId(), "1");
-        assertEquals(metro.getLines(), List.of(new Line("#ff0000", "1", "Red Line", List.of(new Station("A", 40.7128, new com.resume.bot.json.entity.metro.station.Line("#0000ff", "3", "Blue Line"), -74.0060, "Station A", 1L)))));
+        assertEquals(metro.getLines(), List.of(new Line("1", "#ff0000", "Red Line", List.of(new Station("A", "Station A", 40.7128, -74.0060, 1L, new com.resume.bot.json.entity.metro.station.Line("#0000ff", "3", "Blue Line"))))));
         assertEquals(metro.getName(), "City Metro");
         assertEquals(metro.getUrl(), "https://example.com/metro");
     }
