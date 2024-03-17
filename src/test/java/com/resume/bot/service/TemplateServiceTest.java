@@ -5,11 +5,18 @@ import com.resume.bot.model.entity.Template;
 import com.resume.bot.repository.TemplateRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class TemplateServiceTest extends IntegrationBaseTest {
 
@@ -50,24 +57,26 @@ public class TemplateServiceTest extends IntegrationBaseTest {
         assertThrows(EntityNotFoundException.class, () -> templateService.getTemplate(1));
     }
 
-    @Test
-    public void testGetTemplates() {
-        List<Template> templates = List.of(
-                Template.builder()
-                        .templateId(1)
-                        .build(),
-                Template.builder()
-                        .templateId(2)
-                        .build(),
-                Template.builder()
-                        .templateId(3)
-                        .build()
-        );
-
+    @ParameterizedTest
+    @MethodSource("provideTestData")
+    public void testGetTemplates(int expectedSize, List<Template> templates) {
         repository.saveAll(templates);
 
         List<Template> retrievedTemplates = templateService.getTemplates();
-        assertEquals(templates.size(), retrievedTemplates.size());
-        assertTrue(retrievedTemplates.containsAll(templates));
+
+        assertEquals(expectedSize, retrievedTemplates.size());
+        assertEquals(templates, retrievedTemplates);
+    }
+
+    private static Stream<Arguments> provideTestData() {
+        return Stream.of(
+                Arguments.of(0, List.of()),
+                Arguments.of(1, Collections.singletonList(
+                        Template.builder().templateId(1).build())),
+                Arguments.of(3, Arrays.asList(
+                        Template.builder().templateId(1).build(),
+                        Template.builder().templateId(2).build(),
+                        Template.builder().templateId(3).build()))
+        );
     }
 }
