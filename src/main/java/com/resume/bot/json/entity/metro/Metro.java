@@ -19,7 +19,6 @@ public class Metro {
     @NonNull
     private String name;
 
-    @NonNull
     private String url;
 
     @NonNull
@@ -29,7 +28,7 @@ public class Metro {
     public static Metro createMetro(
             @JsonProperty("id") @NonNull String id,
             @JsonProperty("name") @NonNull String name,
-            @JsonProperty("url") @NonNull String url,
+            @JsonProperty("url") String url,
             @JsonProperty("lines") @NonNull List<Line> lines) {
         return new Metro(id, name, url, lines);
     }
