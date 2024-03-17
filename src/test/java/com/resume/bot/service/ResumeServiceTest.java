@@ -5,21 +5,13 @@ import com.resume.bot.model.entity.Resume;
 import com.resume.bot.model.entity.Template;
 import com.resume.bot.model.entity.User;
 import com.resume.bot.repository.ResumeRepository;
-import com.resume.bot.service.ResumeService;
 import jakarta.persistence.EntityNotFoundException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 public class ResumeServiceTest extends IntegrationBaseTest {
 

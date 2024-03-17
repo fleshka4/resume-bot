@@ -1,59 +1,32 @@
 package com.resume.bot.service;
 
 import com.resume.IntegrationBaseTest;
-import com.resume.bot.config.ApplicationConfig;
 import com.resume.bot.json.JsonProcessor;
 import com.resume.bot.json.entity.Industry;
 import com.resume.bot.json.entity.Locale;
-import com.resume.bot.json.entity.Skills;
 import com.resume.bot.json.entity.area.Area;
 import com.resume.bot.json.entity.area.Country;
-import com.resume.bot.json.entity.client.Language;
-import com.resume.bot.json.entity.client.Resume;
-import com.resume.bot.json.entity.client.Resumes;
 import com.resume.bot.json.entity.common.Type;
 import com.resume.bot.json.entity.metro.Metro;
 import com.resume.bot.json.entity.roles.ProfessionalRoles;
-import com.resume.bot.model.entity.TokenHolder;
-import com.resume.bot.model.entity.User;
-import com.resume.bot.service.HeadHunterService;
-import com.resume.bot.service.TokenHolderService;
-import com.resume.bot.service.UserService;
-import com.resume.hh_wrapper.config.HhConfig;
 import com.resume.hh_wrapper.impl.ApiClientImpl;
 import com.resume.hh_wrapper.impl.ApiClientTokenImpl;
 import com.resume.util.HHUriConstants;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 
-import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 public class HeadHunterServiceTest extends IntegrationBaseTest {
     @Autowired
     private ApiClientImpl apiClientImpl;
-
-    @Autowired
-    private ApiClientTokenImpl apiClientTokenImpl;
-
-    @Autowired
-    private UserService userService;
 
     @Autowired
     private HeadHunterService headHunterService;
@@ -95,16 +68,19 @@ public class HeadHunterServiceTest extends IntegrationBaseTest {
     }
 
     @Test
-    public void testGetMetroByCityId() {
+    public void testGetMetroByCityId() throws JSONException {
         String cityId = "1";
 
         Metro metro = headHunterService.getMetroByCityId(hhBaseUrl, cityId);
         assertNotNull(metro);
 
         String hhUrl = hhBaseUrl + HHUriConstants.GET_METRO_BY_CITY_URI;
-        String hhJson = apiClientImpl.get(hhUrl, String.class);
+        String hhJson = apiClientImpl.get(hhUrl.replace("{city_id}", cityId), String.class);
         String metrosJson = JsonProcessor.createJsonFromEntity(metro);
-        assertEquals(hhJson, metrosJson);
+
+        String modifiedMetrosJson = removeUrlFromJson(metrosJson);
+
+        assertEquals(hhJson, modifiedMetrosJson);
     }
 
     @Test
@@ -163,6 +139,10 @@ public class HeadHunterServiceTest extends IntegrationBaseTest {
             jsonObject.remove("uid");
         }
         return jsonArray.toString();
+    }
+
+    private String removeUrlFromJson(String json) {
+        return json.replaceAll("\"url\":null,", "");
     }
 
     private String sortJsonArray(String json) throws JSONException {

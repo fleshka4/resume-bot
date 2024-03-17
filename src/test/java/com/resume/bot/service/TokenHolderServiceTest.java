@@ -41,17 +41,6 @@ public class TokenHolderServiceTest extends IntegrationBaseTest {
         assertNotNull(retrievedTokenHolder);
         assertEquals(tokenHolder.getHhTokensId(), retrievedTokenHolder.getHhTokensId());
     }
-
-//    @Test
-//    public void testGetUserTokenNotFound() {
-//        User user = User.builder()
-//                .tgUid(1L)
-//                .build();
-//
-//        userRepository.save(user);
-//        assertThrows(EntityNotFoundException.class, () -> tokenHolderService.getUserToken(user));
-//    }
-
     @Test
     public void testCheckTokenHolderExists() {
         User user = User.builder()
@@ -94,25 +83,4 @@ public class TokenHolderServiceTest extends IntegrationBaseTest {
         TokenHolder retrievedTokenHolder = tokenHolderRepository.findById(tokenHolder.getHhTokensId()).get();
         assertEquals(tokenHolder, retrievedTokenHolder);
     }
-
-//    @Test
-//    public void testSaveExistingTokenHolder() {
-//        User user = User.builder()
-//                .tgUid(1L)
-//                .build();
-//        TokenHolder tokenHolder1 = TokenHolder.builder()
-//                .hhTokensId(1)
-//                .user(user)
-//                .build();
-//        TokenHolder tokenHolder2 = TokenHolder.builder()
-//                .hhTokensId(2)
-//                .user(user)
-//                .build();
-//
-//        tokenHolderRepository.save(tokenHolder1);
-//        tokenHolderService.save(tokenHolder2);
-//
-//        TokenHolder retrievedTokenHolder = tokenHolderRepository.findById(tokenHolder2.getHhTokensId()).get();
-//        assertEquals(tokenHolder2, retrievedTokenHolder);
-//    }
 }
