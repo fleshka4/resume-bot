@@ -23,6 +23,9 @@ import com.resume.hh_wrapper.config.HhConfig;
 import com.resume.hh_wrapper.impl.ApiClientImpl;
 import com.resume.hh_wrapper.impl.ApiClientTokenImpl;
 import com.resume.util.HHUriConstants;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -32,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -137,13 +141,46 @@ public class HeadHunterServiceTest extends IntegrationBaseTest {
     }
 
     @Test
-    public void testGetLanguages() {
+    public void testGetLanguages() throws JSONException {
         List<Type> languages = headHunterService.getLanguages(hhBaseUrl);
         assertNotNull(languages);
 
         String hhUrl = hhBaseUrl + HHUriConstants.GET_LANGUAGES_URI;
         String hhJson = apiClientImpl.get(hhUrl, String.class);
         String languagesJson = JsonProcessor.createJsonFromEntity(languages);
-        assertEquals(hhJson, languagesJson);
+        String modifiedLanguagesJson = removeUidFromJson(hhJson);
+
+        String sortedModifiedLanguagesJson = sortJsonArray(modifiedLanguagesJson);
+        String sortedLanguagesJson = sortJsonArray(languagesJson);
+
+        assertEquals(sortedModifiedLanguagesJson, sortedLanguagesJson);
+    }
+
+    private String removeUidFromJson(String json) throws JSONException {
+        JSONArray jsonArray = new JSONArray(json);
+        for (int i = 0; i < jsonArray.length(); i++) {
+            JSONObject jsonObject = jsonArray.getJSONObject(i);
+            jsonObject.remove("uid");
+        }
+        return jsonArray.toString();
+    }
+
+    private String sortJsonArray(String json) throws JSONException {
+        JSONArray jsonArray = new JSONArray(json);
+        List<JSONObject> jsonValues = new ArrayList<>();
+        for (int i = 0; i < jsonArray.length(); i++) {
+            jsonValues.add(jsonArray.getJSONObject(i));
+        }
+        jsonValues.sort((o1, o2) -> {
+            try {
+                String id1 = o1.getString("id");
+                String id2 = o2.getString("id");
+                return id1.compareTo(id2);
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        JSONArray sortedJsonArray = new JSONArray(jsonValues);
+        return sortedJsonArray.toString();
     }
 }

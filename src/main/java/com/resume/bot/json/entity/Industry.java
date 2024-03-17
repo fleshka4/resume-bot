@@ -18,16 +18,16 @@ public class Industry {
     private String id;
 
     @NonNull
-    private List<Type> industries;
+    private String name;
 
     @NonNull
-    private String name;
+    private List<Type> industries;
 
     @JsonCreator
     public static Industry createIndustry(
             @JsonProperty("id") @NonNull String id,
-            @JsonProperty("industries") @NonNull List<Type> industries,
-            @JsonProperty("name") @NonNull String name) {
-        return new Industry(id, industries, name);
+            @JsonProperty("name") @NonNull String name,
+            @JsonProperty("industries") @NonNull List<Type> industries) {
+        return new Industry(id, name, industries);
     }
 }

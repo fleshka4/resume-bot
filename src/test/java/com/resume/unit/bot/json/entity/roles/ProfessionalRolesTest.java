@@ -15,8 +15,8 @@ public class ProfessionalRolesTest {
     @Test
     public void gettersAndSettersTest() {
         List<Category> categories = Arrays.asList(
-                new Category("1", "Category1", List.of(new Role(true, "1", false, "Role1"))),
-                new Category("2", "Category2", List.of(new Role(false, "2", true, "Role2")))
+                new Category("1", "Category1", List.of(new Role("1", "Role1", true, false))),
+                new Category("2", "Category2", List.of(new Role("2", "Role2", false, true)))
         );
 
         ProfessionalRoles professionalRoles = new ProfessionalRoles();
@@ -35,7 +35,7 @@ public class ProfessionalRolesTest {
     @Test
     public void constructorWithArgsTest() {
         List<Category> categories = List.of(
-                new Category("1", "Category1", List.of(new Role(true, "1", false, "Role1")))
+                new Category("1", "Category1", List.of(new Role("1", "Role1", true, false)))
         );
 
         ProfessionalRoles professionalRoles = new ProfessionalRoles(categories);
@@ -57,19 +57,19 @@ public class ProfessionalRolesTest {
 
     @Test
     public void equalsAndHashCodeTest() {
-        List<Category> categories1 = List.of(new Category("1", "Category1", List.of(new Role(false, "1", true, "Role1"))));
-        List<Category> categories2 = List.of(new Category("1", "Category1", List.of(new Role(false, "1", true, "Role1"))));
-        List<Category> categories3 = List.of(new Category("2", "Category2", List.of(new Role(false, "3", true, "Role3"))));
+        List<Category> categories1 = List.of(new Category("1", "Category1", List.of(new Role("1", "Role1", false, true))));
+        List<Category> categories2 = List.of(new Category("1", "Category1", List.of(new Role("1", "Role1", false, true))));
+        List<Category> categories3 = List.of(new Category("2", "Category2", List.of(new Role("3", "Role3", false, true))));
 
         ProfessionalRoles professionalRoles1 = new ProfessionalRoles(categories1);
         ProfessionalRoles professionalRoles2 = new ProfessionalRoles(categories2);
         ProfessionalRoles professionalRoles3 = new ProfessionalRoles(categories3);
 
-        
+
         assertEquals(professionalRoles1, professionalRoles2);
         assertNotEquals(professionalRoles1, professionalRoles3);
 
-        
+
         assertEquals(professionalRoles1.hashCode(), professionalRoles2.hashCode());
         assertNotEquals(professionalRoles1.hashCode(), professionalRoles3.hashCode());
     }
@@ -77,8 +77,8 @@ public class ProfessionalRolesTest {
     @Test
     public void toStringMethodTest() {
         List<Category> categories = Arrays.asList(
-                new Category("1", "Category1", List.of(new Role(true, "1", false, "Role1"))),
-                new Category("2", "Category2", List.of(new Role(false, "2", true, "Role2")))
+                new Category("1", "Category1", List.of(new Role("1", "Role1", true, false))),
+                new Category("2", "Category2", List.of(new Role("2", "Role2", false, true)))
         );
 
         ProfessionalRoles professionalRoles = new ProfessionalRoles(categories);
@@ -90,8 +90,8 @@ public class ProfessionalRolesTest {
     @Test
     public void createProfessionalRolesFromJsonTest() {
         List<Category> categories = Arrays.asList(
-                new Category("1", "Category1", List.of(new Role(true, "1", false, "Role1"))),
-                new Category("2", "Category2", List.of(new Role(false, "2", true, "Role2")))
+                new Category("1", "Category1", List.of(new Role("1", "Role1", true, false))),
+                new Category("2", "Category2", List.of(new Role("2", "Role2", false, true)))
         );
 
         String json = """

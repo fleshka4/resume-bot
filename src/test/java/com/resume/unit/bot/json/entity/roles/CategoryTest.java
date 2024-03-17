@@ -15,7 +15,7 @@ public class CategoryTest {
     public void gettersAndSettersTest() {
         String id = "1";
         String name = "TestCategory";
-        List<Role> roles = Arrays.asList(new Role(true, "1", false, "Role1"), new Role(false, "2", true, "Role2"));
+        List<Role> roles = Arrays.asList(new Role("1", "Role1", true, false), new Role("2", "Role2", false, true));
 
         Category category = new Category();
         category.setId(id);
@@ -38,16 +38,16 @@ public class CategoryTest {
 
     @Test
     public void constructorWithNullArgumentsTest() {
-        assertThrows(NullPointerException.class, () -> new Category(null, "TestCategory", List.of(new Role(true, "1", false, "Role1"))));
-        assertThrows(NullPointerException.class, () -> new Category("1", null, List.of(new Role(true, "1", false, "Role1"))));
+        assertThrows(NullPointerException.class, () -> new Category(null, "TestCategory", List.of(new Role("1", "Role1", true, false))));
+        assertThrows(NullPointerException.class, () -> new Category("1", null, List.of(new Role("1", "Role1", true, false))));
         assertThrows(NullPointerException.class, () -> new Category("1", "TestCategory", null));
     }
 
     @Test
     public void equalsAndHashCodeTest() {
-        List<Role> roles1 = Arrays.asList(new Role(true, "1", false, "Role1"), new Role(false, "2", true, "Role2"));
-        List<Role> roles2 = Arrays.asList(new Role(true, "1", false, "Role1"), new Role(false, "2", true, "Role2"));
-        List<Role> roles3 = List.of(new Role(false, "3", true, "Role3"));
+        List<Role> roles1 = Arrays.asList(new Role("1", "Role1", true, false), new Role("2", "Role2", false, true));
+        List<Role> roles2 = Arrays.asList(new Role("1", "Role1", true, false), new Role("2", "Role2", false, true));
+        List<Role> roles3 = List.of(new Role("3", "Role3", false, true));
 
         Category category1 = new Category("1", "TestCategory", roles1);
         Category category2 = new Category("1", "TestCategory", roles2);
@@ -64,7 +64,7 @@ public class CategoryTest {
     public void toStringMethodTest() {
         String id = "1";
         String name = "TestCategory";
-        List<Role> roles = Arrays.asList(new Role(true, "1", false, "Role1"), new Role(false, "2", true, "Role2"));
+        List<Role> roles = Arrays.asList(new Role("1", "Role1", true, false), new Role("2", "Role2", false, true));
 
         Category category = new Category(id, name, roles);
 
@@ -76,7 +76,7 @@ public class CategoryTest {
     public void createCategoryFromJsonTest() {
         String id = "1";
         String name = "TestCategory";
-        List<Role> roles = Arrays.asList(new Role(true, "1", false, "Role1"), new Role(false, "2", true, "Role2"));
+        List<Role> roles = Arrays.asList(new Role("1", "Role1", true, false), new Role("2", "Role2", false, true));
 
         String json = """
                 {

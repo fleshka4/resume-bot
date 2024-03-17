@@ -11,8 +11,6 @@ import lombok.NonNull;
 @AllArgsConstructor
 @Data
 public class Locale {
-    @NonNull
-    private Boolean current;
 
     @NonNull
     private String id;
@@ -20,11 +18,14 @@ public class Locale {
     @NonNull
     private String name;
 
+    @NonNull
+    private Boolean current;
+
     @JsonCreator
     public static Locale createLocale(
-            @JsonProperty("current") @NonNull Boolean current,
             @JsonProperty("id") @NonNull String id,
-            @JsonProperty("name") @NonNull String name) {
-        return new Locale(current, id, name);
+            @JsonProperty("name") @NonNull String name,
+            @JsonProperty("current") @NonNull Boolean current) {
+        return new Locale(id, name, current);
     }
 }

@@ -38,7 +38,7 @@ public class LocaleTest {
         String id = "fr_FR";
         String name = "French (France)";
 
-        Locale locale = new Locale(current, id, name);
+        Locale locale = new Locale(id, name, current);
 
         assertEquals(locale.getCurrent(), current);
         assertEquals(locale.getId(), id);
@@ -47,9 +47,9 @@ public class LocaleTest {
 
     @Test
     public void constructorWithArgsAndNullTest() {
-        assertThrows(NullPointerException.class, () -> new Locale(null, "en_US", "English (US)"));
-        assertThrows(NullPointerException.class, () -> new Locale(true, null, "English (US)"));
-        assertThrows(NullPointerException.class, () -> new Locale(true, "en_US", null));
+        assertThrows(NullPointerException.class, () -> new Locale("en_US", "English (US)", null));
+        assertThrows(NullPointerException.class, () -> new Locale(null, "English (US)", true));
+        assertThrows(NullPointerException.class, () -> new Locale("en_US", null, true));
     }
 
     @Test
@@ -63,22 +63,22 @@ public class LocaleTest {
 
     @Test
     public void equalsAndHashCodeTest() {
-        Locale locale1 = new Locale(true, "en_US", "English (US)");
-        Locale locale2 = new Locale(true, "en_US", "English (US)");
-        Locale locale3 = new Locale(false, "fr_FR", "French (France)");
+        Locale locale1 = new Locale("en_US", "English (US)", true);
+        Locale locale2 = new Locale("en_US", "English (US)", true);
+        Locale locale3 = new Locale("fr_FR", "French (France)", false);
 
-        
+
         assertEquals(locale1, locale2);
         assertNotEquals(locale1, locale3);
 
-        
+
         assertEquals(locale1.hashCode(), locale2.hashCode());
         assertNotEquals(locale1.hashCode(), locale3.hashCode());
     }
 
     @Test
     public void toStringMethodTest() {
-        Locale locale = new Locale(true, "en_US", "English (US)");
+        Locale locale = new Locale("en_US", "English (US)", true);
 
         String expectedToString = "Locale(current=true, id=en_US, name=English (US))";
         assertEquals(expectedToString, locale.toString());

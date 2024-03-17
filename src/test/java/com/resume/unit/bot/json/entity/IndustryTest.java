@@ -41,7 +41,7 @@ public class IndustryTest {
         List<Type> industries = List.of(new Type("2", "Finance"));
         String name = "Finance Sector";
 
-        Industry industry = new Industry(id, industries, name);
+        Industry industry = new Industry(id, name, industries);
 
         assertEquals(industry.getId(), id);
         assertEquals(industry.getIndustries(), industries);
@@ -50,9 +50,9 @@ public class IndustryTest {
 
     @Test
     public void constructorWithArgsAndNullTest() {
-        assertThrows(NullPointerException.class, () -> new Industry(null, List.of(new Type("1", "Technology")), "IT Industry"));
-        assertThrows(NullPointerException.class, () -> new Industry("1", null, "IT Industry"));
-        assertThrows(NullPointerException.class, () -> new Industry("1", List.of(new Type("1", "Technology")), null));
+        assertThrows(NullPointerException.class, () -> new Industry(null, "IT Industry", List.of(new Type("1", "Technology"))));
+        assertThrows(NullPointerException.class, () -> new Industry("1", "IT Industry", null));
+        assertThrows(NullPointerException.class, () -> new Industry("1", null, List.of(new Type("1", "Technology"))));
     }
 
     @Test
@@ -70,9 +70,9 @@ public class IndustryTest {
         List<Type> industries2 = List.of(new Type("1", "Technology"));
         List<Type> industries3 = List.of(new Type("2", "Finance"));
 
-        Industry industry1 = new Industry("1", industries1, "IT Industry");
-        Industry industry2 = new Industry("1", industries2, "IT Industry");
-        Industry industry3 = new Industry("2", industries3, "Finance Sector");
+        Industry industry1 = new Industry("1", "IT Industry", industries1);
+        Industry industry2 = new Industry("1", "IT Industry", industries2);
+        Industry industry3 = new Industry("2", "Finance Sector", industries3);
 
         assertEquals(industry1, industry2);
         assertNotEquals(industry1, industry3);
@@ -84,7 +84,7 @@ public class IndustryTest {
     @Test
     public void toStringMethodTest() {
         List<Type> industries = List.of(new Type("1", "Technology"));
-        Industry industry = new Industry("1", industries, "IT Industry");
+        Industry industry = new Industry("1", "IT Industry", industries);
 
         String expectedToString = "Industry(id=1, industries=[Type(id=1, name=Technology)], name=IT Industry)";
         assertEquals(expectedToString, industry.toString());

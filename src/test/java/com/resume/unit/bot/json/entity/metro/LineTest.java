@@ -15,7 +15,7 @@ public class LineTest {
         String hexColor = "#ff0000";
         String id = "1";
         String name = "Red Line";
-        List<Station> stations = List.of(new Station("A", 40.7128, new com.resume.bot.json.entity.metro.station.Line(hexColor, id, name), -74.0060, "Station A", 1L));
+        List<Station> stations = List.of(new Station("A", "Station A", 40.7128, -74.0060, 1L, new com.resume.bot.json.entity.metro.station.Line(id, hexColor, name)));
 
         Line line = new Line();
         line.setHexColor(hexColor);
@@ -44,7 +44,7 @@ public class LineTest {
         String hexColor = "#00ff00";
         String id = "2";
         String name = "Green Line";
-        List<Station> stations = List.of(new Station("B", 34.0522, new com.resume.bot.json.entity.metro.station.Line(hexColor, id, name), -118.2437, "Station B", 2L));
+        List<Station> stations = List.of(new Station("B", "Station B", 34.0522, -118.243, 2L, new com.resume.bot.json.entity.metro.station.Line(id, hexColor, name)));
 
         Line line = new Line(hexColor, id, name, stations);
 
@@ -56,9 +56,9 @@ public class LineTest {
 
     @Test
     public void constructorWithArgsAndNullTest() {
-        assertThrows(NullPointerException.class, () -> new Line(null, "1", "Red Line", List.of(new Station("A", 40.7128, null, -74.0060, "Station A", 1L))));
-        assertThrows(NullPointerException.class, () -> new Line("#ff0000", null, "Red Line", List.of(new Station("A", 40.7128, null, -74.0060, "Station A", 1L))));
-        assertThrows(NullPointerException.class, () -> new Line("#ff0000", "1", null, List.of(new Station("A", 40.7128, null, -74.0060, "Station A", 1L))));
+        assertThrows(NullPointerException.class, () -> new Line(null, "1", "Red Line", List.of(new Station("A", "Station A", 40.7128, -74.0060, 1L, null))));
+        assertThrows(NullPointerException.class, () -> new Line("#ff0000", null, "Red Line", List.of(new Station("A", "Station A", 40.712, -74.0060, 1L, null))));
+        assertThrows(NullPointerException.class, () -> new Line("#ff0000", "1", null, List.of(new Station("A", "Station A", 40.7128, -74.0060, 1L, null))));
         assertThrows(NullPointerException.class, () -> new Line("#ff0000", "1", "Red Line", null));
     }
 
@@ -77,9 +77,9 @@ public class LineTest {
         String hexColor = "#00ff00";
         String id = "2";
         String name = "Green Line";
-        List<Station> stations1 = List.of(new Station("A", 40.7128, new com.resume.bot.json.entity.metro.station.Line(hexColor, id, name), -74.0060, "Station A", 1L));
-        List<Station> stations2 = List.of(new Station("A", 40.7128, new com.resume.bot.json.entity.metro.station.Line(hexColor, id, name), -74.0060, "Station A", 1L));
-        List<Station> stations3 = List.of(new Station("B", 34.0522, new com.resume.bot.json.entity.metro.station.Line(hexColor, id, name), -118.2437, "Station B", 2L));
+        List<Station> stations1 = List.of(new Station("A", "Station A", 40.7128, -74.0060, 1L, new com.resume.bot.json.entity.metro.station.Line(id, hexColor, name)));
+        List<Station> stations2 = List.of(new Station("A", "Station A", 40.7128, -74.0060, 1L, new com.resume.bot.json.entity.metro.station.Line(id, hexColor, name)));
+        List<Station> stations3 = List.of(new Station("B", "Station B", 34.0522, -118.2437, 2L, new com.resume.bot.json.entity.metro.station.Line(id, hexColor, name)));
 
         Line line1 = new Line("#ff0000", "1", "Red Line", stations1);
         Line line2 = new Line("#ff0000", "1", "Red Line", stations2);
@@ -97,10 +97,10 @@ public class LineTest {
         String hexColor = "#00ff00";
         String id = "2";
         String name = "Green Line";
-        List<Station> stations = List.of(new Station("A", 40.7128, new com.resume.bot.json.entity.metro.station.Line(hexColor, id, name), -74.0060, "Station A", 1L));
-        Line line = new Line("#ff0000", "1", "Red Line", stations);
+        List<Station> stations = List.of(new Station("A", "Station A", 40.7128, -74.0060, 1L, new com.resume.bot.json.entity.metro.station.Line(id, hexColor, name)));
+        Line line = new Line("1", "#ff0000", "Red Line", stations);
 
-        String expectedToString = "Line(hexColor=#ff0000, id=1, name=Red Line, stations=[Station(id=A, lat=40.7128, line=Line(hexColor=#00ff00, id=2, name=Green Line), lng=-74.006, name=Station A, order=1)])";
+        String expectedToString = "Line(id=1, hexColor=#ff0000, name=Red Line, stations=[Station(id=A, lat=40.7128, line=Line(id=2, hexColor=#00ff00, name=Green Line), lng=-74.006, name=Station A, order=1)])";
         assertEquals(expectedToString, line.toString());
     }
 
@@ -133,7 +133,7 @@ public class LineTest {
         assertEquals(line.getHexColor(), "#0000ff");
         assertEquals(line.getId(), "3");
         assertEquals(line.getName(), "Blue Line");
-        assertEquals(line.getStations(), List.of(new Station("C", 34.0522, new com.resume.bot.json.entity.metro.station.Line("#0000ff", "3", "Blue Line"), -118.2437, "Station C", 3L)));
+        assertEquals(line.getStations(), List.of(new Station("C", "Station C", 34.0522, -118.243, 3L, new com.resume.bot.json.entity.metro.station.Line("3", "#0000ff", "Blue Line"))));
     }
 
     @Test

@@ -12,6 +12,7 @@ public class RoleTest {
     private static String id;
     private static boolean isDefault;
     private static String name;
+
     @BeforeAll
     public static void setUp() {
         acceptIncompleteResumes = true;
@@ -75,9 +76,9 @@ public class RoleTest {
 
     @Test
     public void equalsAndHashCode() {
-        Role role1 = new Role(true, "id1", false, "name1");
-        Role role2 = new Role(true, "id1", false, "name1");
-        Role role3 = new Role(true, "id2", false, "name1");
+        Role role1 = new Role("id1", "name1", true, false);
+        Role role2 = new Role("id1", "name1", true, false);
+        Role role3 = new Role("id2", "name1", true, false);
 
         assertEquals(role1, role2);
         assertNotEquals(role1, role3);
@@ -87,7 +88,7 @@ public class RoleTest {
 
     @Test
     public void createRoleWithJsonCreator() {
-        Role role = Role.createRole(true, "jsonId", false, "jsonName");
+        Role role = Role.createRole("jsonId", "jsonName", true, false);
 
         assertTrue(role.isAcceptIncompleteResumes());
         assertEquals("jsonId", role.getId());
@@ -104,7 +105,7 @@ public class RoleTest {
 
     @Test
     public void toStringMethod() {
-        Role role = new Role(true, "id1", false, "name1");
+        Role role = new Role("id1", "name1", true, false);
         String expectedToString = "Role(acceptIncompleteResumes=true, id=id1, isDefault=false, name=name1)";
         assertEquals(expectedToString, role.toString());
     }
