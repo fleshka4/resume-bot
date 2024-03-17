@@ -12,7 +12,7 @@ public class StationTest {
     public void gettersAndSettersTest() {
         String id = "1";
         Double lat = 40.7128;
-        Line line = new Line("#ff0000", "1", "Red Line");
+        Line line = new Line("1", "#ff0000", "Red Line");
         Double lng = -74.0060;
         String name = "Station A";
         Long order = 1L;
@@ -49,12 +49,12 @@ public class StationTest {
     public void constructorWithArgsTest() {
         String id = "2";
         Double lat = 34.0522;
-        Line line = new Line("#00ff00", "2", "Green Line");
+        Line line = new Line("2", "#00ff00", "Green Line");
         Double lng = -118.2437;
         String name = "Station B";
         Long order = 2L;
 
-        Station station = new Station(id, lat, line, lng, name, order);
+        Station station = new Station(id, name, lat, lng, order, line);
 
         assertEquals(station.getId(), id);
         assertEquals(station.getLat(), lat);
@@ -66,12 +66,12 @@ public class StationTest {
 
     @Test
     public void constructorWithArgsAndNullTest() {
-        assertThrows(NullPointerException.class, () -> new Station(null, 40.7128, new Line("#ff0000", "1", "Red Line"), -74.0060, "Station A", 1L));
-        assertThrows(NullPointerException.class, () -> new Station("1", null, new Line("#ff0000", "1", "Red Line"), -74.0060, "Station A", 1L));
-        assertThrows(NullPointerException.class, () -> new Station("1", 40.7128, null, -74.0060, "Station A", 1L));
-        assertThrows(NullPointerException.class, () -> new Station("1", 40.7128, new Line("#ff0000", "1", "Red Line"), null, "Station A", 1L));
-        assertThrows(NullPointerException.class, () -> new Station("1", 40.7128, new Line("#ff0000", "1", "Red Line"), -74.0060, null, 1L));
-        assertThrows(NullPointerException.class, () -> new Station("1", 40.7128, new Line("#ff0000", "1", "Red Line"), -74.0060, "Station A", null));
+        assertThrows(NullPointerException.class, () -> new Station(null, "Station A", 40.7128, -74.0060, 1L, new Line("1", "#ff0000", "Red Line")));
+        assertThrows(NullPointerException.class, () -> new Station("1", "Station A", null, -74.0060, 1L, new Line("1", "#ff0000", "Red Line")));
+        assertThrows(NullPointerException.class, () -> new Station("1", "Station A", 40.7128, -74.0060, 1L, null));
+        assertThrows(NullPointerException.class, () -> new Station("1", "Station A", 40.7128, null, 1L, new Line("1", "#ff0000", "Red Line")));
+        assertThrows(NullPointerException.class, () -> new Station("1", null, 40.7128, -74.0060, 1L, new Line("1", "#ff0000", "Red Line")));
+        assertThrows(NullPointerException.class, () -> new Station("1", "Station A", 40.7128, -74.0060, null, new Line("1", "#ff0000", "Red Line")));
     }
 
     @Test
@@ -88,13 +88,13 @@ public class StationTest {
 
     @Test
     public void equalsAndHashCodeTest() {
-        Line line1 = new Line("#ff0000", "1", "Red Line");
-        Line line2 = new Line("#ff0000", "1", "Red Line");
-        Line line3 = new Line("#00ff00", "2", "Green Line");
+        Line line1 = new Line("1", "#ff0000", "Red Line");
+        Line line2 = new Line("1", "#ff0000", "Red Line");
+        Line line3 = new Line("2", "#00ff00", "Green Line");
 
-        Station station1 = new Station("1", 40.7128, line1, -74.0060, "Station A", 1L);
-        Station station2 = new Station("1", 40.7128, line2, -74.0060, "Station A", 1L);
-        Station station3 = new Station("2", 34.0522, line3, -118.2437, "Station B", 2L);
+        Station station1 = new Station("1", "Station A", 40.7128, -74.0060, 1L, line1);
+        Station station2 = new Station("1", "Station A", 40.7128, -74.0060, 1L, line2);
+        Station station3 = new Station("2", "Station B", 34.0522, -118.2437, 2L, line3);
 
         assertEquals(station1, station2);
         assertNotEquals(station1, station3);
@@ -105,10 +105,10 @@ public class StationTest {
 
     @Test
     public void toStringMethodTest() {
-        Line line = new Line("#ff0000", "1", "Red Line");
-        Station station = new Station("1", 40.7128, line, -74.0060, "Station A", 1L);
+        Line line = new Line("1", "#ff0000", "Red Line");
+        Station station = new Station("1", "Station A", 40.712, -74.0060, 1L, line);
 
-        String expectedToString = "Station(id=1, lat=40.7128, line=Line(hexColor=#ff0000, id=1, name=Red Line), lng=-74.006, name=Station A, order=1)";
+        String expectedToString = "Station(id=1, name=Station A, lat=40.7128, lng=-74.006, order=1, line=Line(id=1, hexColor=#ff0000, name=Red Line))";
         assertEquals(expectedToString, station.toString());
     }
 
@@ -117,15 +117,15 @@ public class StationTest {
         String json = """
                 {
                   "id": "1",
-                  "lat": 40.7128,
-                  "line": {
-                    "hex_color": "#ff0000",
-                    "id": "1",
-                    "name": "Red Line"
-                  },
-                  "lng": -74.0060,
                   "name": "Station A",
-                  "order": 1
+                  "lat": 40.7128,
+                  "lng": -74.0060,
+                  "order": 1,
+                  "line": {
+                    "id": "1",
+                    "hex_color": "#ff0000",
+                    "name": "Red Line"
+                  }
                 }
                 """;
 
@@ -133,7 +133,7 @@ public class StationTest {
 
         assertEquals(station.getId(), "1");
         assertEquals(station.getLat(), 40.7128);
-        assertEquals(station.getLine(), new Line("#ff0000", "1", "Red Line"));
+        assertEquals(station.getLine(), new Line("1", "#ff0000", "Red Line"));
         assertEquals(station.getLng(), -74.0060);
         assertEquals(station.getName(), "Station A");
         assertEquals(station.getOrder(), 1L);
@@ -155,11 +155,11 @@ public class StationTest {
         String json = """
                 {
                   "id": "null",
-                  "lat": null,
-                  "line": null,
-                  "lng": null,
                   "name": null,
-                  "order": null
+                  "lat": null,
+                  "lng": null,
+                  "order": null,
+                  "line": null
                 }
                 """;
 
