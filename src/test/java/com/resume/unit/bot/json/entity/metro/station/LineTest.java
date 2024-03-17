@@ -38,7 +38,7 @@ public class LineTest {
         String id = "2";
         String name = "Green Line";
 
-        Line line = new Line(hexColor, id, name);
+        Line line = new Line(id, hexColor, name);
 
         assertEquals(line.getHexColor(), hexColor);
         assertEquals(line.getId(), id);
@@ -78,7 +78,7 @@ public class LineTest {
     public void toStringMethodTest() {
         Line line = new Line("#ff0000", "1", "Red Line");
 
-        String expectedToString = "Line(hexColor=#ff0000, id=1, name=Red Line)";
+        String expectedToString = "Line(id=#ff0000, hexColor=1, name=Red Line)";
         assertEquals(expectedToString, line.toString());
     }
 

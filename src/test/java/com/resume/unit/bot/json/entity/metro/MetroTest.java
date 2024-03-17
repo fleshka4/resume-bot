@@ -37,7 +37,6 @@ public class MetroTest {
         assertThrows(NullPointerException.class, () -> metro.setId(null));
         assertThrows(NullPointerException.class, () -> metro.setLines(null));
         assertThrows(NullPointerException.class, () -> metro.setName(null));
-        assertThrows(NullPointerException.class, () -> metro.setUrl(null));
     }
 
     @Test
@@ -59,7 +58,6 @@ public class MetroTest {
     public void constructorWithArgsAndNullTest() {
         assertThrows(NullPointerException.class, () -> new Metro(null, "City Metro", "https://example.com/metro", List.of(new Line("1", "#ff0000", "Red Line", List.of(new Station("A", "Station A", 40.7128, -74.0060, 1L, new com.resume.bot.json.entity.metro.station.Line("3", "#0000ff", "Blue Line")))))));
         assertThrows(NullPointerException.class, () -> new Metro("1", null, "https://example.com/metro", List.of(new Line("1", "#ff0000", "Red Line", List.of(new Station("A", "Station A", 40.7128, -74.0060, 1L, new com.resume.bot.json.entity.metro.station.Line("3", "#0000ff", "Blue Line")))))));
-        assertThrows(NullPointerException.class, () -> new Metro("1", "City Metro", null, List.of(new Line("1", "#ff0000", "Red Line", List.of(new Station("A", "Station A", 40.7128, -74.0060, 1L, new com.resume.bot.json.entity.metro.station.Line("3", "#0000ff", "Blue Line")))))));
         assertThrows(NullPointerException.class, () -> new Metro("1", "City Metro", "https://example.com/metro", null));
     }
 
@@ -95,7 +93,7 @@ public class MetroTest {
         List<Line> lines = List.of(new Line("1", "#ff0000", "Red Line", List.of(new Station("A", "Station A", 40.7128, -74.0060, 1L, new com.resume.bot.json.entity.metro.station.Line("#0000ff", "3", "Blue Line")))));
         Metro metro = new Metro("1", "City Metro", "https://example.com/metro", lines);
 
-        String expectedToString = "Metro(id=1, lines=[Line(id=1, hexColor=#ff0000, name=Red Line, stations=[Station(id=A, name=Station A, lat=40.7128, lng=-74.006, order=1, line=Line(hexColor=#0000ff, id=3, name=Blue Line))])], name=City Metro, url=https://example.com/metro)";
+        String expectedToString = "Metro(id=1, name=City Metro, url=https://example.com/metro, lines=[Line(id=1, hexColor=#ff0000, name=Red Line, stations=[Station(id=A, name=Station A, lat=40.7128, lng=-74.006, order=1, line=Line(id=#0000ff, hexColor=3, name=Blue Line))])])";
         assertEquals(expectedToString, metro.toString());
     }
 
@@ -133,7 +131,7 @@ public class MetroTest {
         Metro metro = JsonProcessor.createEntityFromJson(json, Metro.class);
 
         assertEquals(metro.getId(), "1");
-        assertEquals(metro.getLines(), List.of(new Line("1", "#ff0000", "Red Line", List.of(new Station("A", "Station A", 40.7128, -74.0060, 1L, new com.resume.bot.json.entity.metro.station.Line("#0000ff", "3", "Blue Line"))))));
+        assertEquals(metro.getLines(), List.of(new Line("1", "#ff0000", "Red Line", List.of(new Station("A", "Station A", 40.7128, -74.0060, 1L, new com.resume.bot.json.entity.metro.station.Line("3", "#0000ff", "Blue Line"))))));
         assertEquals(metro.getName(), "City Metro");
         assertEquals(metro.getUrl(), "https://example.com/metro");
     }

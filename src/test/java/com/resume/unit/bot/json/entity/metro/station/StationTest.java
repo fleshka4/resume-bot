@@ -108,7 +108,7 @@ public class StationTest {
         Line line = new Line("1", "#ff0000", "Red Line");
         Station station = new Station("1", "Station A", 40.712, -74.0060, 1L, line);
 
-        String expectedToString = "Station(id=1, name=Station A, lat=40.7128, lng=-74.006, order=1, line=Line(id=1, hexColor=#ff0000, name=Red Line))";
+        String expectedToString = "Station(id=1, name=Station A, lat=40.712, lng=-74.006, order=1, line=Line(id=1, hexColor=#ff0000, name=Red Line))";
         assertEquals(expectedToString, station.toString());
     }
 

@@ -80,7 +80,7 @@ public class LocaleTest {
     public void toStringMethodTest() {
         Locale locale = new Locale("en_US", "English (US)", true);
 
-        String expectedToString = "Locale(current=true, id=en_US, name=English (US))";
+        String expectedToString = "Locale(id=en_US, name=English (US), current=true)";
         assertEquals(expectedToString, locale.toString());
     }
 

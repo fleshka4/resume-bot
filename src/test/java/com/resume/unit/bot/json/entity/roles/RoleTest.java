@@ -106,7 +106,7 @@ public class RoleTest {
     @Test
     public void toStringMethod() {
         Role role = new Role("id1", "name1", true, false);
-        String expectedToString = "Role(acceptIncompleteResumes=true, id=id1, isDefault=false, name=name1)";
+        String expectedToString = "Role(id=id1, name=name1, acceptIncompleteResumes=true, isDefault=false)";
         assertEquals(expectedToString, role.toString());
     }
 }

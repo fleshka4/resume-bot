@@ -86,7 +86,7 @@ public class IndustryTest {
         List<Type> industries = List.of(new Type("1", "Technology"));
         Industry industry = new Industry("1", "IT Industry", industries);
 
-        String expectedToString = "Industry(id=1, industries=[Type(id=1, name=Technology)], name=IT Industry)";
+        String expectedToString = "Industry(id=1, name=IT Industry, industries=[Type(id=1, name=Technology)])";
         assertEquals(expectedToString, industry.toString());
     }
 

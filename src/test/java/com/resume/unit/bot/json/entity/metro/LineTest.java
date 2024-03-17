@@ -100,7 +100,7 @@ public class LineTest {
         List<Station> stations = List.of(new Station("A", "Station A", 40.7128, -74.0060, 1L, new com.resume.bot.json.entity.metro.station.Line(id, hexColor, name)));
         Line line = new Line("1", "#ff0000", "Red Line", stations);
 
-        String expectedToString = "Line(id=1, hexColor=#ff0000, name=Red Line, stations=[Station(id=A, lat=40.7128, line=Line(id=2, hexColor=#00ff00, name=Green Line), lng=-74.006, name=Station A, order=1)])";
+        String expectedToString = "Line(id=1, hexColor=#ff0000, name=Red Line, stations=[Station(id=A, name=Station A, lat=40.7128, lng=-74.006, order=1, line=Line(id=2, hexColor=#00ff00, name=Green Line))])";
         assertEquals(expectedToString, line.toString());
     }
 
@@ -133,7 +133,7 @@ public class LineTest {
         assertEquals(line.getHexColor(), "#0000ff");
         assertEquals(line.getId(), "3");
         assertEquals(line.getName(), "Blue Line");
-        assertEquals(line.getStations(), List.of(new Station("C", "Station C", 34.0522, -118.243, 3L, new com.resume.bot.json.entity.metro.station.Line("3", "#0000ff", "Blue Line"))));
+        assertEquals(line.getStations(), List.of(new Station("C", "Station C", 34.0522, -118.2437, 3L, new com.resume.bot.json.entity.metro.station.Line("3", "#0000ff", "Blue Line"))));
     }
 
     @Test
