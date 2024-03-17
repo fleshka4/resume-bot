@@ -184,7 +184,7 @@
                 <version>3.2.5</version>
                 <configuration>
                     <includes>
-                        <include>**/bot/service/*.java</include>
+                        <include>com/resume/bot/service/*.java</include>
                     </includes>
                 </configuration>
                 <executions>
