@@ -3,9 +3,9 @@ package com.resume.bot.service;
 import com.resume.IntegrationBaseTest;
 import com.resume.bot.model.entity.Template;
 import com.resume.bot.repository.TemplateRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import jakarta.persistence.EntityNotFoundException;
 
 import java.util.List;
 
@@ -18,10 +18,6 @@ public class TemplateServiceTest extends IntegrationBaseTest {
 
     @Autowired
     private TemplateService templateService;
-
-//    @BeforeEach
-//    public void setUp() {
-//    }
 
     @Test
     public void testSaveTemplate() {
