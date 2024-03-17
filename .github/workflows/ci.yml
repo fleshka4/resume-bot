@@ -28,18 +28,8 @@ jobs:
           java-version: '21'
           architecture: 'x64'
 
-      - name: Install Maven
-        run: |
-          sudo apt-get install -y maven
-
-      - name: Build with Maven
-        run: mvn -B clean install
-
-      - name: Archive compiled code
-        uses: actions/upload-artifact@v4
-        with:
-          name: compiled-code
-          path: target/
+      - name: Build
+        run: mvn clean install -DskipTests -Dmaven.test.skip=true
 
   unit-tests:
     needs: build
@@ -56,10 +46,8 @@ jobs:
           java-version: '21'
           architecture: 'x64'
 
-      - name: Download compiled code
-        uses: actions/download-artifact@v4
-        with:
-          name: compiled-code
+      - name: Build
+        run: mvn clean install -DskipTests -Dmaven.test.skip=true
 
       - name: Run Unit Tests
         run: mvn -B test -Dtest=unit/**/*
@@ -85,10 +73,8 @@ jobs:
           java-version: '21'
           architecture: 'x64'
 
-      - name: Download compiled code
-        uses: actions/download-artifact@v4
-        with:
-          name: compiled-code
+      - name: Build
+        run: mvn clean install -DskipTests -Dmaven.test.skip=true
 
       - name: Run Integration Tests
         run: mvn -B verify -Dtest=bot/service/**/*
