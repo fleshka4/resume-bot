@@ -2,15 +2,16 @@ package com.resume.bot.model.entity;
 
 import com.resume.bot.json.entity.common.Token;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Table(name = "hh_tokens")
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
+@EqualsAndHashCode
+@AllArgsConstructor
 public class TokenHolder {
 
     @Id

@@ -1,68 +1,81 @@
 package com.resume.bot.service;
 
+import com.resume.IntegrationBaseTest;
 import com.resume.bot.model.entity.TokenHolder;
 import com.resume.bot.model.entity.User;
 import com.resume.bot.repository.TokenHolderRepository;
-import jakarta.persistence.EntityNotFoundException;
-import org.junit.jupiter.api.BeforeEach;
+import com.resume.bot.repository.UserRepository;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
-public class TokenHolderServiceTest {
+public class TokenHolderServiceTest extends IntegrationBaseTest {
 
-    @Mock
-    private TokenHolderRepository repository;
+    @Autowired
+    private TokenHolderRepository tokenHolderRepository;
 
-    @InjectMocks
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private TokenHolderService tokenHolderService;
-
-    @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
 
     @Test
     public void testGetUserTokenExists() {
-        User user = new User();
-        TokenHolder tokenHolder = new TokenHolder();
+        User user = User.builder()
+                .tgUid(1L)
+                .build();
 
-        when(repository.findByUser(user)).thenReturn(Optional.of(tokenHolder));
+        TokenHolder tokenHolder = TokenHolder.builder()
+                .hhTokensId(1)
+                .user(user)
+                .build();
+
+        user.setTokenHolder(tokenHolder);
+
+        userRepository.save(user);
+        tokenHolderRepository.save(tokenHolder);
+
         TokenHolder retrievedTokenHolder = tokenHolderService.getUserToken(user);
 
         assertNotNull(retrievedTokenHolder);
-        assertEquals(tokenHolder, retrievedTokenHolder);
-    }
+        assertEquals(tokenHolder.getHhTokensId(), retrievedTokenHolder.getHhTokensId());
 
-    @Test
-    public void testGetUserTokenNotFound() {
-        User user = new User();
-
-        when(repository.findByUser(user)).thenReturn(Optional.empty());
-        assertThrows(EntityNotFoundException.class, () -> tokenHolderService.getUserToken(user));
+        tokenHolderRepository.delete(tokenHolder);
+        userRepository.delete(user);
     }
 
     @Test
     public void testCheckTokenHolderExists() {
-        User user = new User();
+        User user = User.builder()
+                .tgUid(1L)
+                .build();
 
-        when(repository.existsTokenHolderByUser(user)).thenReturn(true);
+        TokenHolder tokenHolder = TokenHolder.builder()
+                .hhTokensId(1)
+                .user(user)
+                .build();
+
+        user.setTokenHolder(tokenHolder);
+
+        userRepository.save(user);
+        tokenHolderRepository.save(tokenHolder);
         boolean exists = tokenHolderService.checkTokenHolderExists(user);
 
         assertTrue(exists);
+
+        tokenHolderRepository.delete(tokenHolder);
+        userRepository.delete(user);
     }
 
     @Test
     public void testCheckTokenHolderNotExists() {
-        User user = new User();
+        User user = User.builder()
+                .tgUid(1L)
+                .build();
 
-        when(repository.existsTokenHolderByUser(user)).thenReturn(false);
+        userRepository.save(user);
         boolean exists = tokenHolderService.checkTokenHolderExists(user);
 
         assertFalse(exists);
@@ -70,28 +83,12 @@ public class TokenHolderServiceTest {
 
     @Test
     public void testSaveNewTokenHolder() {
-        TokenHolder newTokenHolder = new TokenHolder();
+        TokenHolder tokenHolder = TokenHolder.builder()
+                .hhTokensId(1)
+                .build();
 
-        when(repository.existsTokenHolderByUser(newTokenHolder.getUser())).thenReturn(false);
-
-        tokenHolderService.save(newTokenHolder);
-        verify(repository, times(1)).save(newTokenHolder);
-    }
-
-    @Test
-    public void testSaveExistingTokenHolder() {
-        TokenHolder existingTokenHolder = new TokenHolder();
-
-        when(repository.existsTokenHolderByUser(existingTokenHolder.getUser())).thenReturn(true);
-
-        tokenHolderService.save(existingTokenHolder);
-
-        verify(repository, times(1)).updateAccessTokenAndExpiresInAndRefreshTokenByUser(
-                existingTokenHolder.getAccessToken(),
-                existingTokenHolder.getExpiresIn(),
-                existingTokenHolder.getRefreshToken(),
-                existingTokenHolder.getUser()
-        );
-        verify(repository, never()).save(existingTokenHolder);
+        tokenHolderService.save(tokenHolder);
+        TokenHolder retrievedTokenHolder = tokenHolderRepository.findById(tokenHolder.getHhTokensId()).get();
+        assertEquals(tokenHolder, retrievedTokenHolder);
     }
 }

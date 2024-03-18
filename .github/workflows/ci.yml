@@ -1,0 +1,76 @@
+on:
+  push:
+    branches:
+      - '*'
+
+env:
+  CLIENT_ID: ${{ vars.CLIENT_ID }}
+  CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+  BOT_NAME: ${{ vars.BOT_NAME }}
+  BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'adopt'
+          java-version: '21'
+          architecture: 'x64'
+
+      - name: Build
+        run: mvn clean install -DskipTests -Dmaven.test.skip=true
+
+  unit-tests:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'adopt'
+          java-version: '21'
+          architecture: 'x64'
+
+      - name: Build
+        run: mvn clean install -DskipTests -Dmaven.test.skip=true
+
+      - name: Run Unit Tests
+        run: mvn -B test -Dtest=unit/**/*
+
+      - name: Upload JaCoCo Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: target/site/jacoco/
+
+  integration-tests:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'adopt'
+          java-version: '21'
+          architecture: 'x64'
+
+      - name: Build
+        run: mvn clean install -DskipTests -Dmaven.test.skip=true
+
+      - name: Run Integration Tests
+        run: mvn -B test -Dtest=com/resume/bot/service/*

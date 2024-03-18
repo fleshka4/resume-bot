@@ -17,20 +17,19 @@ public class Metro {
     private String id;
 
     @NonNull
-    private List<Line> lines;
-
-    @NonNull
     private String name;
 
-    @NonNull
     private String url;
+
+    @NonNull
+    private List<Line> lines;
 
     @JsonCreator
     public static Metro createMetro(
             @JsonProperty("id") @NonNull String id,
-            @JsonProperty("lines") @NonNull List<Line> lines,
             @JsonProperty("name") @NonNull String name,
-            @JsonProperty("url") @NonNull String url) {
-        return new Metro(id, lines, name, url);
+            @JsonProperty("url") String url,
+            @JsonProperty("lines") @NonNull List<Line> lines) {
+        return new Metro(id, name, url, lines);
     }
 }

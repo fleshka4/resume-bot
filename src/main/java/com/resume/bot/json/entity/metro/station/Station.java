@@ -15,28 +15,28 @@ public class Station {
     private String id;
 
     @NonNull
-    private Double lat;
+    private String name;
 
     @NonNull
-    private Line line;
+    private Double lat;
 
     @NonNull
     private Double lng;
 
     @NonNull
-    private String name;
+    private Long order;
 
     @NonNull
-    private Long order;
+    private Line line;
 
     @JsonCreator
     public static Station createStation(
             @JsonProperty("id") @NonNull String id,
-            @JsonProperty("lat") @NonNull Double lat,
-            @JsonProperty("line") @NonNull Line line,
-            @JsonProperty("lng") @NonNull Double lng,
             @JsonProperty("name") @NonNull String name,
-            @JsonProperty("order") @NonNull Long order) {
-        return new Station(id, lat, line, lng, name, order);
+            @JsonProperty("lat") @NonNull Double lat,
+            @JsonProperty("lng") @NonNull Double lng,
+            @JsonProperty("order") @NonNull Long order,
+            @JsonProperty("line") @NonNull Line line) {
+        return new Station(id, name, lat, lng, order, line);
     }
 }

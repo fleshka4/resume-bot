@@ -11,24 +11,25 @@ import lombok.NonNull;
 @AllArgsConstructor
 @Data
 public class Role {
-    @JsonProperty("accept_incomplete_resumes")
-    private boolean acceptIncompleteResumes;
 
     @NonNull
     private String id;
 
-    @JsonProperty("is_default")
-    private boolean isDefault;
-
     @NonNull
     private String name;
 
+    @JsonProperty("accept_incomplete_resumes")
+    private boolean acceptIncompleteResumes;
+
+    @JsonProperty("is_default")
+    private boolean isDefault;
+
     @JsonCreator
     public static Role createRole(
-            @JsonProperty("accept_incomplete_resumes") boolean acceptIncompleteResumes,
             @JsonProperty("id") String id,
-            @JsonProperty("is_default") boolean isDefault,
-            @JsonProperty("name") String name) {
-        return new Role(acceptIncompleteResumes, id, isDefault, name);
+            @JsonProperty("name") String name,
+            @JsonProperty("accept_incomplete_resumes") boolean acceptIncompleteResumes,
+            @JsonProperty("is_default") boolean isDefault) {
+        return new Role(id, name, acceptIncompleteResumes, isDefault);
     }
 }

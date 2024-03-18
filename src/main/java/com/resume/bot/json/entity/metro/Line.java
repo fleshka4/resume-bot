@@ -15,12 +15,12 @@ import java.util.List;
 @AllArgsConstructor
 @Data
 public class Line {
+    @NonNull
+    private String id;
+
     @JsonProperty("hex_color")
     @NonNull
     private String hexColor;
-
-    @NonNull
-    private String id;
 
     @NonNull
     private String name;
@@ -30,10 +30,10 @@ public class Line {
 
     @JsonCreator
     public static Line createLine(
-            @JsonProperty("hex_color") @NonNull String hexColor,
             @JsonProperty("id") @NonNull String id,
+            @JsonProperty("hex_color") @NonNull String hexColor,
             @JsonProperty("name") @NonNull String name,
             @JsonProperty("stations") @NonNull List<Station> stations) {
-        return new Line(hexColor, id, name, stations);
+        return new Line(id, hexColor, name, stations);
     }
 }

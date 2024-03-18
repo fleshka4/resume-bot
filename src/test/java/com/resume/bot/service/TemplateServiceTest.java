@@ -1,79 +1,82 @@
 package com.resume.bot.service;
 
+import com.resume.IntegrationBaseTest;
 import com.resume.bot.model.entity.Template;
 import com.resume.bot.repository.TemplateRepository;
 import jakarta.persistence.EntityNotFoundException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class TemplateServiceTest {
+public class TemplateServiceTest extends IntegrationBaseTest {
 
-    @Mock
+    @Autowired
     private TemplateRepository repository;
 
-    @InjectMocks
+    @Autowired
     private TemplateService templateService;
-
-    @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
 
     @Test
     public void testSaveTemplate() {
-        Template template = new Template();
+        Template template = Template.builder()
+                .templateId(1)
+                .build();
 
-        when(repository.save(template)).thenReturn(template);
+        templateService.saveTemplate(template);
 
-        Template savedTemplate = templateService.saveTemplate(template);
+        Template savedTemplate = repository.findById(template.getTemplateId()).get();
 
-        assertNotNull(savedTemplate);
         assertEquals(template, savedTemplate);
-        verify(repository, times(1)).save(template);
     }
 
     @Test
-    public void testGetTemplateExists() {
-        Template template = new Template();
+    public void testGetTemplate() {
+        Template template = Template.builder()
+                .templateId(1)
+                .build();
 
-        when(repository.findById(anyInt())).thenReturn(Optional.of(template));
+        repository.save(template);
 
-        Template retrievedTemplate = templateService.getTemplate(1);
+        Template savedTemplate = templateService.getTemplate(template.getTemplateId());
 
-        assertNotNull(retrievedTemplate);
-        assertEquals(template, retrievedTemplate);
+        assertEquals(template, savedTemplate);
     }
 
     @Test
     public void testGetTemplateNotFound() {
-        when(repository.findById(anyInt())).thenReturn(Optional.empty());
-
         assertThrows(EntityNotFoundException.class, () -> templateService.getTemplate(1));
     }
 
-    @Test
-    public void testGetTemplates() {
-        List<Template> templates = Arrays.asList(
-                new Template(),
-                new Template(),
-                new Template()
-        );
-
-        when(repository.findAll()).thenReturn(templates);
+    @ParameterizedTest
+    @MethodSource("provideTestData")
+    public void testGetTemplates(int expectedSize, List<Template> templates) {
+        repository.saveAll(templates);
 
         List<Template> retrievedTemplates = templateService.getTemplates();
-        assertNotNull(retrievedTemplates);
-        assertEquals(templates.size(), retrievedTemplates.size());
-        assertTrue(retrievedTemplates.containsAll(templates));
+
+        assertEquals(expectedSize, retrievedTemplates.size());
+        assertEquals(templates, retrievedTemplates);
+    }
+
+    private static Stream<Arguments> provideTestData() {
+        return Stream.of(
+                Arguments.of(0, List.of()),
+                Arguments.of(1, Collections.singletonList(
+                        Template.builder().templateId(1).build())),
+                Arguments.of(3, Arrays.asList(
+                        Template.builder().templateId(1).build(),
+                        Template.builder().templateId(2).build(),
+                        Template.builder().templateId(3).build()))
+        );
     }
 }

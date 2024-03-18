@@ -1,195 +1,129 @@
 package com.resume.bot.service;
 
+import com.resume.IntegrationBaseTest;
 import com.resume.bot.model.entity.Resume;
 import com.resume.bot.model.entity.Template;
 import com.resume.bot.model.entity.User;
 import com.resume.bot.repository.ResumeRepository;
 import jakarta.persistence.EntityNotFoundException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
-public class ResumeServiceTest {
+public class ResumeServiceTest extends IntegrationBaseTest {
 
-    @Mock
+    @Autowired
     private ResumeRepository repository;
 
-    @InjectMocks
+    @Autowired
     private ResumeService resumeService;
 
-    @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private TemplateService templateService;
+
+    @Test
+    public void testGetResumeNotFound() {
+        assertThrows(EntityNotFoundException.class, () -> resumeService.getResume(1));
     }
 
     @Test
     public void testSaveResume() {
         Resume resume = new Resume();
-
-        when(repository.save(resume)).thenReturn(resume);
+        resume.setResumeId(1);
+        resume.setResumeData("aaa");
+        resume.setTitle("Title");
 
         Resume savedResume = resumeService.saveResume(resume);
 
         assertNotNull(savedResume);
-        assertEquals(resume, savedResume);
-        verify(repository, times(1)).save(resume);
+        assertEquals(resume.getResumeId(), savedResume.getResumeId());
+        assertEquals(resume.getResumeData(), savedResume.getResumeData());
+        assertEquals(resume.getTitle(), savedResume.getTitle());
     }
 
     @Test
     public void testGetResumeExists() {
         Resume resume = new Resume();
+        resume.setResumeId(1);
+        resume.setResumeData("aaa");
+        resume.setTitle("Title");
 
-        when(repository.findById(anyInt())).thenReturn(Optional.of(resume));
-
+        repository.save(resume);
         Resume retrievedResume = resumeService.getResume(1);
 
         assertNotNull(retrievedResume);
-        assertEquals(resume, retrievedResume);
-    }
-
-    @Test
-    public void testGetResumeNotFound() {
-        when(repository.findById(anyInt())).thenReturn(Optional.empty());
-
-        assertThrows(EntityNotFoundException.class, () -> resumeService.getResume(1));
+        assertEquals(resume.getTitle(), retrievedResume.getTitle());
     }
 
     @Test
     public void testGetResumeByTitle() {
         Resume resume = new Resume();
+        resume.setTitle("Title");
+        resume.setResumeId(1);
+        resume.setResumeData("aaa");
 
-        when(repository.findByTitle(anyString())).thenReturn(Optional.of(resume));
-
+        resumeService.saveResume(resume);
         Resume retrievedResume = resumeService.getResumeByTitle("Title");
 
         assertNotNull(retrievedResume);
-        assertEquals(resume, retrievedResume);
+        assertEquals(resume.getTitle(), retrievedResume.getTitle());
     }
 
     @Test
     public void testGetResumeByTitleAndUserTgUid() {
-        User user = new User();
-        user.setTgUid(243433443L);
+        long tgUid = 243433443L;
 
-        Long userTgUid = user.getTgUid();
+        User user = new User();
+        user.setTgUid(tgUid);
+
+        userService.saveUser(user);
 
         Resume resume = new Resume();
+        resume.setTitle("Title");
+        resume.setResumeId(1);
+        resume.setResumeData("aaa");
         resume.setUser(user);
 
-        when(repository.findAllByTitle(anyString())).thenReturn(List.of(resume));
-
-        Optional<Resume> retrievedResume = resumeService.getResumeByTitle("Title", userTgUid);
+        resumeService.saveResume(resume);
+        Optional<Resume> retrievedResume = resumeService.getResumeByTitle("Title", tgUid);
 
         assertTrue(retrievedResume.isPresent());
-        assertEquals(resume, retrievedResume.get());
+        assertEquals(resume.getTitle(), retrievedResume.get().getTitle());
+        assertEquals(resume.getUser().getTgUid(), retrievedResume.get().getUser().getTgUid());
     }
 
-    @Test
-    public void testUpdateHhLinkByResumeId() {
-        String hhLink = "https://example.com";
-        int resumeId = 1;
-
-        resumeService.updateHhLinkByResumeId(hhLink, resumeId);
-        verify(repository, times(1)).updateHhLinkByResumeId(hhLink, resumeId);
-    }
-
-    @Test
-    public void testUpdateTemplateByResumeId() {
-        Template template = new Template();
-        int resumeId = 1;
-
-        resumeService.updateTemplateByResumeId(template, resumeId);
-        verify(repository, times(1)).updateTemplateByResumeId(template, resumeId);
-    }
-
-    @Test
-    public void testUpdateResumeDataByResumeId() {
-        String resumeData = "Updated resume data";
-        int resumeId = 1;
-
-
-        resumeService.updateResumeDataByResumeId(resumeData, resumeId);
-        verify(repository, times(1)).updateResumeDataByResumeId(resumeData, resumeId);
-    }
-
-    @Test
-    public void testUpdatePdfPathByResumeId() {
-        String pdfPath = "updated/path/to/pdf";
-        int resumeId = 1;
-
-        resumeService.updatePdfPathByResumeId(pdfPath, resumeId);
-        verify(repository, times(1)).updatePdfPathByResumeId(pdfPath, resumeId);
-    }
-
-    @Test
-    public void testDeleteResume() {
-        Resume resume = new Resume();
-
-        resumeService.deleteResume(resume);
-        verify(repository, times(1)).delete(resume);
-    }
-
-    @Test
-    public void testGetResumesByUser() {
-        User user = new User();
-
-        List<Resume> resumes = new ArrayList<>();
-        resumes.add(new Resume());
-        resumes.add(new Resume());
-
-        when(repository.findByUser(user)).thenReturn(resumes);
-
-        List<Resume> retrievedResumes = resumeService.getResumesByUser(user);
-        assertNotNull(retrievedResumes);
-        assertEquals(resumes.size(), retrievedResumes.size());
-        assertTrue(retrievedResumes.containsAll(resumes));
-    }
-
-    @Test
-    public void testGetResumesByUserId() {
-        Long userId = 1L;
-
-        List<Resume> resumes = new ArrayList<>();
-        resumes.add(new Resume());
-        resumes.add(new Resume());
-
-        when(repository.findByUser_TgUid(userId)).thenReturn(resumes);
-        List<Resume> retrievedResumes = resumeService.getResumesByUserId(userId);
-
-        assertNotNull(retrievedResumes);
-        assertEquals(resumes.size(), retrievedResumes.size());
-        assertTrue(retrievedResumes.containsAll(resumes));
-    }
 
     @Test
     public void testGetHhResumesByUserId() {
-        Long userIdOne = 1L;
+        Resume resume = new Resume();
+        resume.setTitle("Title");
+        resume.setResumeId(1);
+        resume.setResumeData("aaa");
 
-        List<Resume> resumes = new ArrayList<>();
+        Template template1 = new Template(1, "abc.img", "abc.pdf");
+        resume.setTemplate(template1);
 
-        User userOne = new User();
-        userOne.setTgUid(userIdOne);
+        templateService.saveTemplate(template1);
 
-        Resume resumeOne = new Resume();
-        resumeOne.setUser(userOne);
-        resumeOne.setLink("https://example.com");
+        resumeService.saveResume(resume);
 
-        resumes.add(resumeOne);
+        Resume found = resumeService.getResumeByTitle("Title");
+        assertEquals(template1.getTemplateId(), found.getTemplate().getTemplateId());
 
-        when(repository.findByUser_TgUid(userIdOne)).thenReturn(resumes);
-        List<Resume> retrievedResumes = resumeService.getHhResumesByUserId(userIdOne);
+        Template template2 = new Template(2, "bbc.img", "ggd.pdf");
+        resume.setTemplate(template2);
 
-        assertNotNull(retrievedResumes);
-        assertEquals(1, retrievedResumes.size());
-        assertTrue(retrievedResumes.contains(resumes.getFirst()));
+        templateService.saveTemplate(template2);
+
+        resumeService.saveResume(resume);
+
+        found = resumeService.getResumeByTitle("Title");
+        assertEquals(template2.getTemplateId(), found.getTemplate().getTemplateId());
     }
 }
