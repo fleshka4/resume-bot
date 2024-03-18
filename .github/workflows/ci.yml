@@ -77,4 +77,4 @@ jobs:
         run: mvn clean install -DskipTests -Dmaven.test.skip=true
 
       - name: Run Integration Tests
-        run: mvn -B verify -Dtest=bot/service/**/*
+        run: mvn -B verify -Dtest=com/resume/bot/service/*
