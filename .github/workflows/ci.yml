@@ -2,10 +2,6 @@ on:
   push:
     branches:
       - '*'
-  pull_request:
-    branches:
-      - master
-      - develop
 
 env:
   CLIENT_ID: ${{ vars.CLIENT_ID }}
