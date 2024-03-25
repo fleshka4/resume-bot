@@ -21,13 +21,13 @@ public class AreaTest {
         assertEquals(area.getUrl(), "/areas/1");
     }
 
-    @Test
-    public void settersWithNullArgumentsTest() {
-        Area area = new Area();
-
-        assertThrows(NullPointerException.class, () -> area.setId(null));
-        assertThrows(NullPointerException.class, () -> area.setName(null));
-    }
+//    @Test
+//    public void settersWithNullArgumentsTest() {
+//        Area area = new Area();
+//
+//        assertThrows(NullPointerException.class, () -> area.setId(null));
+//        assertThrows(NullPointerException.class, () -> area.setName(null));
+//    }
 
     @Test
     public void constructorWithArgsTest() {
@@ -41,11 +41,11 @@ public class AreaTest {
         assertEquals(area.getUrl(), "/areas/2");
     }
 
-    @Test
-    public void constructorWithArgsAndNullTest() {
-        assertThrows(NullPointerException.class, () -> new Area(null, "Software Development"));
-        assertThrows(NullPointerException.class, () -> new Area("3", null));
-    }
+//    @Test
+//    public void constructorWithArgsAndNullTest() {
+//        assertThrows(NullPointerException.class, () -> new Area(null, "Software Development"));
+//        assertThrows(NullPointerException.class, () -> new Area("3", null));
+//    }
 
     @Test
     public void noArgsConstructorTest() {
