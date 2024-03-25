@@ -373,7 +373,7 @@ public class BotUtil {
                         """.formatted(
                         exp.getStart() + (exp.getEnd() != null ? " - %s".formatted(exp.getEnd()) : ""),
                         exp.getCompany(),
-                        exp.getArea().getName(),
+                        exp.getArea() != null ? exp.getArea().getName() : "",
                         exp.getCompanyUrl(),
                         exp.getIndustries().stream().map(Type::getName).collect(Collectors.joining(", ")),
                         exp.getPosition(),
@@ -397,15 +397,15 @@ public class BotUtil {
                 : "";
 
         Salary salary = res.getSalary();
-        String salStr = "%d %s".formatted(salary.getAmount(), salary.getCurrency());
+        String salStr = salary != null ? "%d %s".formatted(salary.getAmount(), salary.getCurrency()) : "";
 
         List<Type> employment = res.getEmployments();
-        String empStr = employment.stream().map(Type::getName)
-                .collect(Collectors.joining("", "желаемая занятость: ", "\n"));
+        String empStr = employment != null ? employment.stream().map(Type::getName)
+                .collect(Collectors.joining("", "желаемая занятость: ", "\n")) : "";
 
         List<Type> schedule = res.getSchedules();
-        String schedStr = schedule.stream().map(Type::getName)
-                .collect(Collectors.joining("", "желаемый график: ", "\n"));
+        String schedStr = schedule != null ? schedule.stream().map(Type::getName)
+                .collect(Collectors.joining("", "желаемый график: ", "\n")) : "";
 
         String outInfo = """
                 Ваше резюме:

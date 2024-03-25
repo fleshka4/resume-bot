@@ -11,15 +11,18 @@ import static com.resume.util.HHUriConstants.GET_AREAS_URI;
 @NoArgsConstructor
 @Data
 public class Area {
-    @NonNull
+//    @NonNull
     private String id;
 
-    @NonNull
+//    @NonNull
     private String name;
 
     private String url = GET_AREAS_URI + "/" + id;
 
-    public Area(@NonNull String id, @NonNull String name) {
+    public Area(//@NonNull
+                String id,
+                //@NonNull
+                String name) {
         this.id = id;
         this.name = name;
         url = GET_AREAS_URI + "/" + id;
@@ -35,8 +38,12 @@ public class Area {
 
     @JsonCreator
     public static Area createArea(
-            @JsonProperty("id") @NonNull String id,
-            @JsonProperty("name") @NonNull String name) {
+            @JsonProperty("id")
+            //@NonNull
+            String id,
+            @JsonProperty("name")
+            //@NonNull
+            String name) {
         return new Area(id, name);
     }
 }

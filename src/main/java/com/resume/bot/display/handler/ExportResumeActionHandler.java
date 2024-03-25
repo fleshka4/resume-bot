@@ -106,7 +106,6 @@ public class ExportResumeActionHandler implements CallbackActionHandler {
         }
 
         buttonLabelsUpdated.add("Назад");
-        buttonIds.add("back_to_menu_3");
 
         executeEditMessageWithBigKeyBoard(bot, EmojiParser.parseToUnicode("""
                 После выбора конкретного резюме, у вас будет возможность:

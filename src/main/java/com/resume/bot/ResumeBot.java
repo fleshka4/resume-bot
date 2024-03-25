@@ -231,8 +231,6 @@ public class ResumeBot extends TelegramLongPollingBot {
 
         buttonLabelsDb.addAll(buttonLabelsHH);
 
-        buttonLabelsDb.add("Назад");
-
         List<String> buttonIdsAll = new ArrayList<>();
 
         for (int i = 1; i <= resumesFromDB.size() + hhResumes.size(); i++) {
